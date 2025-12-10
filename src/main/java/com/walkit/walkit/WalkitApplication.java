@@ -1,0 +1,13 @@
+package com.walkit.walkit;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class WalkitApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(WalkitApplication.class, args);
+	}
+
+}
