@@ -30,6 +30,12 @@ public class OAuthService {
     public TokenResponse loginWithKakao(String accessToken) {
         KakaoUserInfoResponse kakaoUser = getKakaoUserInfo(accessToken);
 
+        boolean isRegistered = false;
+        if (!userRepository.findByAuthProviderAndProviderId(AuthProvider.KAKAO, String.valueOf(kakaoUser.getId())).isEmpty()) {
+            isRegistered = true;
+        }
+
+
         User user = findOrCreateUser(
             AuthProvider.KAKAO,
             String.valueOf(kakaoUser.getId()),
@@ -46,6 +52,7 @@ public class OAuthService {
             .refreshToken(jwtRefreshToken)
             .tokenType("Bearer")
             .expiresIn(3600L)
+            .isRegistered(isRegistered)
             .build();
     }
 
