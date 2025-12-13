@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.user.entity;
+package com.walkit.walkit.domain.user.enums;
 
 public enum UserRole {
     ROLE_USER,

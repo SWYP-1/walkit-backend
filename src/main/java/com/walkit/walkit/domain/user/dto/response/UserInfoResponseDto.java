@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.user.dto;
+package com.walkit.walkit.domain.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.walkit.walkit.domain.user.entity.User;
@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class UserInfoResponse {
+public class UserInfoResponseDto {
 
     @JsonProperty("user_id")
     private Long userId;
@@ -24,8 +24,8 @@ public class UserInfoResponse {
     @JsonProperty("auth_provider")
     private AuthProvider authProvider;
 
-    public static UserInfoResponse from(User user) {
-        return UserInfoResponse.builder()
+    public static UserInfoResponseDto from(User user) {
+        return UserInfoResponseDto.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
