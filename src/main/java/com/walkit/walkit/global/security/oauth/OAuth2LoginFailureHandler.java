@@ -1,6 +1,6 @@
 package com.walkit.walkit.global.security.oauth;
 
-import com.walkit.walkit.global.common.dto.ApiResponse;
+import com.walkit.walkit.common.dto.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

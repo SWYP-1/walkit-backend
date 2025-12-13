@@ -1,4 +1,4 @@
-package com.walkit.walkit.global.common.enums;
+package com.walkit.walkit.common.enums;
 
 public enum AuthProvider {
     NAVER,

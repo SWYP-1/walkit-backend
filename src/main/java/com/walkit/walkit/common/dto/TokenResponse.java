@@ -1,6 +1,5 @@
-package com.walkit.walkit.global.common.dto;
+package com.walkit.walkit.common.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

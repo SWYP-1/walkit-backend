@@ -1,4 +1,4 @@
-package com.walkit.walkit.global.common.dto;
+package com.walkit.walkit.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

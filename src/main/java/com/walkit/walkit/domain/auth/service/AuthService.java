@@ -1,7 +1,7 @@
 package com.walkit.walkit.domain.auth.service;
 
 import com.walkit.walkit.domain.user.repository.RefreshTokenRepository;
-import com.walkit.walkit.global.common.dto.TokenResponse;
+import com.walkit.walkit.common.dto.TokenResponse;
 import com.walkit.walkit.global.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
