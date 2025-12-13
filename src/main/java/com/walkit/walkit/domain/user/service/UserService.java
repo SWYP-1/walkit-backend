@@ -1,5 +1,10 @@
 package com.walkit.walkit.domain.user.service;
 
+import com.walkit.walkit.common.image.entity.UserImage;
+import com.walkit.walkit.common.image.enums.ImageType;
+import com.walkit.walkit.common.image.repository.UserImageRepository;
+import com.walkit.walkit.common.image.service.ImageService;
+import com.walkit.walkit.common.image.service.UserImageService;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseSubscribeDto;
@@ -25,6 +30,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserImageService userImageService;
+    private final ImageService imageService;
+    private final UserImageRepository userImageRepository;
 
 
     public void saveBirthYear(Long userId, int year) {
@@ -39,7 +47,8 @@ public class UserService {
 
     public ResponseUserDto findUser(Long userId) {
         User user = findUserById(userId);
-        return ResponseUserDto.from("aa", user);
+        UserImage userImage = userImageRepository.findByUserId(userId);
+        return ResponseUserDto.from(userImage.getImageName(), user);
     }
 
     public ResponseSubscribeDto isSubscribed(Long userId) {
@@ -52,8 +61,14 @@ public class UserService {
         user.updateIsSubscribed(isSubscribed);
     }
 
-    public void changeUser(Long userId, RequestUserDto dto, MultipartFile image) {
+    public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
         User user = findUserById(userId);
+        user.update(dto);
+
+        // 이미지가 제공된 경우에만 업로드
+        if (image != null && !image.isEmpty()) {
+            imageService.uploadFile(ImageType.USER, image, userId);
+        }
     }
 
     private User findUserById(Long userId) {

@@ -4,16 +4,11 @@ import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseSubscribeDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseUserDto;
-import com.walkit.walkit.domain.user.dto.response.UserInfoResponseDto;
-import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.user.service.UserService;
-import com.walkit.walkit.global.exception.CustomException;
-import com.walkit.walkit.global.exception.ErrorCode;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -62,12 +57,12 @@ public class UserController {
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> changeUser(
+    public ResponseEntity<Void> updateUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestPart RequestUserDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image
             ) {
-        userService.changeUser(userPrincipal.getUserId(), dto, image);
+        userService.updateUser(userPrincipal.getUserId(), dto, image);
         return ResponseEntity.status(OK).build();
     }
 }
