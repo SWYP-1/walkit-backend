@@ -2,7 +2,7 @@ package com.walkit.walkit.domain.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.walkit.walkit.domain.user.entity.User;
-import com.walkit.walkit.global.common.enums.AuthProvider;
+import com.walkit.walkit.common.enums.AuthProvider;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

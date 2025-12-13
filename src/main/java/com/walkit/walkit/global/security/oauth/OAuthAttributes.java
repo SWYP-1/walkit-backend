@@ -2,7 +2,7 @@ package com.walkit.walkit.global.security.oauth;
 
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.enums.UserRole;
-import com.walkit.walkit.global.common.enums.AuthProvider;
+import com.walkit.walkit.common.enums.AuthProvider;
 import com.walkit.walkit.global.security.oauth.userinfo.*;
 import lombok.Builder;
 import lombok.Getter;

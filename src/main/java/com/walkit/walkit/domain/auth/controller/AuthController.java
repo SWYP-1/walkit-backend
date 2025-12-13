@@ -4,7 +4,7 @@ import com.walkit.walkit.domain.auth.dto.OAuthLoginRequest;
 import com.walkit.walkit.domain.auth.service.AuthService;
 import com.walkit.walkit.domain.auth.service.OAuthService;
 import com.walkit.walkit.domain.user.dto.request.RequestRefreshTokenDto;
-import com.walkit.walkit.global.common.dto.TokenResponse;
+import com.walkit.walkit.common.dto.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

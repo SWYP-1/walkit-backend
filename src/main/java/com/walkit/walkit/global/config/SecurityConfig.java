@@ -47,6 +47,9 @@ public class SecurityConfig {
                             "/actuator/health"
                         ).permitAll()
                         .requestMatchers(
+                            "/images/upload",
+                            "/images/download/**",
+                            "/images/delete/**",
                             "/oauth2/**",
                             "/login/oauth2/**"
                         ).permitAll()

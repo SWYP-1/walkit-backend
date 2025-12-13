@@ -1,7 +1,7 @@
 package com.walkit.walkit.domain.user.repository;
 
 import com.walkit.walkit.domain.user.entity.User;
-import com.walkit.walkit.global.common.enums.AuthProvider;
+import com.walkit.walkit.common.enums.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

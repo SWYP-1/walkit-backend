@@ -2,11 +2,14 @@ package com.walkit.walkit.domain.user.entity;
 
 import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
+import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.enums.Sex;
 import com.walkit.walkit.domain.user.enums.UserRole;
-import com.walkit.walkit.global.common.enums.AuthProvider;
+import com.walkit.walkit.common.enums.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "user",
@@ -38,6 +41,7 @@ public class User extends BaseTimeEntity {
 
     private String nickname;
     private int birthYear;
+    private LocalDate birthDate;
     private Sex sex;
     private String imageUrl;
 
@@ -45,9 +49,7 @@ public class User extends BaseTimeEntity {
     private boolean isTermAgreed;
     private boolean isPrivacyAgreed;
 
-
-
-    public User update(String name, String profileImageUrl) {
+    public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
         return this;
@@ -64,5 +66,11 @@ public class User extends BaseTimeEntity {
 
     public void updateIsSubscribed(boolean isSubscribed) {
         this.isSubscribed = isSubscribed;
+    }
+
+    public void update(RequestUserDto dto) {
+        this.nickname = dto.getName();
+        this.birthDate = dto.getBirthDate();
+        this.sex = dto.getSex();
     }
 }

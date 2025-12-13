@@ -55,7 +55,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByAuthProviderAndProviderId(
                 attributes.getAuthProvider(),
                 attributes.getOauth2UserInfo().getProviderId()
-        ).map(existingUser -> existingUser.update(
+        ).map(existingUser -> existingUser.updateOauth(
                 attributes.getOauth2UserInfo().getName(),
                 attributes.getOauth2UserInfo().getProfileImageUrl()
         )).orElse(attributes.toEntity());
