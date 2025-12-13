@@ -40,25 +40,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers(
-                            "/",
-                            "/error",
-                            "/favicon.ico",
-                            "/actuator/health"
-                        ).permitAll()
-                        .requestMatchers(
-                            "/images/upload",
-                            "/images/download/**",
-                            "/images/delete/**",
-                            "/oauth2/**",
-                            "/login/oauth2/**"
-                        ).permitAll()
-                        .requestMatchers(
-                            "/auth/refresh",
-                            "/auth/logout",
-                            "/auth/kakao",
-                            "/auth/naver"
-                        ).permitAll()
+                        .requestMatchers("/", "/error", "/favicon.ico", "/actuator/health").permitAll()
+                        .requestMatchers("/images/upload", "/images/download/**", "/images/delete/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/auth/refresh", "/auth/logout", "/auth/kakao", "/auth/naver").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
