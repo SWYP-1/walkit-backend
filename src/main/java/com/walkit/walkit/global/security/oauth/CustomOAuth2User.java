@@ -1,6 +1,6 @@
 package com.walkit.walkit.global.security.oauth;
 
-import com.walkit.walkit.domain.user.entity.UserRole;
+import com.walkit.walkit.domain.user.enums.UserRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
