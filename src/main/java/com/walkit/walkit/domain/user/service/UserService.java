@@ -48,7 +48,7 @@ public class UserService {
     public ResponseUserDto findUser(Long userId) {
         User user = findUserById(userId);
         UserImage userImage = userImageRepository.findByUserId(userId);
-        return ResponseUserDto.from(userImage.getImageName(), user);
+        return ResponseUserDto.from(userImage, user);
     }
 
     public ResponseSubscribeDto isSubscribed(Long userId) {
