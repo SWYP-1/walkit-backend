@@ -1,7 +1,7 @@
 package com.walkit.walkit.global.security.jwt;
 
 import com.walkit.walkit.domain.user.entity.User;
-import com.walkit.walkit.domain.user.entity.UserRole;
+import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.global.common.enums.AuthProvider;
 import lombok.Builder;
 import lombok.Getter;

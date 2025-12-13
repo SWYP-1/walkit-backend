@@ -51,8 +51,10 @@ public class SecurityConfig {
                             "/login/oauth2/**"
                         ).permitAll()
                         .requestMatchers(
-                            "/api/auth/refresh",
-                            "/api/auth/logout"
+                            "/auth/refresh",
+                            "/auth/logout",
+                            "/auth/kakao",
+                            "/auth/naver"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
