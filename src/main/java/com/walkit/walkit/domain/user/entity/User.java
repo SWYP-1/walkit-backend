@@ -32,6 +32,7 @@ public class User extends BaseTimeEntity {
     private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 100)
     private AuthProvider authProvider;
 
     private String providerId;

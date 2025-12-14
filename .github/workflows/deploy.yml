@@ -30,6 +30,12 @@ jobs:
 #        run: |
 #          mkdir -p ./src/main/resources/firebase
 #          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" | base64 --decode > ./src/main/resources/firebase/serviceAccountKey.json
+      - name: Create Apple key
+        run: |
+          mkdir -p ./src/main/resources/key
+          cat << 'EOF' > ./src/main/resources/key/AuthKey.p8
+          ${{ secrets.APPLE_KEY_BASE64 }}
+          EOF
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2

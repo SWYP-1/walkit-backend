@@ -43,4 +43,10 @@ public class AuthController {
         return ResponseEntity.ok(tokenResponse);
     }
 
+    @PostMapping("/sdk/apple")
+    public ResponseEntity<TokenResponse> appleLogin(@RequestBody OAuthLoginRequest request) {
+        TokenResponse tokenResponse = oAuthService.loginWithApple(request.getAccessToken());
+        return ResponseEntity.ok(tokenResponse);
+    }
+
 }
