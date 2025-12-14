@@ -71,8 +71,13 @@ jobs:
             
             # Docker 이미지 Pull
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_NAME }}:latest
+            
+            # Docker Network 생성 및 기존 컨테이너 연결
+            docker network create walkit-network || true
+            docker network connect walkit-network walkit-mysql || true
 
             docker run -d --name ${{ secrets.CONTAINER_NAME }} \
+              --network walkit-network \
               -p 8080:8080 \
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_NAME }}:latest
