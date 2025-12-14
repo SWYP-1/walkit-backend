@@ -3,6 +3,7 @@ package com.walkit.walkit.domain.user.entity;
 import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
+import com.walkit.walkit.domain.user.enums.Asset;
 import com.walkit.walkit.domain.user.enums.Sex;
 import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.common.enums.AuthProvider;
@@ -50,6 +51,9 @@ public class User extends BaseTimeEntity {
     private boolean isTermAgreed;
     private boolean isPrivacyAgreed;
 
+    private int characterLevel;
+    private Asset asset;
+
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
@@ -73,5 +77,13 @@ public class User extends BaseTimeEntity {
         this.nickname = dto.getName();
         this.birthDate = dto.getBirthDate();
         this.sex = dto.getSex();
+    }
+
+    public void updateCharacterLevel(int level) {
+        this.characterLevel = level;
+    }
+
+    public void updateAsset(Asset asset) {
+        this.asset = asset;
     }
 }
