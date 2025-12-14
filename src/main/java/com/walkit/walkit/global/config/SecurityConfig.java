@@ -41,8 +41,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/", "/error", "/favicon.ico", "/actuator/health").permitAll()
+                        .requestMatchers("/.well-known/**").permitAll()  // Apple domain verification
                         .requestMatchers("/images/upload", "/images/download/**", "/images/delete/**", "/oauth2/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers("/auth/refresh", "/auth/logout", "/auth/kakao", "/auth/naver").permitAll()
+                        .requestMatchers("/auth/refresh", "/auth/logout", "/auth/kakao", "/auth/naver", "/auth/apple").permitAll()
+                        .requestMatchers("/api/callback/apple").permitAll()  // Apple OAuth callback
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -38,3 +38,7 @@ out/
 
 ### yml ###
 application.yml
+
+
+### Apple Login Private Key ###
+*.p8

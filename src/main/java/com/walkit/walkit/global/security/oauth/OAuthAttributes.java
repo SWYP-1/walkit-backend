@@ -26,6 +26,7 @@ public class OAuthAttributes {
         return switch (authProvider) {
             case NAVER -> ofNaver(userNameAttributeName, attributes, authProvider);
             case KAKAO -> ofKakao(userNameAttributeName, attributes, authProvider);
+            case APPLE -> ofApple(userNameAttributeName, attributes, authProvider);
         };
     }
 
@@ -45,6 +46,16 @@ public class OAuthAttributes {
         return OAuthAttributes.builder()
                 .nameAttributeKey(userNameAttributeName)
                 .oauth2UserInfo(new KakaoOAuth2UserInfo(attributes))
+                .authProvider(authProvider)
+                .build();
+    }
+
+    private static OAuthAttributes ofApple(String userNameAttributeName,
+                                          Map<String, Object> attributes,
+                                          AuthProvider authProvider) {
+        return OAuthAttributes.builder()
+                .nameAttributeKey(userNameAttributeName)
+                .oauth2UserInfo(new AppleOAuth2UserInfo(attributes))
                 .authProvider(authProvider)
                 .build();
     }

@@ -1,5 +1,8 @@
 package com.walkit.walkit.domain.auth.service;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.walkit.walkit.domain.auth.dto.AppleUserInfoResponse;
 import com.walkit.walkit.domain.auth.dto.KakaoUserInfoResponse;
 import com.walkit.walkit.domain.auth.dto.NaverUserInfoResponse;
 import com.walkit.walkit.domain.user.entity.User;
@@ -115,6 +118,59 @@ public class OAuthService {
         } catch (Exception e) {
             log.error("Failed to get Naver user info: {}", e.getMessage(), e);
             throw new RuntimeException("네이버 사용자 정보 조회 실패: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public TokenResponse loginWithApple(String idToken) {
+        AppleUserInfoResponse appleUser = getAppleUserInfo(idToken);
+
+        boolean isRegistered = false;
+        if (!userRepository.findByAuthProviderAndProviderId(AuthProvider.APPLE, appleUser.getId()).isEmpty()) {
+            isRegistered = true;
+        }
+
+        User user = findOrCreateUser(
+            AuthProvider.APPLE,
+            appleUser.getId(),
+            appleUser.getEmail(),
+            appleUser.getName(),
+            appleUser.getProfileImageUrl()
+        );
+
+        String jwtAccessToken = jwtService.generateAccessToken(user.getId());
+        String jwtRefreshToken = jwtService.generateRefreshToken(user.getId());
+
+        return TokenResponse.builder()
+            .accessToken(jwtAccessToken)
+            .refreshToken(jwtRefreshToken)
+            .tokenType("Bearer")
+            .expiresIn(3600L)
+            .isRegistered(isRegistered)
+            .build();
+    }
+
+    private AppleUserInfoResponse getAppleUserInfo(String idToken) {
+        try {
+            // Apple ID Token (JWT) 파싱
+            SignedJWT signedJWT = SignedJWT.parse(idToken);
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+
+            String sub = claims.getSubject();
+            String email = claims.getStringClaim("email");
+            String name = claims.getStringClaim("name");
+
+            log.info("Apple user info extracted - sub: {}, email: {}", sub, email);
+
+            return AppleUserInfoResponse.builder()
+                    .sub(sub)
+                    .email(email)
+                    .name(name)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to get Apple user info: {}", e.getMessage(), e);
+            throw new RuntimeException("Apple 사용자 정보 조회 실패: " + e.getMessage(), e);
         }
     }
 
