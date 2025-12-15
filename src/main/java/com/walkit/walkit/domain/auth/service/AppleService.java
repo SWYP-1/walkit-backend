@@ -104,6 +104,42 @@ public class AppleService {
         }
     }
 
+    /**
+     * Apple SDK에서 받은 identityToken으로 직접 로그인 처리
+     * 모바일 앱에서 Apple SDK를 통해 받은 identityToken을 사용
+     */
+    @Transactional
+    public TokenResponse loginWithIdentityToken(String identityToken) {
+        try {
+            // 1. ID Token 파싱하여 사용자 정보 추출
+            SignedJWT signedJWT = SignedJWT.parse(identityToken);
+            JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
+
+            String userId = payload.getSubject(); // Apple의 고유 사용자 ID
+            String email = payload.getStringClaim("email");
+
+            log.info("Apple identityToken 로그인 - userId: {}, email: {}", userId, email);
+
+            // 2. 사용자 조회 또는 생성
+            User user = findOrCreateUser(userId, email);
+
+            // 3. JWT 토큰 생성
+            String jwtAccessToken = jwtService.generateAccessToken(user.getId());
+            String jwtRefreshToken = jwtService.generateRefreshToken(user.getId());
+
+            return TokenResponse.builder()
+                    .accessToken(jwtAccessToken)
+                    .refreshToken(jwtRefreshToken)
+                    .tokenType("Bearer")
+                    .expiresIn(3600L)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Apple identityToken 로그인 실패", e);
+            throw new RuntimeException("Apple identityToken 로그인에 실패했습니다: " + e.getMessage(), e);
+        }
+    }
+
     private String generateAuthToken(String code) throws IOException {
         if (code == null) {
             throw new IllegalArgumentException("인가 코드가 없습니다");
