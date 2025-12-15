@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +62,7 @@ public class Walk extends BaseTimeEntity {
 
 
     // 산책 위치 (경도,위도)
+    @Builder.Default
     @OneToMany(mappedBy = "walk", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WalkPoint> points = new ArrayList<>();
 

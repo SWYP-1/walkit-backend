@@ -5,11 +5,9 @@ import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walks.dto.request.WalkPointRequestDto;
-import com.walkit.walkit.domain.walks.dto.request.WalkCompleteRequestDto;
-import com.walkit.walkit.domain.walks.dto.request.WalkStartRequestDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkDetailResponseDto;
+import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
 import com.walkit.walkit.domain.walks.dto.response.WalkPointResponseDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkStartResponseDto;
 import com.walkit.walkit.domain.walks.entity.Walk;
 import com.walkit.walkit.domain.walks.entity.WalkPoint;
 import com.walkit.walkit.domain.walks.repository.WalkRepository;
@@ -30,55 +28,31 @@ public class WalkServiceImpl implements WalkService {
     private final UserRepository userRepository;
     private final ImageService imageService;
 
-    // 산책 시작
+
+
+
+    // 산책 저장
     @Override
     @Transactional
-    public WalkStartResponseDto startWalk(Long userId, WalkStartRequestDto request) {
+    public WalkResponseDto saveWalk(
+            Long userId, WalkRequestDto request) {
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Walk 생성
         Walk walk = Walk.builder()
                 .user(user)
                 .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
                 .preWalkEmotion(request.getPreWalkEmotion())
+                .postWalkEmotion(request.getPostWalkEmotion())
+                .stepCount(request.getStepCount())
+                .totalDistance(request.getTotalDistance())
+                .note(request.getNote())
                 .build();
 
         Walk saved = walkRepository.save(walk);
-
-        return WalkStartResponseDto.builder()
-                .id(saved.getId())
-                .startTime(saved.getStartTime())
-                .preWalkEmotion(saved.getPreWalkEmotion())
-                .createdDate(saved.getCreatedDate())
-                .build();
-    }
-
-
-
-    // 산책 종료
-    @Override
-    @Transactional
-    public WalkDetailResponseDto completeWalk(
-            Long userId, Long walkId, WalkCompleteRequestDto request) {
-
-        Walk walk = walkRepository. findByIdAndUser_Id(walkId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("산책 기록을 찾을 수 없습니다."));
-
-        // 이미 완료된 산책인지 체크
-        if (walk.getEndTime() != null) {
-            throw new IllegalStateException("이미 완료된 산책입니다.");
-        }
-
-
-        // 종료 정보 업데이트
-        walk.complete(
-                request.getEndTime(),
-                request.getStepCount(),
-                request.getTotalDistance(),
-                request.getNote(),
-                request.getPostWalkEmotion()
-        );
 
         // points 저장
         if (request.getPoints() != null && !request.getPoints().isEmpty()) {
@@ -109,7 +83,7 @@ public class WalkServiceImpl implements WalkService {
 
     // 산책 기록 조회 (단건)
     @Override
-    public WalkDetailResponseDto getWalk(Long userId, Long walkId) {
+    public WalkResponseDto getWalk(Long userId, Long walkId) {
         Walk walk = walkRepository.findDetailByIdAndUserId(walkId, userId)
                 .orElseThrow(() -> new RuntimeException("Walk not found"));
 
@@ -128,7 +102,7 @@ public class WalkServiceImpl implements WalkService {
     }
 
     // 상세 응답
-    private WalkDetailResponseDto toDetailResponse(Walk walk) {
+    private WalkResponseDto toDetailResponse(Walk walk) {
         List<WalkPointResponseDto> points = walk.getPoints().stream()
                 .map(p -> new WalkPointResponseDto(
                         p.getLatitude(),
@@ -137,7 +111,7 @@ public class WalkServiceImpl implements WalkService {
                 ))
                 .toList();
 
-        return WalkDetailResponseDto.builder()
+        return WalkResponseDto.builder()
                 .id(walk.getId())
                 .preWalkEmotion(walk.getPreWalkEmotion())
                 .postWalkEmotion(walk.getPostWalkEmotion())
