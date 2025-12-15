@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/images/upload", "/images/download/**", "/images/delete/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/auth/refresh", "/auth/logout", "/auth/kakao", "/auth/naver", "/auth/apple").permitAll()
                         .requestMatchers("/api/callback/apple").permitAll()  // Apple OAuth callback
+                        .requestMatchers("/api/auth/apple/token").permitAll()  // Apple SDK identityToken login
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )

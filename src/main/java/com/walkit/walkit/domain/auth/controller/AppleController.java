@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.auth.controller;
 
+import com.walkit.walkit.domain.auth.dto.AppleTokenLoginRequest;
 import com.walkit.walkit.domain.auth.service.AppleService;
 import com.walkit.walkit.common.dto.TokenResponse;
 import lombok.RequiredArgsConstructor;
@@ -66,4 +67,6 @@ public class AppleController {
             }
         }
     }
+
+
 }

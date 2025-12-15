@@ -1,6 +1,8 @@
 package com.walkit.walkit.domain.auth.controller;
 
+import com.walkit.walkit.domain.auth.dto.AppleTokenLoginRequest;
 import com.walkit.walkit.domain.auth.dto.OAuthLoginRequest;
+import com.walkit.walkit.domain.auth.service.AppleService;
 import com.walkit.walkit.domain.auth.service.AuthService;
 import com.walkit.walkit.domain.auth.service.OAuthService;
 import com.walkit.walkit.domain.user.dto.request.RequestRefreshTokenDto;
@@ -18,6 +20,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final OAuthService oAuthService;
+    private final AppleService appleService;
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestBody RequestRefreshTokenDto request) {
@@ -43,10 +46,19 @@ public class AuthController {
         return ResponseEntity.ok(tokenResponse);
     }
 
-    @PostMapping("/sdk/apple")
-    public ResponseEntity<TokenResponse> appleLogin(@RequestBody OAuthLoginRequest request) {
-        TokenResponse tokenResponse = oAuthService.loginWithApple(request.getAccessToken());
-        return ResponseEntity.ok(tokenResponse);
+    @PostMapping("/apple")
+    public ResponseEntity<?> loginWithToken(@RequestBody AppleTokenLoginRequest request) {
+        try {
+            log.info("Apple identityToken login request received");
+
+            TokenResponse tokenResponse = appleService.loginWithIdentityToken(request.getAccessToken());
+
+            return ResponseEntity.ok(tokenResponse);
+
+        } catch (Exception e) {
+            log.error("Apple identityToken login failed", e);
+            return ResponseEntity.badRequest().body("Apple login failed: " + e.getMessage());
+        }
     }
 
 }
