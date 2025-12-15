@@ -8,17 +8,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WalkResponseDto {
+public class WalkStartResponseDto {
     private Long id;
-    private Emotion emotion;
-    private String text;
-    private String imageUrl;
-    private LocalDate walkedAt;
-    private LocalDateTime createdAt;
+    private Emotion preWalkEmotion;
+    private Long startTime;
+    private LocalDateTime createdDate;
 }

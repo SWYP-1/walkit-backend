@@ -10,14 +10,16 @@ import java.util.List;
 
 @Getter
 @Setter
-public class WalkRequestDto {
+public class WalkCompleteRequestDto {
 
-    private Emotion emotion;        // 감정
-    private String text;            // 산책 일기 텍스트
-    private LocalDate walkedAt;     // 산책 날짜
-    private List<WalkPointRequestDto> points;    // 코스(선택) - 없으면 null
+    private Emotion postWalkEmotion;    // 종료 후 감정
+    private String note;                // 산책 일기 텍스트
+    private List<WalkPointRequestDto> points;    // 코스
     @JsonIgnore
     private MultipartFile image;    // 이미지
+    private Long endTime;           // 산책 종료 시간
+    private Double totalDistance;   // 총 산책 거리
+    private Integer stepCount;      // 걸음 수
 
 
 }
