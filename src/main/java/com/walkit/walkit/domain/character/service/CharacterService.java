@@ -17,8 +17,8 @@ public class CharacterService {
 
     public String getCharacterImageName(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        int characterLevel = user.getCharacterLevel();
-        String asset = user.getAsset().toString();
+        int characterLevel = user.getCharacter().getLevel();
+        String asset = String.valueOf(user.getCharacter().getAsset());
 
         return "CHARACTER_" + "LEVEL_" + characterLevel + "ASSERT_" + asset + ".jpg";
     }

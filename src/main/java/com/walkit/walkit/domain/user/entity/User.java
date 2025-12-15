@@ -1,6 +1,7 @@
 package com.walkit.walkit.domain.user.entity;
 
 import com.walkit.walkit.domain.BaseTimeEntity;
+import com.walkit.walkit.domain.character.entity.Character;
 import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
@@ -52,13 +53,12 @@ public class User extends BaseTimeEntity {
     private boolean isTermAgreed;
     private boolean isPrivacyAgreed;
 
-    private int characterLevel;
-    private Asset asset;
+    @Embedded
+    private Character character;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goal_id")
     private Goal goal;
-
 
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
@@ -85,13 +85,6 @@ public class User extends BaseTimeEntity {
         this.sex = dto.getSex();
     }
 
-    public void updateCharacterLevel(int level) {
-        this.characterLevel = level;
-    }
-
-    public void updateAsset(Asset asset) {
-        this.asset = asset;
-    }
 
     public void updateGoal(Goal goal) {
         this.goal = goal;
