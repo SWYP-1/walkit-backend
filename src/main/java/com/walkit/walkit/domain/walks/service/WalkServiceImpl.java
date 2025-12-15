@@ -5,10 +5,11 @@ import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walks.dto.request.WalkPointRequestDto;
-import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walks.dto.request.WalkCompleteRequestDto;
+import com.walkit.walkit.domain.walks.dto.request.WalkStartRequestDto;
 import com.walkit.walkit.domain.walks.dto.response.WalkDetailResponseDto;
 import com.walkit.walkit.domain.walks.dto.response.WalkPointResponseDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walks.dto.response.WalkStartResponseDto;
 import com.walkit.walkit.domain.walks.entity.Walk;
 import com.walkit.walkit.domain.walks.entity.WalkPoint;
 import com.walkit.walkit.domain.walks.repository.WalkRepository;
@@ -17,8 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Service
@@ -30,27 +30,55 @@ public class WalkServiceImpl implements WalkService {
     private final UserRepository userRepository;
     private final ImageService imageService;
 
-
+    // 산책 시작
     @Override
     @Transactional
-    public WalkResponseDto saveWalk(Long userId, WalkRequestDto request) {
-
+    public WalkStartResponseDto startWalk(Long userId, WalkStartRequestDto request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        LocalDate walkedAt = (request.getWalkedAt() != null)
-                ? request.getWalkedAt()
-                : LocalDate.now();
+        // Walk 생성
+        Walk walk = Walk.builder()
+                .user(user)
+                .startTime(request.getStartTime())
+                .preWalkEmotion(request.getPreWalkEmotion())
+                .build();
 
-        // 먼저 Walk 저장 (이미지 없이)
-        Walk walk = Walk.create(
-                user,
-                request.getEmotion(),
-                request.getText(),
-                walkedAt,
-                null
-        );
         Walk saved = walkRepository.save(walk);
+
+        return WalkStartResponseDto.builder()
+                .id(saved.getId())
+                .startTime(saved.getStartTime())
+                .preWalkEmotion(saved.getPreWalkEmotion())
+                .createdDate(saved.getCreatedDate())
+                .build();
+    }
+
+
+
+    // 산책 종료
+    @Override
+    @Transactional
+    public WalkDetailResponseDto completeWalk(
+            Long userId, Long walkId, WalkCompleteRequestDto request) {
+
+        Walk walk = walkRepository. findByIdAndUser_Id(walkId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("산책 기록을 찾을 수 없습니다."));
+
+        // 이미 완료된 산책인지 체크
+        if (walk.getEndTime() != null) {
+            throw new IllegalStateException("이미 완료된 산책입니다.");
+        }
+
+
+        // 종료 정보 업데이트
+        walk.complete(
+                request.getEndTime(),
+                request.getStepCount(),
+                request.getTotalDistance(),
+                request.getNote(),
+                request.getPostWalkEmotion()
+        );
 
         // points 저장
         if (request.getPoints() != null && !request.getPoints().isEmpty()) {
@@ -60,24 +88,26 @@ public class WalkServiceImpl implements WalkService {
                 validateLatLng(p.getLatitude(), p.getLongitude());
                 if (p.getTimestampMillis() == null) throw new IllegalArgumentException("timestampMillis required");
 
-                Instant recordedAt = Instant.ofEpochMilli(p.getTimestampMillis());
-                newPoints.add(WalkPoint.of(saved, i, p.getLatitude(), p.getLongitude(),recordedAt));
+                Long recordedAt = p.getTimestampMillis();
+                newPoints.add(WalkPoint.of(walk, p.getLatitude(), p.getLongitude(), recordedAt));
             }
-            saved.replacePoints(newPoints);
-            saved.updateStartEndFromPoints();      // start/end 요약 좌표 세팅
+            walk.replacePoints(newPoints);
+            walk.updateStartEndFromPoints();      // start/end 요약 좌표 세팅
         }
 
-        // 이미지 있으면 업로드
+
+        // 이미지 업로드
         MultipartFile image = request.getImage();
         if (image != null && !image.isEmpty()) {
-            String imageUrl = imageService.uploadFile(ImageType.WALK, image, saved.getId());
-            saved.updateImageUrl(imageUrl); // 대표 이미지 - 필요 없으면 주석 처리
+            String imageUrl = imageService.uploadFile(ImageType.WALK, image, walk.getId());
+            walk.updateImageUrl(imageUrl); // 대표 이미지 - 필요 없으면 주석 처리
         }
 
-        return toSummaryResponse(saved);
+        return toDetailResponse(walk);
     }
 
 
+    // 산책 기록 조회 (단건)
     @Override
     public WalkDetailResponseDto getWalk(Long userId, Long walkId) {
         Walk walk = walkRepository.findDetailByIdAndUserId(walkId, userId)
@@ -87,36 +117,37 @@ public class WalkServiceImpl implements WalkService {
     }
 
 
-    // 요약 응답
-    private WalkResponseDto toSummaryResponse(Walk walk) {
-        return WalkResponseDto.builder()
-                .id(walk.getId())
-                .emotion(walk.getEmotion())
-                .text(walk.getText())
-                .walkedAt(walk.getWalkedAt())
-                .imageUrl(walk.getImageUrl())
-                .createdAt(walk.getCreatedDate())
-                .build();
+    // 산책 기록 수정
+    @Override
+    @Transactional
+    public void updateNote(Long userId, Long walkId, String note) {
+        Walk walk = walkRepository.findByIdAndUser_Id(walkId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("산책 기록을 찾을 수 없습니다."));
+
+        walk.updateNote(note);
     }
 
-    // 상세 응답(points 추가)
+    // 상세 응답
     private WalkDetailResponseDto toDetailResponse(Walk walk) {
         List<WalkPointResponseDto> points = walk.getPoints().stream()
                 .map(p -> new WalkPointResponseDto(
-                       // p.getSeq(),
                         p.getLatitude(),
                         p.getLongitude(),
-                        p.getRecordedAt() == null ? null : p.getRecordedAt().toEpochMilli()
+                        p.getRecordedAt() == null ? null : p.getRecordedAt()
                 ))
                 .toList();
 
         return WalkDetailResponseDto.builder()
                 .id(walk.getId())
-                .emotion(walk.getEmotion())
-                .text(walk.getText())
-                .walkedAt(walk.getWalkedAt())
+                .preWalkEmotion(walk.getPreWalkEmotion())
+                .postWalkEmotion(walk.getPostWalkEmotion())
+                .note(walk.getNote())
+                .stepCount(walk.getStepCount())
+                .totalDistance(walk.getTotalDistance())
+                .startTime(walk.getStartTime())
+                .endTime(walk.getEndTime())
                 .imageUrl(walk.getImageUrl())
-                .createdAt(walk.getCreatedDate())
+                .createdDate(walk.getCreatedDate())
                 .points(points)
                 .build();
     }

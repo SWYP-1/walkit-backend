@@ -16,10 +16,14 @@ import java.util.List;
 @NoArgsConstructor
 public class WalkDetailResponseDto {
     private Long id;
-    private Emotion emotion;
-    private String text;
+    private Emotion preWalkEmotion;
+    private Emotion postWalkEmotion;
+    private String note;
     private String imageUrl;
-    private LocalDate walkedAt;
-    private LocalDateTime createdAt;
+    private Long startTime;
+    private Long endTime;
+    private Integer stepCount;
+    private Double totalDistance;
+    private LocalDateTime createdDate;
     private List<WalkPointResponseDto> points;
 }

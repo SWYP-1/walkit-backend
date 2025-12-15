@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WalkPointResponseDto {
-    //private Integer seq;
     private Double latitude;
     private Double longitude;
     private Long timestampMillis;
