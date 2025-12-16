@@ -9,11 +9,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserWeeklyMissionRepository extends JpaRepository<UserWeeklyMission, Long> {
 
 
-    // 유저가 "완료한" 미션은 다음 주 후보에서 제외하기 위한 missionId 리스트 조회
+    // missionId 리스트 조회 (유저가 완료한 미션 다음 주 후보에서 제외)
     @Query("""
         select distinct uwm.mission.id
         from UserWeeklyMission uwm
@@ -22,7 +23,7 @@ public interface UserWeeklyMissionRepository extends JpaRepository<UserWeeklyMis
     """)
     List<Long> findCompletedMissionIds(@Param("userId") Long userId);
 
-    //  주간 마감: 이번 주 IN_PROGRESS -> FAILED
+    // 주간 마감: 이번 주 IN_PROGRESS -> FAILED
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
         update UserWeeklyMission uwm
@@ -34,11 +35,11 @@ public interface UserWeeklyMissionRepository extends JpaRepository<UserWeeklyMis
     int closeWeek(@Param("weekStart") LocalDate weekStart);
 
 
-    // 이번 주 / 카테고리 배정 여부 확인
+    // 이번 주/카테고리 배정 여부 확인
     boolean existsByUser_IdAndWeekStartAndCategory(Long userId, LocalDate weekStart, MissionCategory category);
 
 
-    //
+    // 주간 미션 조회
     @Query("""
     select uwm
     from UserWeeklyMission uwm
@@ -51,5 +52,15 @@ public interface UserWeeklyMissionRepository extends JpaRepository<UserWeeklyMis
             @Param("userId") Long userId,
             @Param("weekStart") LocalDate weekStart
     );
+
+    @Query("""
+    select uwm
+    from UserWeeklyMission uwm
+    join fetch uwm.user u
+    join fetch uwm.mission m
+    where uwm.id = :uwmId
+""")
+    Optional<UserWeeklyMission> findByIdWithUserAndMission(@Param("uwmId") Long uwmId);
+
 
 }

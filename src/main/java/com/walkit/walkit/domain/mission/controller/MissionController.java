@@ -1,6 +1,8 @@
 package com.walkit.walkit.domain.mission.controller;
 
 import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponse;
+import com.walkit.walkit.domain.mission.service.UserMissionVerifyService;
+import com.walkit.walkit.domain.mission.service.WeeklyMissionClaimService;
 import com.walkit.walkit.domain.mission.service.WeeklyMissionService;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
@@ -19,6 +21,7 @@ public class MissionController {
 
     private final WeeklyMissionService weeklyMissionService;
     private final UserWeeklyMissionRepository userWeeklyMissionRepository;
+    private final WeeklyMissionClaimService missionClaimService;
 
     @GetMapping("/weekly")
     public List<WeeklyMissionResponse> myWeekly(
@@ -36,4 +39,11 @@ public class MissionController {
                 .toList();
     }
 
+    @PostMapping("/weekly/verify/{userwmId}")
+    public WeeklyMissionResponse verifyWeekly(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long userwmId
+    ) {
+        return missionClaimService.claim(principal.getUserId(),userwmId);
+    }
 }
