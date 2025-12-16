@@ -53,11 +53,22 @@ public class GoalService {
         return ResponseGoalProcessDto.builder().currentWalkCount(currentWalks).walkProgressPercentage(walkProgressPercentage).build();
     }
 
-    public void achieveGoal(User user, Goal goal) {
-        goal.plusCurrentWalks();
+    public void checkAchieveGoal(User user, int stepCount) {
+        Goal goal = user.getGoal();
 
+        isAchieveTargetStepCount(stepCount, goal);
+        isAchieveGoal(goal);
+    }
+
+    private static void isAchieveGoal(Goal goal) {
         if (goal.getCurrentWalkCount() >= goal.getTargetWalkCount()) {
             // todo 경험치 증가시키기
+        }
+    }
+
+    private static void isAchieveTargetStepCount(int stepCount, Goal goal) {
+        if (goal.getTargetStepCount() <= stepCount) {
+            goal.plusCurrentWalks();
         }
     }
 
