@@ -7,9 +7,11 @@ import com.walkit.walkit.domain.auth.service.AuthService;
 import com.walkit.walkit.domain.auth.service.OAuthService;
 import com.walkit.walkit.domain.user.dto.request.RequestRefreshTokenDto;
 import com.walkit.walkit.common.dto.TokenResponse;
+import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,8 +31,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody RequestRefreshTokenDto request) {
-        authService.logout(request.getRefreshToken());
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        authService.logout(userPrincipal.getUserId());
         return ResponseEntity.ok().build();
     }
 

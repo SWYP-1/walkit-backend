@@ -12,7 +12,8 @@ public enum ErrorCode {
 
     // USER
     USER_NOT_FOUND(NOT_FOUND, 1001, "[User] 사용자를 찾을 수 없습니다"),
-    INVALID_TOKEN(UNAUTHORIZED, 1002, "[User] 토큰이 올바르지 않습니다");
+    INVALID_TOKEN(UNAUTHORIZED, 1002, "[User] 토큰이 올바르지 않습니다"),
+    USER_IMAGE_NOT_FOUND(NOT_FOUND, 1002, "[User] 사용자 이미지를 찾을 수 없습니다");
 
     private final HttpStatus httpStatus;
     private final Integer code;

@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Getter
 public class RequestUserDto {
 
-    private String name;
+    private String nickname;
     private LocalDate birthDate;
     private Sex sex;
 }
