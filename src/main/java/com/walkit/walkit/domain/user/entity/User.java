@@ -43,6 +43,7 @@ public class User extends BaseTimeEntity {
     @Column(length = 100)
     private UserRole role = UserRole.ROLE_USER;
 
+    @Column(unique = true)
     private String nickname;
     private LocalDate birthDate;
 
@@ -62,6 +63,9 @@ public class User extends BaseTimeEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goal_id")
     private Goal goal;
+
+
+
 
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;

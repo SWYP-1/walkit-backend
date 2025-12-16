@@ -4,6 +4,9 @@ import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.repository.UserImageRepository;
 import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.common.image.service.UserImageService;
+import com.walkit.walkit.domain.follow.entity.Follow;
+import com.walkit.walkit.domain.follow.enums.FollowStatus;
+import com.walkit.walkit.domain.follow.repository.FollowRepository;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseMarketingConsentDto;
@@ -13,6 +16,7 @@ import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
+import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +37,7 @@ public class UserService {
     private final ImageService imageService;
     private final UserImageRepository userImageRepository;
     private final EntityManager entityManager;
+    private final FollowRepository followRepository;
 
     public void savePolicy(Long userId, RequestPolicyDto dto) {
         User user = findUserById(userId);
@@ -85,13 +90,38 @@ public class UserService {
         user.updateMarketingConsent(marketingConsent);
     }
 
-    public ResponseUserNickNameFindDto findUserByNickname(String nickname) {
-        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        String userImageName = userImageService.findUserImageName(user.getId());
+    public ResponseUserNickNameFindDto findUserByNickname(UserPrincipal userPrincipal, String nickname) {
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String targetUserImageName = userImageService.findUserImageName(targetUser.getId());
 
-        log.info("userImageName={}", userImageName);
+        if (userPrincipal == null) {
+            return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).build();
+        } else {
+            User user = findUserById(userPrincipal.getUserId());
+            FollowStatus followStatus = null;
+            if (followRepository.existsBySenderAndReceiver(user, targetUser)) {
+                Follow follow = followRepository.findBySenderAndReceiver(user, targetUser);
 
-        return ResponseUserNickNameFindDto.builder().userId(user.getId()).nickName(nickname).imageName(userImageName).build();
+                if (follow.getFollowStatus() == null) {
+                    followStatus = FollowStatus.EMPTY;
+                } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
+                    followStatus = FollowStatus.PENDING;
+                } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
+                    followStatus = FollowStatus.ACCEPTED;
+                }
+            } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
+                Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
+
+                if (follow.getFollowStatus() == null) {
+                    followStatus = FollowStatus.EMPTY;
+                } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
+                    followStatus = FollowStatus.PENDING;
+                } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
+                    followStatus = FollowStatus.ACCEPTED;
+                }
+            }
+            return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(followStatus).build();
+        }
     }
 
     private User findUserById(Long userId) {

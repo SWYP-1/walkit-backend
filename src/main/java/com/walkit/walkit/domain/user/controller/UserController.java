@@ -55,8 +55,8 @@ public class UserController {
     }
 
     @GetMapping("/nickname")
-    public ResponseEntity<ResponseUserNickNameFindDto> findUserByNickname(@RequestParam String nickname) {
-        ResponseUserNickNameFindDto dto = userService.findUserByNickname(nickname);
+    public ResponseEntity<ResponseUserNickNameFindDto> findUserByNickname(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String nickname) {
+        ResponseUserNickNameFindDto dto = userService.findUserByNickname(userPrincipal, nickname);
         return  ResponseEntity.status(OK).body(dto);
     }
 
