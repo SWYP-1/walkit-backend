@@ -11,8 +11,10 @@ import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class GoalService {
 
@@ -28,7 +30,7 @@ public class GoalService {
 
     public void saveGoal(Long userId, RequestGoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Goal goal = Goal.builder().targetSteps(dto.getTargetStepCount()).targetWalk(dto.getTargetWalkCount()).build();
+        Goal goal = Goal.builder().targetStepCount(dto.getTargetStepCount()).targetWalkCount(dto.getTargetWalkCount()).build();
 
         user.updateGoal(goal);
         goalRepository.save(goal);
@@ -48,7 +50,7 @@ public class GoalService {
         int currentWalks = goal.getCurrentWalkCount();
         int targetWalks = goal.getTargetWalkCount();
 
-        double walkProgressPercentage = calculatePercentage(currentWalks, targetWalks);
+        String walkProgressPercentage = calculatePercentage(currentWalks, targetWalks);
 
         return ResponseGoalProcessDto.builder().currentWalkCount(currentWalks).walkProgressPercentage(walkProgressPercentage).build();
     }
@@ -72,9 +74,14 @@ public class GoalService {
         }
     }
 
-    private double calculatePercentage(int current, int target) {
-        if (target <= 0) return 0.0;
+    private String calculatePercentage(int current, int target) {
+        if (target <= 0) {
+            return "0.0";
+        }
+
         double percentage = ((double) current / target) * 100.0;
-        return Math.min(percentage, 100.0);
+        double limitedPercentage = Math.min(percentage, 100.0);
+
+        return String.format("%.1f", limitedPercentage);
     }
 }

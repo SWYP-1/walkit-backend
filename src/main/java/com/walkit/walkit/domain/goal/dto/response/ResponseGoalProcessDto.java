@@ -8,5 +8,5 @@ import lombok.Getter;
 public class ResponseGoalProcessDto {
 
     private int currentWalkCount;
-    private double walkProgressPercentage;
+    private String walkProgressPercentage;
 }

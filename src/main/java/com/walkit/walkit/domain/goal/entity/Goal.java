@@ -23,10 +23,10 @@ public class Goal {
     private int currentWalkCount;
 
     @Builder
-    public Goal(int targetSteps, int targetWalk, int currentWalks) {
-        this.targetStepCount = targetSteps;
-        this.targetWalkCount = targetWalk;
-        this.currentWalkCount = currentWalks;
+    public Goal(int targetStepCount, int targetWalkCount, int currentWalkCount) {
+        this.targetStepCount = targetStepCount;
+        this.targetWalkCount = targetWalkCount;
+        this.currentWalkCount = currentWalkCount;
     }
 
     public void update(RequestGoalDto dto) {
