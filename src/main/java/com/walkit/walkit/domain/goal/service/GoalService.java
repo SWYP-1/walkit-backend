@@ -11,8 +11,10 @@ import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class GoalService {
 
@@ -23,12 +25,12 @@ public class GoalService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal goal = user.getGoal();
 
-         return ResponseGoalDto.builder().targetSteps(goal.getTargetSteps()).targetWalks(goal.getTargetWalks()).build();
+         return ResponseGoalDto.builder().targetStepCount(goal.getTargetStepCount()).targetWalkCount(goal.getTargetWalkCount()).build();
     }
 
     public void saveGoal(Long userId, RequestGoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Goal goal = Goal.builder().targetSteps(dto.getTargetSteps()).targetWalk(dto.getTargetWalks()).build();
+        Goal goal = Goal.builder().targetStepCount(dto.getTargetStepCount()).targetWalkCount(dto.getTargetWalkCount()).build();
 
         user.updateGoal(goal);
         goalRepository.save(goal);
@@ -45,25 +47,41 @@ public class GoalService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal goal = user.getGoal();
 
-        int currentWalks = goal.getCurrentWalks();
-        int targetWalks = goal.getTargetWalks();
+        int currentWalks = goal.getCurrentWalkCount();
+        int targetWalks = goal.getTargetWalkCount();
 
-        double walkProgressPercentage = calculatePercentage(currentWalks, targetWalks);
+        String walkProgressPercentage = calculatePercentage(currentWalks, targetWalks);
 
-        return ResponseGoalProcessDto.builder().currentWalks(currentWalks).walkProgressPercentage(walkProgressPercentage).build();
+        return ResponseGoalProcessDto.builder().currentWalkCount(currentWalks).walkProgressPercentage(walkProgressPercentage).build();
     }
 
-    public void achieveGoal(User user, Goal goal) {
-        goal.plusCurrentWalks();
+    public void checkAchieveGoal(User user, int stepCount) {
+        Goal goal = user.getGoal();
 
-        if (goal.getCurrentWalks() >= goal.getTargetWalks()) {
+        isAchieveTargetStepCount(stepCount, goal);
+        isAchieveGoal(goal);
+    }
+
+    private static void isAchieveGoal(Goal goal) {
+        if (goal.getCurrentWalkCount() >= goal.getTargetWalkCount()) {
             // todo 경험치 증가시키기
         }
     }
 
-    private double calculatePercentage(int current, int target) {
-        if (target <= 0) return 0.0;
+    private static void isAchieveTargetStepCount(int stepCount, Goal goal) {
+        if (goal.getTargetStepCount() <= stepCount) {
+            goal.plusCurrentWalks();
+        }
+    }
+
+    private String calculatePercentage(int current, int target) {
+        if (target <= 0) {
+            return "0.0";
+        }
+
         double percentage = ((double) current / target) * 100.0;
-        return Math.min(percentage, 100.0);
+        double limitedPercentage = Math.min(percentage, 100.0);
+
+        return String.format("%.1f", limitedPercentage);
     }
 }
