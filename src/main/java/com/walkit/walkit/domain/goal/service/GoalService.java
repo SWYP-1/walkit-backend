@@ -23,12 +23,12 @@ public class GoalService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal goal = user.getGoal();
 
-         return ResponseGoalDto.builder().targetSteps(goal.getTargetSteps()).targetWalks(goal.getTargetWalks()).build();
+         return ResponseGoalDto.builder().targetStepCount(goal.getTargetStepCount()).targetWalkCount(goal.getTargetWalkCount()).build();
     }
 
     public void saveGoal(Long userId, RequestGoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Goal goal = Goal.builder().targetSteps(dto.getTargetSteps()).targetWalk(dto.getTargetWalks()).build();
+        Goal goal = Goal.builder().targetSteps(dto.getTargetStepCount()).targetWalk(dto.getTargetWalkCount()).build();
 
         user.updateGoal(goal);
         goalRepository.save(goal);
@@ -45,18 +45,18 @@ public class GoalService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal goal = user.getGoal();
 
-        int currentWalks = goal.getCurrentWalks();
-        int targetWalks = goal.getTargetWalks();
+        int currentWalks = goal.getCurrentWalkCount();
+        int targetWalks = goal.getTargetWalkCount();
 
         double walkProgressPercentage = calculatePercentage(currentWalks, targetWalks);
 
-        return ResponseGoalProcessDto.builder().currentWalks(currentWalks).walkProgressPercentage(walkProgressPercentage).build();
+        return ResponseGoalProcessDto.builder().currentWalkCount(currentWalks).walkProgressPercentage(walkProgressPercentage).build();
     }
 
     public void achieveGoal(User user, Goal goal) {
         goal.plusCurrentWalks();
 
-        if (goal.getCurrentWalks() >= goal.getTargetWalks()) {
+        if (goal.getCurrentWalkCount() >= goal.getTargetWalkCount()) {
             // todo 경험치 증가시키기
         }
     }

@@ -18,27 +18,27 @@ public class Goal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int targetSteps;
-    private int targetWalks;
-    private int currentWalks;
+    private int targetStepCount;
+    private int targetWalkCount;
+    private int currentWalkCount;
 
     @Builder
     public Goal(int targetSteps, int targetWalk, int currentWalks) {
-        this.targetSteps = targetSteps;
-        this.targetWalks = targetWalk;
-        this.currentWalks = currentWalks;
+        this.targetStepCount = targetSteps;
+        this.targetWalkCount = targetWalk;
+        this.currentWalkCount = currentWalks;
     }
 
     public void update(RequestGoalDto dto) {
-        this.targetSteps = dto.getTargetSteps();
-        this.targetWalks = dto.getTargetWalks();
+        this.targetStepCount = dto.getTargetStepCount();
+        this.targetWalkCount = dto.getTargetWalkCount();
     }
 
    public void plusCurrentWalks() {
-       this.currentWalks++;
+       this.currentWalkCount++;
    }
 
     public void initialize() {
-        this.currentWalks = 0;
+        this.currentWalkCount = 0;
     }
 }
