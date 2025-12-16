@@ -5,6 +5,6 @@ import lombok.Getter;
 @Getter
 public class RequestGoalDto {
 
-    private int targetSteps;
-    private int targetWalks;
+    private int targetStepCount;
+    private int targetWalkCount;
 }

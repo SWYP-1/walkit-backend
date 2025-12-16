@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ResponseSubscribeDto {
+public class ResponseMarketingConsentDto {
 
-    private boolean isSubscribed;
+    private boolean isMarketingConsent;
 }

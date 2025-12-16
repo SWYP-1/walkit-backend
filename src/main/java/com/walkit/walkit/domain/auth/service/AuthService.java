@@ -11,12 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class AuthService {
 
     private final JwtService jwtService;
+
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Transactional
     public TokenResponse refreshToken(String refreshToken) {
         String newAccessToken = jwtService.refreshAccessToken(refreshToken);
 
@@ -31,9 +32,7 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional
-    public void logout(String refreshToken) {
-        Long userId = jwtService.getUserIdFromToken(refreshToken);
+    public void logout(Long userId) {
         refreshTokenRepository.deleteByUserId(userId);
     }
 }

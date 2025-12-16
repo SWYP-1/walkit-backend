@@ -7,6 +7,6 @@ import lombok.Getter;
 @Builder
 public class ResponseGoalDto {
 
-    private int targetSteps;
-    private int targetWalks;
+    private int targetStepCount;
+    private int targetWalkCount;
 }

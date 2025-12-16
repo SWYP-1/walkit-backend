@@ -1,25 +1,26 @@
 package com.walkit.walkit.domain.user.service;
 
-import com.walkit.walkit.common.image.entity.UserImage;
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.repository.UserImageRepository;
 import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.common.image.service.UserImageService;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseSubscribeDto;
+import com.walkit.walkit.domain.user.dto.response.ResponseMarketingConsentDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseUserDto;
+import com.walkit.walkit.domain.user.dto.response.ResponseUserNickNameFindDto;
 import com.walkit.walkit.domain.user.entity.User;
-import com.walkit.walkit.domain.user.repository.RefreshTokenRepository;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
-import com.walkit.walkit.global.security.jwt.JwtService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -28,17 +29,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final UserImageService userImageService;
     private final ImageService imageService;
     private final UserImageRepository userImageRepository;
-
-
-    public void saveBirthYear(Long userId, int year) {
-        User user = findUserById(userId);
-        user.updateBirthYear(year);
-    }
+    private final EntityManager entityManager;
 
     public void savePolicy(Long userId, RequestPolicyDto dto) {
         User user = findUserById(userId);
@@ -47,18 +41,9 @@ public class UserService {
 
     public ResponseUserDto findUser(Long userId) {
         User user = findUserById(userId);
-        UserImage userImage = userImageRepository.findByUserId(userId);
-        return ResponseUserDto.from(userImage, user);
-    }
+        String imageName = userImageService.findUserImageName(userId);
 
-    public ResponseSubscribeDto isSubscribed(Long userId) {
-        User user = findUserById(userId);
-        return ResponseSubscribeDto.builder().isSubscribed(user.isSubscribed()).build();
-    }
-
-    public void updateSubscribed(Long userId, boolean isSubscribed) {
-        User user = findUserById(userId);
-        user.updateIsSubscribed(isSubscribed);
+        return ResponseUserDto.from(imageName, user);
     }
 
     public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
@@ -67,8 +52,46 @@ public class UserService {
 
         // 이미지가 제공된 경우에만 업로드
         if (image != null && !image.isEmpty()) {
+
+            if (userImageRepository.findByUserId(user.getId()).isPresent()) {
+                String oldImageName = userImageService.delete(userId);
+                entityManager.flush();
+                imageService.deleteFile(oldImageName);
+            }
+
             imageService.uploadFile(ImageType.USER, image, userId);
         }
+    }
+
+    public void saveNickname(Long userId, String nickname) {
+        User user = findUserById(userId);
+        user.updateNickname(nickname);
+    }
+
+    public void saveBirthDate(Long userId, LocalDate birthDate) {
+        User user = findUserById(userId);
+        user.updateBirthDate(birthDate);
+    }
+
+    public ResponseMarketingConsentDto checkMarketingConsent(Long userId) {
+        User user = findUserById(userId);
+        boolean marketingConsent = user.isMarketingConsent();
+
+        return ResponseMarketingConsentDto.builder().isMarketingConsent(marketingConsent).build();
+    }
+
+    public void updateMarketingConsent(Long userId, boolean marketingConsent) {
+        User user = findUserById(userId);
+        user.updateMarketingConsent(marketingConsent);
+    }
+
+    public ResponseUserNickNameFindDto findUserByNickname(String nickname) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String userImageName = userImageService.findUserImageName(user.getId());
+
+        log.info("userImageName={}", userImageName);
+
+        return ResponseUserNickNameFindDto.builder().userId(user.getId()).nickName(nickname).imageName(userImageName).build();
     }
 
     private User findUserById(Long userId) {

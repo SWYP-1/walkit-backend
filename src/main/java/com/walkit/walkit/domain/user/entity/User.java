@@ -5,7 +5,6 @@ import com.walkit.walkit.domain.character.entity.Character;
 import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
-import com.walkit.walkit.domain.user.enums.Asset;
 import com.walkit.walkit.domain.user.enums.Sex;
 import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.common.enums.AuthProvider;
@@ -41,17 +40,21 @@ public class User extends BaseTimeEntity {
     private String providerId;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 100)
     private UserRole role = UserRole.ROLE_USER;
 
     private String nickname;
-    private int birthYear;
     private LocalDate birthDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100)
     private Sex sex;
+
     private String imageUrl;
 
-    private boolean isSubscribed;
-    private boolean isTermAgreed;
-    private boolean isPrivacyAgreed;
+    private boolean isMarketingConsent = false;
+    private boolean isTermAgreed = false;
+    private boolean isPrivacyAgreed = false;
 
     @Embedded
     private Character character;
@@ -66,27 +69,31 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
-    public void updateBirthYear(int year) {
-        this.birthYear = year;
-    }
-
     public void updatePolicy(RequestPolicyDto dto) {
         this.isTermAgreed = dto.isTermsAgreed();
         this.isPrivacyAgreed = dto.isPrivacyAgreed();
-    }
-
-    public void updateIsSubscribed(boolean isSubscribed) {
-        this.isSubscribed = isSubscribed;
+        this.isMarketingConsent = dto.isMarketingConsent();
     }
 
     public void update(RequestUserDto dto) {
-        this.nickname = dto.getName();
+        this.nickname = dto.getNickname();
         this.birthDate = dto.getBirthDate();
         this.sex = dto.getSex();
     }
 
-
     public void updateGoal(Goal goal) {
         this.goal = goal;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public void updateMarketingConsent(boolean marketingConsent) {
+        this.isMarketingConsent = marketingConsent;
     }
 }
