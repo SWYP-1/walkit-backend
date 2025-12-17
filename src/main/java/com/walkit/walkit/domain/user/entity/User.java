@@ -66,7 +66,7 @@ public class User extends BaseTimeEntity {
     private Goal goal;
 
     @Column(nullable = false)
-    private Integer point = 0;// 포인트 컬럼 임시 추가
+    private int point = 0;// 포인트 컬럼 임시 추가
 
 
     public User updateOauth(String name, String profileImageUrl) {
