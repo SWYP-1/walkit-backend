@@ -13,6 +13,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
+
 
 @Entity
 @Table(name = "user",
@@ -66,7 +68,7 @@ public class User extends BaseTimeEntity {
     private Goal goal;
 
     @Column(nullable = false)
-    private Integer point = 0;// 포인트 컬럼 임시 추가
+    private int point = 0;// 포인트 컬럼 임시 추가
 
 
     public User updateOauth(String name, String profileImageUrl) {
@@ -101,6 +103,18 @@ public class User extends BaseTimeEntity {
 
     public void updateMarketingConsent(boolean marketingConsent) {
         this.isMarketingConsent = marketingConsent;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
 

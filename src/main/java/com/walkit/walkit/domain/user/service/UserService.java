@@ -52,9 +52,16 @@ public class UserService {
         return ResponseUserDto.from(imageName, user);
     }
 
-    public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
+    public void updateUser(Long userId, RequestUserDto dto) {
         User user = findUserById(userId);
+
+        checkExistsUserByNickname(user, dto.getNickname());
+
         user.update(dto);
+    }
+
+    public void updateUserImage(Long userId, MultipartFile image) {
+        User user = findUserById(userId);
 
         // 이미지가 제공된 경우에만 업로드
         if (image != null && !image.isEmpty()) {
@@ -70,8 +77,26 @@ public class UserService {
     }
 
     public void saveNickname(Long userId, String nickname) {
+        checkExistsUserByNickname(nickname);
+
         User user = findUserById(userId);
         user.updateNickname(nickname);
+    }
+
+    private void checkExistsUserByNickname(String nickname) {
+        if (userRepository.existsByNickname(nickname)) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
+        }
+    }
+
+    private void checkExistsUserByNickname(User user, String nickname) {
+        if (userRepository.existsByNickname(nickname) && (user.getNickname() != null && !user.getNickname().equals(nickname))) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
+        }
+
+        if (userRepository.existsByNickname(nickname) && user.getNickname() == null) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
+        }
     }
 
     public void saveBirthDate(Long userId, LocalDate birthDate) {
@@ -99,11 +124,18 @@ public class UserService {
             return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).build();
         } else {
             User user = findUserById(userPrincipal.getUserId());
+
+            if (user == targetUser) {
+                return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(FollowStatus.MYSELF).build();
+
+            }
+
+
             FollowStatus followStatus = null;
             if (followRepository.existsBySenderAndReceiver(user, targetUser)) {
                 Follow follow = followRepository.findBySenderAndReceiver(user, targetUser);
 
-                if (follow.getFollowStatus() == null) {
+                if (follow == null) {
                     followStatus = FollowStatus.EMPTY;
                 } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
                     followStatus = FollowStatus.PENDING;
@@ -113,13 +145,15 @@ public class UserService {
             } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
                 Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
 
-                if (follow.getFollowStatus() == null) {
+                if (follow == null) {
                     followStatus = FollowStatus.EMPTY;
                 } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
                     followStatus = FollowStatus.PENDING;
                 } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                     followStatus = FollowStatus.ACCEPTED;
                 }
+            } else {
+                followStatus = FollowStatus.EMPTY;
             }
             return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(followStatus).build();
         }

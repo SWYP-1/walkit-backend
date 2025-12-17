@@ -8,12 +8,15 @@ import com.walkit.walkit.domain.user.dto.response.ResponseUserNickNameFindDto;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.user.service.UserService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,13 +28,16 @@ import static org.springframework.http.HttpStatus.*;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class UserController {
 
     private final UserRepository userRepository;
     private final UserService userService;
 
     @PostMapping("/birth-date/{birthDate}")
-    public ResponseEntity<Void> saveBirthDate(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String birthDate) {
+    public ResponseEntity<Void> saveBirthDate(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable String birthDate) {
         userService.saveBirthDate(userPrincipal.getUserId(), LocalDate.parse(birthDate));
         return ResponseEntity.status(CREATED).build();
     }
@@ -43,7 +49,9 @@ public class UserController {
     }
 
     @PostMapping("/nickname/{nickname}")
-    public ResponseEntity<Void> saveNickname(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
+    public ResponseEntity<Void> saveNickname(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable @Pattern(regexp = "^[가-힣a-zA-Z]{1,20}$", message = "닉네임은 1~20자의 한글 또는 영문만 가능합니다.") String nickname) {
         userService.saveNickname(userPrincipal.getUserId(), nickname);
         return ResponseEntity.status(CREATED).build();
     }
@@ -72,13 +80,22 @@ public class UserController {
         return ResponseEntity.status(OK).build();
     }
 
-    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping
     public ResponseEntity<Void> updateUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestPart RequestUserDto dto,
-            @RequestPart(value = "image", required = false) MultipartFile image
-            ) {
-        userService.updateUser(userPrincipal.getUserId(), dto, image);
+            @Valid @RequestBody RequestUserDto dto
+    ) {
+        userService.updateUser(userPrincipal.getUserId(), dto);
         return ResponseEntity.status(OK).build();
     }
+
+    @PutMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateUserImage(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestPart(value = "image", required = false) MultipartFile image // 따로 받기
+    ) {
+        userService.updateUserImage(userPrincipal.getUserId(), image);
+        return ResponseEntity.status(OK).build();
+    }
+
 }

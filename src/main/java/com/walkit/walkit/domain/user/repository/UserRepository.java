@@ -25,6 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByNickname(String nickname);
 
+
     @Query("select u.lastAccessAt from User u where u.id = :userId")
     LocalDateTime findLastAccessAt(@Param("userId") Long userId);
 
@@ -53,5 +54,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     """)
     void markInactive48hNotified(@Param("userIds") List<Long> userIds,
                                  @Param("now") LocalDateTime now);
+
+
+    boolean existsByNickname(String nickname);
 
 }
