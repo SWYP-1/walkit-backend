@@ -5,6 +5,7 @@ import com.walkit.walkit.domain.goal.dto.response.ResponseGoalDto;
 import com.walkit.walkit.domain.goal.dto.response.ResponseGoalProcessDto;
 import com.walkit.walkit.domain.goal.service.GoalService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class GoalController {
     private final GoalService goalService;
 
     @PostMapping
-    public ResponseEntity<Void> saveGoal(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody RequestGoalDto dto) {
+    public ResponseEntity<Void> saveGoal(@AuthenticationPrincipal UserPrincipal userPrincipal, @Valid @RequestBody RequestGoalDto dto) {
         goalService.saveGoal(userPrincipal.getUserId(), dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -37,7 +38,7 @@ public class GoalController {
     }
 
     @PutMapping
-    public ResponseEntity<Void> updateGoal(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody RequestGoalDto dto) {
+    public ResponseEntity<Void> updateGoal(@AuthenticationPrincipal UserPrincipal userPrincipal, @Valid @RequestBody RequestGoalDto dto) {
         goalService.updateGoal(userPrincipal.getUserId(), dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
