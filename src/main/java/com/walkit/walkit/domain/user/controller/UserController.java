@@ -80,12 +80,22 @@ public class UserController {
         return ResponseEntity.status(OK).build();
     }
 
-    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping
     public ResponseEntity<Void> updateUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @ModelAttribute RequestUserDto dto) {
-
-        userService.updateUser(userPrincipal.getUserId(), dto, dto.getImage());
+            @Valid @RequestBody RequestUserDto dto
+    ) {
+        userService.updateUser(userPrincipal.getUserId(), dto);
         return ResponseEntity.status(OK).build();
     }
+
+    @PutMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateUserImage(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestPart(value = "image", required = false) MultipartFile image // 따로 받기
+    ) {
+        userService.updateUserImage(userPrincipal.getUserId(), image);
+        return ResponseEntity.status(OK).build();
+    }
+
 }

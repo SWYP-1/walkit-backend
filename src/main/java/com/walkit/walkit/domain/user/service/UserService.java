@@ -51,12 +51,16 @@ public class UserService {
         return ResponseUserDto.from(imageName, user);
     }
 
-    public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
+    public void updateUser(Long userId, RequestUserDto dto) {
         User user = findUserById(userId);
 
         checkExistsUserByNickname(user, dto.getNickname());
 
         user.update(dto);
+    }
+
+    public void updateUserImage(Long userId, MultipartFile image) {
+        User user = findUserById(userId);
 
         // 이미지가 제공된 경우에만 업로드
         if (image != null && !image.isEmpty()) {
