@@ -65,6 +65,10 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "goal_id")
     private Goal goal;
 
+    @Column(nullable = false)
+    private Integer point = 0;// 포인트 컬럼 임시 추가
+
+
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
@@ -109,5 +113,11 @@ public class User extends BaseTimeEntity {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+
+    public void addPoints(int amount) {
+        if (amount <= 0) return;
+        this.point += amount;
     }
 }
