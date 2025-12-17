@@ -12,6 +12,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user",
@@ -107,4 +108,67 @@ public class User extends BaseTimeEntity {
         if (amount <= 0) return;
         this.point += amount;
     }
+
+    // == 알림 설정 ==
+
+    // 기기 알림 켜기/끄기 (전체 알림)
+    @Builder.Default
+    @Column(name = "notification_enabled", nullable = false)
+    private Boolean notificationEnabled = true;
+
+    // 목표 달성 알림
+    @Builder.Default
+    @Column(name = "goal_notification_enabled", nullable = false)
+    private Boolean goalNotificationEnabled = true;
+
+    // 새로운 미션 오픈 알림
+    @Builder.Default
+    @Column(name = "new_mission_notification_enabled", nullable = false)
+    private Boolean newMissionNotificationEnabled = true;
+
+    @Column(name = "last_access_at")
+    private LocalDateTime lastAccessAt;
+
+    private LocalDateTime inactive48hNotifiedAt;
+
+    public void updateLastAccessAt(LocalDateTime time) {
+        this.lastAccessAt = time;
+    }
+
+
+     // 전체 알림 수신 가능 여부
+    public boolean canReceiveNotification() {
+        return notificationEnabled != null && notificationEnabled;
+    }
+
+
+    // 목표 달성 알림 수신 가능 여부
+    public boolean canReceiveGoalNotification() {
+        return canReceiveNotification() &&
+                goalNotificationEnabled != null &&
+                goalNotificationEnabled;
+    }
+
+    // 미션 알림 수신 가능 여부
+    public boolean canReceiveMissionNotification() {
+        return canReceiveNotification() &&
+                newMissionNotificationEnabled != null &&
+                newMissionNotificationEnabled;
+    }
+
+    public void updateNotificationEnabled(Boolean enabled) {
+        this.notificationEnabled = enabled;
+    }
+
+    public void updateGoalNotificationEnabled(Boolean enabled) {
+        this.goalNotificationEnabled = enabled;
+    }
+
+    public void updateNewMissionNotificationEnabled(Boolean enabled) {
+        this.newMissionNotificationEnabled = enabled;
+    }
+
+
 }
+
+
