@@ -54,7 +54,7 @@ public class UserService {
     public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
         User user = findUserById(userId);
 
-        checkExistsUserByNickname(dto.getNickname());
+        checkExistsUserByNickname(user, dto.getNickname());
 
         user.update(dto);
 
