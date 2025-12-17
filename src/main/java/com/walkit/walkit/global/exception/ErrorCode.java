@@ -16,8 +16,10 @@ public enum ErrorCode {
     USER_IMAGE_NOT_FOUND(NOT_FOUND, 1002, "[User] 사용자 이미지를 찾을 수 없습니다"),
 
     // FOLLOW
-    FOLLOW_NOT_FOUND(NOT_FOUND, 2001, "[Follow] 팔로잉을 찾을 수 없습니다");
-
+    FOLLOW_NOT_FOUND(NOT_FOUND, 2001, "[Follow] 팔로우을 찾을 수 없습니다"),
+    ALREADY_EXISTS_PENDING_FOLLOW(NOT_ACCEPTABLE, 2002, "[Follow] 이미 요청중인 팔로우가 존재합니다."),
+    ALREADY_EXISTS_ACCEPTED_FOLLOW(NOT_ACCEPTABLE, 2003, "[Follow] 이미 완료된 팔로우가 존재합니다."),
+    CANT_FOLLOW_ONESELF(NOT_ACCEPTABLE, 2004, "[Follow] 자기 자신은 팔로우 할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final Integer code;
