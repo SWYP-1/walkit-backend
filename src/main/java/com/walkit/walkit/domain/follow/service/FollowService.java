@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.walkit.walkit.global.exception.ErrorCode.FOLLOW_NOT_FOUND;
 
@@ -33,9 +34,19 @@ public class FollowService {
         followRepository.save(follow);
     }
 
-    public void acceptFollow(Long userId, Long followingId) {
-        Follow follow = followRepository.findById(followingId).orElseThrow(() -> new CustomException(FOLLOW_NOT_FOUND));
-        follow.accept();
+    public void acceptFollow(Long userId, String nickname) {
+        User user1 = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user2 = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (followRepository.existsBySenderAndReceiver(user1, user2)) {
+            Follow follow = followRepository.findBySenderAndReceiver(user1, user2);
+            follow.accept();
+        }
+
+        if (followRepository.existsBySenderAndReceiver(user2, user1)) {
+            Follow follow = followRepository.findBySenderAndReceiver(user2, user1);
+            follow.accept();
+        }
     }
 
     public void deleteFollow(Long userId, String nickname) {
@@ -61,11 +72,11 @@ public class FollowService {
         List<User> user1 = follows1.stream().map(Follow::getReceiver).toList();
         List<User> user2 = follows2.stream().map(Follow::getSender).toList();
 
-        user1.addAll(user2);
+        List<User> allUser = Stream.concat(user1.stream(), user2.stream())
+                .distinct()
+                .toList();
 
-        List<User> allUsers = user1;
-
-        return allUsers.stream().map(ResponseFollowerDto::of).toList();
+        return allUser.stream().map(ResponseFollowerDto::of).toList();
     }
 
     public List<ResponseFollowingDto> findRequestFollowing(Long userId) {

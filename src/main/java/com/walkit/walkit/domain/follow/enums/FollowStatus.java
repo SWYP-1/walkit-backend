@@ -10,5 +10,6 @@ public enum FollowStatus {
     EMPTY,
     PENDING,
     ACCEPTED,
-    REJECTED
+    REJECTED,
+    MYSELF
 }

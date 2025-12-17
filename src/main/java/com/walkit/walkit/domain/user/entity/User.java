@@ -12,6 +12,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user",
@@ -64,9 +65,6 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "goal_id")
     private Goal goal;
 
-
-
-
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
@@ -99,5 +97,17 @@ public class User extends BaseTimeEntity {
 
     public void updateMarketingConsent(boolean marketingConsent) {
         this.isMarketingConsent = marketingConsent;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
