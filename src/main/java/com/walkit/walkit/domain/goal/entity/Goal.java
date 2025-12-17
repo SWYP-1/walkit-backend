@@ -22,6 +22,9 @@ public class Goal {
     private int targetWalkCount;
     private int currentWalkCount;
 
+    private boolean halfWalkNotified;     // 50% 알림 보냈는지
+    private boolean fullWalkNotified;     // 100% 알림 보냈는지
+
     @Builder
     public Goal(int targetStepCount, int targetWalkCount, int currentWalkCount) {
         this.targetStepCount = targetStepCount;
@@ -40,5 +43,14 @@ public class Goal {
 
     public void initialize() {
         this.currentWalkCount = 0;
+        this.halfWalkNotified = false;
+        this.fullWalkNotified = false;
     }
+
+    public boolean isWalkHalfNotified() { return halfWalkNotified; }
+    public boolean isWalkFullNotified() { return fullWalkNotified; }
+
+    public void markWalkHalfNotified() { this.halfWalkNotified = true; }
+    public void markWalkFullNotified() { this.fullWalkNotified = true; }
+
 }

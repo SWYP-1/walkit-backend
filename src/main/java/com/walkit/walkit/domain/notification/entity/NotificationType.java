@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.notification;
+package com.walkit.walkit.domain.notification.entity;
 
 public enum NotificationType {
     GOAL,              // 목표 알림

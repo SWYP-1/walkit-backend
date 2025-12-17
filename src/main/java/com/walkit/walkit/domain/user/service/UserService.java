@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -160,5 +161,15 @@ public class UserService {
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+
+    @Transactional
+    public void updateLastAccessAt(Long userId, LocalDateTime now) {
+        userRepository.updateLastAccessAt(userId, now);
+    }
+
+    public LocalDateTime findLastAccessAt(Long userId) {
+        return userRepository.findLastAccessAt(userId);
     }
 }

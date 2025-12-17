@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.walks.service;
 
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.service.ImageService;
+import com.walkit.walkit.domain.notification.service.GoalPushService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walks.dto.request.WalkPointRequestDto;
@@ -27,8 +28,7 @@ public class WalkServiceImpl implements WalkService {
     private final WalkRepository walkRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-
-
+    private final GoalPushService goalPushService;
 
 
     // 산책 저장
@@ -54,6 +54,7 @@ public class WalkServiceImpl implements WalkService {
 
         Walk saved = walkRepository.save(walk);
 
+
         // points 저장
         if (request.getPoints() != null && !request.getPoints().isEmpty()) {
             List<WalkPoint> newPoints = new java.util.ArrayList<>();
@@ -77,7 +78,11 @@ public class WalkServiceImpl implements WalkService {
             walk.updateImageUrl(imageUrl); // 대표 이미지 - 필요 없으면 주석 처리
         }
 
+        // 목표(산책 횟수) 50%/100% 체크 후 알림 호출
+        goalPushService.onWalkCompleted(user);
+
         return toDetailResponse(walk);
+
     }
 
 
