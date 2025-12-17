@@ -38,9 +38,9 @@ public class FollowController {
         return  ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
-    @PatchMapping("/accept/{followId}")
-    public ResponseEntity<Void> acceptFollow(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long followId) {
-        followService.acceptFollow(userPrincipal.getUserId(), followId);
+    @PatchMapping("/nickname/{nickname}")
+    public ResponseEntity<Void> acceptFollow(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
+        followService.acceptFollow(userPrincipal.getUserId(), nickname);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

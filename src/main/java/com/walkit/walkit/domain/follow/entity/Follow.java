@@ -28,10 +28,9 @@ public class Follow {
     private FollowStatus followStatus = FollowStatus.PENDING;
 
     @Builder
-    public Follow(User sender, User receiver, FollowStatus followStatus) {
+    public Follow(User sender, User receiver) {
         this.sender = sender;
         this.receiver = receiver;
-        this.followStatus = followStatus;
     }
 
     public void accept() {

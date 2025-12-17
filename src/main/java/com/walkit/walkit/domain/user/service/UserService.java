@@ -98,11 +98,18 @@ public class UserService {
             return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).build();
         } else {
             User user = findUserById(userPrincipal.getUserId());
+
+            if (user == targetUser) {
+                return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(FollowStatus.MYSELF).build();
+
+            }
+
+
             FollowStatus followStatus = null;
             if (followRepository.existsBySenderAndReceiver(user, targetUser)) {
                 Follow follow = followRepository.findBySenderAndReceiver(user, targetUser);
 
-                if (follow.getFollowStatus() == null) {
+                if (follow == null) {
                     followStatus = FollowStatus.EMPTY;
                 } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
                     followStatus = FollowStatus.PENDING;
@@ -112,13 +119,15 @@ public class UserService {
             } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
                 Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
 
-                if (follow.getFollowStatus() == null) {
+                if (follow == null) {
                     followStatus = FollowStatus.EMPTY;
                 } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
                     followStatus = FollowStatus.PENDING;
                 } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                     followStatus = FollowStatus.ACCEPTED;
                 }
+            } else {
+                followStatus = FollowStatus.EMPTY;
             }
             return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(followStatus).build();
         }
