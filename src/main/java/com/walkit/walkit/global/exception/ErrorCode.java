@@ -14,6 +14,9 @@ public enum ErrorCode {
     USER_NOT_FOUND(NOT_FOUND, 1001, "[User] 사용자를 찾을 수 없습니다"),
     INVALID_TOKEN(UNAUTHORIZED, 1002, "[User] 토큰이 올바르지 않습니다"),
     USER_IMAGE_NOT_FOUND(NOT_FOUND, 1002, "[User] 사용자 이미지를 찾을 수 없습니다"),
+    ALREADY_EXISTS_USER(BAD_REQUEST, 1003, "[User] 사용자가 이미 존재합니다."),
+    INVALID_NICKNAME_FORMAT(BAD_REQUEST, 1004, "[User] 닉네임은 1~20자의 한글 또는 영문만 가능합니다."),
+    INVALID_DATE_FORMAT(BAD_REQUEST, 1005, "[User] 날짜 형식이 올바르지 않습니다. (yyyy-MM-dd)"),
 
     // FOLLOW
     FOLLOW_NOT_FOUND(NOT_FOUND, 2001, "[Follow] 팔로우을 찾을 수 없습니다"),
