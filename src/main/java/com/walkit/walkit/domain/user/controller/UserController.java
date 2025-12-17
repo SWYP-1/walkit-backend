@@ -83,10 +83,9 @@ public class UserController {
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @RequestPart RequestUserDto dto,
-            @RequestPart(value = "image", required = false) MultipartFile image
-            ) {
-        userService.updateUser(userPrincipal.getUserId(), dto, image);
+            @Valid @ModelAttribute RequestUserDto dto) {
+
+        userService.updateUser(userPrincipal.getUserId(), dto, dto.getImage());
         return ResponseEntity.status(OK).build();
     }
 }
