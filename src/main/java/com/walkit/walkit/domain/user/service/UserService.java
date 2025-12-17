@@ -53,6 +53,9 @@ public class UserService {
 
     public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
         User user = findUserById(userId);
+
+        checkExistsUserByNickname(dto.getNickname());
+
         user.update(dto);
 
         // 이미지가 제공된 경우에만 업로드
@@ -69,8 +72,22 @@ public class UserService {
     }
 
     public void saveNickname(Long userId, String nickname) {
+        checkExistsUserByNickname(nickname);
+
         User user = findUserById(userId);
         user.updateNickname(nickname);
+    }
+
+    private void checkExistsUserByNickname(String nickname) {
+        if (userRepository.existsByNickname(nickname)) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
+        }
+    }
+
+    private void checkExistsUserByNickname(User user, String nickname) {
+        if (userRepository.existsByNickname(nickname) && !(user.getNickname().equals(nickname))) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
+        }
     }
 
     public void saveBirthDate(Long userId, LocalDate birthDate) {
