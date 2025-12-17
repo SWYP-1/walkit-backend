@@ -54,7 +54,7 @@ public class UserService {
     public void updateUser(Long userId, RequestUserDto dto, MultipartFile image) {
         User user = findUserById(userId);
 
-        checkExistsUserByNickname(dto.getNickname());
+        checkExistsUserByNickname(user, dto.getNickname());
 
         user.update(dto);
 
@@ -85,7 +85,11 @@ public class UserService {
     }
 
     private void checkExistsUserByNickname(User user, String nickname) {
-        if (userRepository.existsByNickname(nickname) && !(user.getNickname().equals(nickname))) {
+        if (userRepository.existsByNickname(nickname) && (user.getNickname() != null && !user.getNickname().equals(nickname))) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
+        }
+
+        if (userRepository.existsByNickname(nickname) && user.getNickname() == null) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_USER);
         }
     }
