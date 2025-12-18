@@ -25,14 +25,14 @@ public class Walk extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 산책 전 감정
+    // 산책 전 감정 - 필수
     @Enumerated(EnumType.STRING)
     @Column(name = "preWalkEmotion", nullable = false, length = 20)
     private Emotion preWalkEmotion;
 
-    // 산책 후 감정
+    // 산책 후 감정 - 필수
     @Enumerated(EnumType.STRING)
-    @Column(name = "postWalkEmotion", length = 20)
+    @Column(name = "postWalkEmotion", nullable = false, length = 20)
     private Emotion postWalkEmotion;
 
 
