@@ -1,6 +1,6 @@
 package com.walkit.walkit.common.image.entity;
 
-import com.walkit.walkit.domain.walks.entity.Walk;
+import com.walkit.walkit.domain.walk.entity.Walk;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;

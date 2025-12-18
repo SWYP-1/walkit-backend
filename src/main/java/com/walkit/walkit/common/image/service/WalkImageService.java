@@ -2,8 +2,8 @@ package com.walkit.walkit.common.image.service;
 
 import com.walkit.walkit.common.image.entity.WalkImage;
 import com.walkit.walkit.common.image.repository.WalkImageRepository;
-import com.walkit.walkit.domain.walks.entity.Walk;
-import com.walkit.walkit.domain.walks.repository.WalkRepository;
+import com.walkit.walkit.domain.walk.entity.Walk;
+import com.walkit.walkit.domain.walk.repository.WalkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

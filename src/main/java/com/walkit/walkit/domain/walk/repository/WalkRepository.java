@@ -1,7 +1,7 @@
-package com.walkit.walkit.domain.walks.repository;
+package com.walkit.walkit.domain.walk.repository;
 
 
-import com.walkit.walkit.domain.walks.entity.Walk;
+import com.walkit.walkit.domain.walk.entity.Walk;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

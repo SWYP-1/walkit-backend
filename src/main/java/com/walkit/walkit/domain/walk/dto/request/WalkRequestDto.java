@@ -1,7 +1,7 @@
-package com.walkit.walkit.domain.walks.dto.request;
+package com.walkit.walkit.domain.walk.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.walkit.walkit.domain.walks.entity.Emotion;
+import com.walkit.walkit.domain.walk.entity.Emotion;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;

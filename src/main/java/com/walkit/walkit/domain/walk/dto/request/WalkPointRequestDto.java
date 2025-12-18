@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.walks.dto.request;
+package com.walkit.walkit.domain.walk.dto.request;
 
 import lombok.Getter;
 

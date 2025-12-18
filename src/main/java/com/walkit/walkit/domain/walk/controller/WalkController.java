@@ -1,9 +1,9 @@
-package com.walkit.walkit.domain.walks.controller;
+package com.walkit.walkit.domain.walk.controller;
 
-import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
-import com.walkit.walkit.domain.walks.dto.request.WalkNoteUpdateRequestDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
-import com.walkit.walkit.domain.walks.service.WalkService;
+import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.request.WalkNoteUpdateRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.service.WalkService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,6 +1,6 @@
-package com.walkit.walkit.domain.walks.dto.response;
+package com.walkit.walkit.domain.walk.dto.response;
 
-import com.walkit.walkit.domain.walks.entity.Emotion;
+import com.walkit.walkit.domain.walk.entity.Emotion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

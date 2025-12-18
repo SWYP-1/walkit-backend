@@ -1,17 +1,17 @@
-package com.walkit.walkit.domain.walks.service;
+package com.walkit.walkit.domain.walk.service;
 
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.domain.notification.service.GoalPushService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
-import com.walkit.walkit.domain.walks.dto.request.WalkPointRequestDto;
-import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkPointResponseDto;
-import com.walkit.walkit.domain.walks.entity.Walk;
-import com.walkit.walkit.domain.walks.entity.WalkPoint;
-import com.walkit.walkit.domain.walks.repository.WalkRepository;
+import com.walkit.walkit.domain.walk.dto.request.WalkPointRequestDto;
+import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkPointResponseDto;
+import com.walkit.walkit.domain.walk.entity.Walk;
+import com.walkit.walkit.domain.walk.entity.WalkPoint;
+import com.walkit.walkit.domain.walk.repository.WalkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

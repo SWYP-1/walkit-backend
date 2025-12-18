@@ -1,8 +1,8 @@
-package com.walkit.walkit.domain.walks.service;
+package com.walkit.walkit.domain.walk.service;
 
 
-import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
 
 
 public interface WalkService {
