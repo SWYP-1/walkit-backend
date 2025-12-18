@@ -22,6 +22,7 @@ where w.id = :walkId and w.user.id = :userId
 """)
     Optional<Walk> findDetailByIdAndUserId(Long walkId, Long userId);  // points까지 같이 조인해서 한 번에 가져옴
 
+    // 주간 걸음수 합
     @Query("""
         select coalesce(sum(w.stepCount), 0)
         from Walk w
@@ -33,8 +34,9 @@ where w.id = :walkId and w.user.id = :userId
             @Param("userId") Long userId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
-    ); // 주간 걸음수 합
+    );
 
+    // 주간 산책 기록이 존재하는 '날짜' 목록
     @Query("""
     select distinct function('date', w.createdDate)
     from Walk w
@@ -50,5 +52,9 @@ where w.id = :walkId and w.user.id = :userId
     );
 
 
+    // 일간 산책 단건 조회
+    Optional<Walk> findFirstByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeDesc(
+            Long userId, Long dayEnd, Long dayStart
+    );
 
 }

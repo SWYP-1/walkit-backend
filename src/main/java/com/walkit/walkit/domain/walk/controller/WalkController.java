@@ -49,6 +49,18 @@ public class WalkController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "산책 기록 날짜 조회", description = "startTime(epoch millis)이 속한 날짜(KST) 기준으로 내 산책 기록 1건을 조회합니다.")
+    @GetMapping()
+    public ResponseEntity<WalkResponseDto> getDailyWalk(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam long startTime
+    ) {
+        Long userId = principal.getUserId();
+        WalkResponseDto dto = walkService.getWalkByDay(userId, startTime);
+        return ResponseEntity.ok(dto);
+    }
+
+
     @Operation(summary = "산책 기록 텍스트 수정", description = "산책 기록의 note(일기 텍스트)만 수정합니다.")
     @PatchMapping("/update/{walkId}")
     public ResponseEntity<Void> updateNote(
