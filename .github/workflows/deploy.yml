@@ -26,10 +26,10 @@ jobs:
           ${{ secrets.APPLICATION_YML }}
           EOF
 
-#      - name: Create Firebase service account key
-#        run: |
-#          mkdir -p ./src/main/resources/firebase
-#          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" | base64 --decode > ./src/main/resources/firebase/serviceAccountKey.json
+      - name: Create Firebase service account key
+        run: |
+          mkdir -p ./src/main/resources/fcm
+          echo "${{ secrets.FCM_FIREBASE_KEY }}" | base64 --decode > ./src/main/resources/fcm/walkit-33959-firebase-adminsdk-fbsvc-e035ff0a35.json
       - name: Create Apple key
         run: |
           mkdir -p ./src/main/resources/key
