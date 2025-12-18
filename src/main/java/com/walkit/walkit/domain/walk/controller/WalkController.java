@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.walk.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
 import com.walkit.walkit.domain.walk.dto.request.WalkNoteUpdateRequestDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
@@ -23,19 +24,20 @@ import org.springframework.web.multipart.MultipartFile;
 public class WalkController {
 
     private final WalkService walkService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-    @Operation(summary = "산책 기록 저장", description = "산책 기록을 저장합니다.")
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<WalkResponseDto> createNotice(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                                                        @RequestPart("data") WalkRequestDto requestDto,
-                                                        @RequestPart(value = "image", required = false) MultipartFile image) {
-
-        requestDto.setImage(image);
-        Long userId = userPrincipal.getUserId();
-        WalkResponseDto response = walkService.saveWalk(userId, requestDto);
-        return ResponseEntity.ok(response);
+    @PostMapping(value="/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<WalkResponseDto> saveWalk(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestPart("data") String data,
+            @RequestPart(value="image", required=false) MultipartFile image
+    ) throws Exception {
+        WalkRequestDto dto = objectMapper.readValue(data, WalkRequestDto.class);
+        dto.setImage(image);
+        return ResponseEntity.ok(walkService.saveWalk(principal.getUserId(), dto));
     }
+
 
 
 
