@@ -9,35 +9,42 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
 
 @Slf4j
 @Configuration
 public class FcmConfig {
 
-    @Value("${fcm.firebase.config.path}")
+    @Value("${fcm.firebase.config.path:}")
     private String firebaseConfigPath;
 
     @PostConstruct
     public void initialize() {
-        try {
-            ClassPathResource resource = new ClassPathResource(firebaseConfigPath);
-            try (InputStream stream = resource.getInputStream()) {
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(stream))
-                        .build();
+        if (firebaseConfigPath == null || firebaseConfigPath.isBlank()) {
+            log.warn("fcm.firebase.config.path is missing. Skip Firebase init.");
+            return;
+        }
 
-                if (FirebaseApp.getApps().isEmpty()) {
-                    FirebaseApp.initializeApp(options);
-                    log.info("Firebase app has been initialized successfully.");
-                }
+        try (InputStream stream = resolveStream(firebaseConfigPath)) {
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(stream))
+                    .build();
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+                log.info("Firebase app has been initialized successfully.");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Error initializing Firebase app", e);
         }
+    }
+
+    private InputStream resolveStream(String path) throws IOException {
+        java.io.File f = new java.io.File(path);
+        if (f.exists() && f.isFile()) {
+            return new java.io.FileInputStream(f);
+        }
+        return new ClassPathResource(path).getInputStream();
     }
 }
