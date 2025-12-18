@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.walks.entity;
+package com.walkit.walkit.domain.walk.entity;
 
 import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.user.entity.User;

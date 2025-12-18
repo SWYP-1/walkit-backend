@@ -1,23 +1,26 @@
-package com.walkit.walkit.domain.walks.service;
+package com.walkit.walkit.domain.walk.service;
 
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.domain.notification.service.GoalPushService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
-import com.walkit.walkit.domain.walks.dto.request.WalkPointRequestDto;
-import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkPointResponseDto;
-import com.walkit.walkit.domain.walks.entity.Walk;
-import com.walkit.walkit.domain.walks.entity.WalkPoint;
-import com.walkit.walkit.domain.walks.repository.WalkRepository;
+import com.walkit.walkit.domain.walk.dto.request.WalkPointRequestDto;
+import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkPointResponseDto;
+import com.walkit.walkit.domain.walk.entity.Walk;
+import com.walkit.walkit.domain.walk.entity.WalkPoint;
+import com.walkit.walkit.domain.walk.repository.WalkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -30,8 +33,10 @@ public class WalkServiceImpl implements WalkService {
     private final ImageService imageService;
     private final GoalPushService goalPushService;
 
+    private static final ZoneId ZONE = ZoneId.of("Asia/Seoul");
 
-    // 산책 저장
+
+    // 산책 기록 저장
     @Override
     @Transactional
     public WalkResponseDto saveWalk(
@@ -86,10 +91,30 @@ public class WalkServiceImpl implements WalkService {
     }
 
 
-    // 산책 기록 조회 (단건)
+    // 산책 기록 조회(단건)
     @Override
     public WalkResponseDto getWalk(Long userId, Long walkId) {
         Walk walk = walkRepository.findDetailByIdAndUserId(walkId, userId)
+                .orElseThrow(() -> new RuntimeException("Walk not found"));
+
+        return toDetailResponse(walk);
+    }
+
+
+    // 산책 기록 조회(날짜)
+    public WalkResponseDto getWalkByDay(Long userId, long anchorMillis) {
+
+        // millis를 KST 기준의 날짜(LocalDate)로 변환 (연-월-일 추출)
+        LocalDate day = Instant.ofEpochMilli(anchorMillis)
+                .atZone(ZONE) // Asia/Seoul 기준으로 변환
+                .toLocalDate();
+
+        // 조회할 날짜의 00:00 ~ 다음날 00:00 범위를 만들어 하루 조회
+        long dayStart = day.atStartOfDay(ZONE).toInstant().toEpochMilli();
+        long dayEnd = day.plusDays(1).atStartOfDay(ZONE).toInstant().toEpochMilli();
+
+        Walk walk = walkRepository
+                .findFirstByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeDesc(userId, dayStart, dayEnd)
                 .orElseThrow(() -> new RuntimeException("Walk not found"));
 
         return toDetailResponse(walk);

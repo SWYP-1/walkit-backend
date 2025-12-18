@@ -1,8 +1,8 @@
-package com.walkit.walkit.domain.walks.service;
+package com.walkit.walkit.domain.walk.service;
 
 
-import com.walkit.walkit.domain.walks.dto.request.WalkRequestDto;
-import com.walkit.walkit.domain.walks.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
 
 
 public interface WalkService {
@@ -13,6 +13,9 @@ public interface WalkService {
 
     // 산책 기록 조회(단건)
     WalkResponseDto getWalk(Long userId, Long walkId);
+
+    // 산책 기록 조회(날짜)
+    WalkResponseDto getWalkByDay(Long userId, long anchorMillis);
 
     // 산책 기록 수정
     void updateNote(Long userId, Long walkId, String note);

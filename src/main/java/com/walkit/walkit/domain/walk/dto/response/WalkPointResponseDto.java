@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.walks.dto.response;
+package com.walkit.walkit.domain.walk.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
