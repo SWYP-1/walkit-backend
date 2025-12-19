@@ -53,7 +53,7 @@ public class WeeklyMissionService {
                     .build());
         }
 
-        // 사진 1개 - 색상 랜덤
+        /*// 사진 1개 - 색상 랜덤
         if (!userWeeklyMissionRepository.existsByUser_IdAndWeekStartAndCategory(userId, weekStart, MissionCategory.PHOTO)) {
 
             List<Mission> photoMissions = missionRepository.findByTypeAndActiveTrue(MissionType.PHOTO_COLOR);
@@ -76,7 +76,7 @@ public class WeeklyMissionService {
                     .weekStart(weekStart)
                     .weekEnd(weekEnd)
                     .build());
-        }
+        }*/
     }
 
     private Mission pickRandomChallengeExcludingCompleted(Long userId) {
@@ -124,11 +124,11 @@ public class WeeklyMissionService {
         }
     }
 
-    private MissionColor pickColorForWeek(LocalDate weekStart) {
+  /*  private MissionColor pickColorForWeek(LocalDate weekStart) {
         long weeks = java.time.temporal.ChronoUnit.WEEKS.between(BASE_WEEK_START, weekStart);
         int idx = (int) Math.floorMod(weeks, COLORS.length);
         return COLORS[idx];
-    }
+    }*/
 
     private String toJson(Map<String, Object> map) {
         try {
