@@ -36,20 +36,18 @@ where w.id = :walkId and w.user.id = :userId
             @Param("end") LocalDateTime end
     );
 
-    // 주간 산책 기록이 존재하는 '날짜' 목록
-    @Query("""
-    select distinct function('date', w.createdDate)
-    from Walk w
-    where w.user.id = :userId
-      and w.createdDate >= :start
-      and w.createdDate < :end
-    order by function('date', w.createdDate)
-""")
-    List<Date> findDistinctWalkDatesBetween(
+    // startTime(millis) 기준으로 기간 내 산책 시작 '날짜' 목록
+    @Query("SELECT w FROM Walk w " +
+            "WHERE w.user.id = :userId " +
+            "AND w.startTime >= :startMillis " +
+            "AND w.startTime < :endMillis " +
+            "ORDER BY w.startTime")
+    List<Walk> findWalksBetween(
             @Param("userId") Long userId,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end
+            @Param("startMillis") Long startMillis,
+            @Param("endMillis") Long endMillis
     );
+
 
 
     // 일간 산책 단건 조회

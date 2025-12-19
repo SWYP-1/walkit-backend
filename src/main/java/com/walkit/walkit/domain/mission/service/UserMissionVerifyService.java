@@ -3,12 +3,15 @@ package com.walkit.walkit.domain.mission.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walkit.walkit.domain.mission.entity.MissionType;
 import com.walkit.walkit.domain.mission.entity.UserWeeklyMission;
+import com.walkit.walkit.domain.walk.entity.Walk;
 import com.walkit.walkit.domain.walk.repository.WalkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.List;
 import java.time.LocalDate;
@@ -60,20 +63,36 @@ public class UserMissionVerifyService {
 
         int requiredDays = getRequiredDays(userMission);
 
-        LocalDateTime start = userMission.getWeekStart().atStartOfDay();
-        LocalDateTime end = userMission.getWeekEnd().plusDays(1).atStartOfDay();
+        long startMillis = userMission.getWeekStart()
+                .atStartOfDay(ZoneId.of("Asia/Seoul"))
+                .toInstant()
+                .toEpochMilli();
 
-        List<java.sql.Date> sqlDates = walkRepository.findDistinctWalkDatesBetween(
-                userMission.getUser().getId(), start, end
+        long endMillis = userMission.getWeekEnd()
+                .plusDays(1) // 일요일 24:00 까지 포함
+                .atStartOfDay(ZoneId.of("Asia/Seoul"))
+                .toInstant()
+                .toEpochMilli();
+
+        // Walk 엔티티 조회
+        List<Walk> walks = walkRepository.findWalksBetween(
+                userMission.getUser().getId(),
+                startMillis,
+                endMillis
         );
 
-        // LocalDate 변환
-        List<LocalDate> dates = sqlDates.stream()
-                .map(java.sql.Date::toLocalDate)
+
+        // 날짜 추출 및 중복 제거
+        List<LocalDate> dates = walks.stream()
+                .map(walk -> Instant.ofEpochMilli(walk.getStartTime())
+                        .atZone(ZoneId.of("Asia/Seoul"))
+                        .toLocalDate())
                 .distinct()
                 .sorted()
                 .toList();
 
+
+        // 연속 일수 계산
         int maxStreak = 0;
         int streak = 0;
         LocalDate prev = null;
@@ -91,6 +110,12 @@ public class UserMissionVerifyService {
         }
 
         boolean achieved = maxStreak >= requiredDays;
+
+        log.info("attendance range millis: startMillis={}, endMillis={}", startMillis, endMillis);
+        log.info("attendance range kst: {} ~ {}",
+                Instant.ofEpochMilli(startMillis).atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
+                Instant.ofEpochMilli(endMillis).atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        );
 
         log.info("출석 검증: userId={}, dates={}, maxStreak={}, requiredDays={}, achieved={}",
                 userMission.getUser().getId(), dates, maxStreak, requiredDays, achieved);
