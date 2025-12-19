@@ -22,4 +22,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     Optional<Follow> findOptionalBySenderAndReceiver(User user, User targetUser);
 
     boolean existsBySenderAndReceiverAndFollowStatus(User sender, User receiver, FollowStatus followStatus);
+
+    boolean existsBySenderIdAndReceiverIdAndFollowStatus(Long senderId, Long receiverId, FollowStatus followStatus);
 }

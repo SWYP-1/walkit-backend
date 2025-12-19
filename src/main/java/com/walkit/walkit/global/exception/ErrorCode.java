@@ -22,7 +22,11 @@ public enum ErrorCode {
     FOLLOW_NOT_FOUND(NOT_FOUND, 2001, "[Follow] 팔로우을 찾을 수 없습니다"),
     ALREADY_EXISTS_PENDING_FOLLOW(NOT_ACCEPTABLE, 2002, "[Follow] 이미 요청중인 팔로우가 존재합니다."),
     ALREADY_EXISTS_ACCEPTED_FOLLOW(NOT_ACCEPTABLE, 2003, "[Follow] 이미 완료된 팔로우가 존재합니다."),
-    CANT_FOLLOW_ONESELF(NOT_ACCEPTABLE, 2004, "[Follow] 자기 자신은 팔로우 할 수 없습니다.");
+    CANT_FOLLOW_ONESELF(NOT_ACCEPTABLE, 2004, "[Follow] 자기 자신은 팔로우 할 수 없습니다."),
+
+    // WALK_LIKE
+    ALREADY_EXISTS_WALK_LIKE(NOT_ACCEPTABLE, 3001, "[WalkLike] 해당 산책기록에 이미 좋아요를 눌렀습니다."),
+    WALK_LIKE_NOT_FOUND(NOT_FOUND, 3002, "[WalkLike] 해당 산책기록에 좋아요를 누른 기록이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final Integer code;
