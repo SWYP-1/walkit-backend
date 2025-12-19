@@ -45,11 +45,24 @@ public class WalkServiceImpl implements WalkService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        Long start = request.getStartTime();
+        Long end   = request.getEndTime();
+
+        Long totalTime = null;
+        if (start != null && end != null) {
+            long diff = end - start;
+            if (diff < 0) {
+                throw new IllegalArgumentException("endTime must be >= startTime");
+            }
+            totalTime = diff;
+        }
+
         // Walk 생성
         Walk walk = Walk.builder()
                 .user(user)
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
+                .totalTime(totalTime)
                 .preWalkEmotion(request.getPreWalkEmotion())
                 .postWalkEmotion(request.getPostWalkEmotion())
                 .stepCount(request.getStepCount())
@@ -150,6 +163,7 @@ public class WalkServiceImpl implements WalkService {
                 .totalDistance(walk.getTotalDistance())
                 .startTime(walk.getStartTime())
                 .endTime(walk.getEndTime())
+                .totalTime(walk.getTotalTime())
                 .imageUrl(walk.getImageUrl())
                 .createdDate(walk.getCreatedDate())
                 .points(points)
