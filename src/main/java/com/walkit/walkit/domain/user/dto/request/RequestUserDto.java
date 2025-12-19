@@ -10,18 +10,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
-@Setter
 @Getter
 @RequiredArgsConstructor // final 필드를 매개변수로 받는 생성자 생성
 public class RequestUserDto {
 
     @Pattern(regexp = "^[가-힣a-zA-Z]{1,20}$", message = "닉네임은 1~20자의 한글 또는 영문만 가능합니다.")
-    private final String nickname;
+    private String nickname;
 
     @NotNull(message = "생년월일은 필수입니다.")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private final LocalDate birthDate;
+    private LocalDate birthDate;
 
-    private final Sex sex;
+    private Sex sex;
 
 }
