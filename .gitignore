@@ -42,3 +42,6 @@ application.yml
 
 ### Apple Login Private Key ###
 *.p8
+
+###
+*.json
