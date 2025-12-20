@@ -15,7 +15,6 @@ public class ResponseUserDto {
     private String imageName;
     private String nickname;
     private LocalDate birthDate;
-    private Sex sex;
 
     public static ResponseUserDto from(String imageName, User user) {
         return ResponseUserDto.builder()
@@ -23,7 +22,6 @@ public class ResponseUserDto {
                 .imageName(imageName)
                 .nickname(user.getNickname())
                 .birthDate(user.getBirthDate())
-                .sex(user.getSex())
                 .build();
     }
 }

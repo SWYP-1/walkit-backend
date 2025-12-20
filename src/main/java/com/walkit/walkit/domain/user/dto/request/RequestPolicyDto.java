@@ -7,5 +7,6 @@ public class RequestPolicyDto {
 
     private boolean termsAgreed;
     private boolean privacyAgreed;
+    private boolean locationAgreed;
     private boolean marketingConsent;
 }
