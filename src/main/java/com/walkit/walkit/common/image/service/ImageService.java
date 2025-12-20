@@ -12,6 +12,7 @@ import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -41,6 +42,7 @@ public class ImageService {
                     .bucket(bucketName)
                     .key(imageName)
                     .contentType(image.getContentType())
+                    .acl(ObjectCannedACL.PUBLIC_READ)  // 모든 파일을 공개로 설정
                     .build();
 
             // 파일 업로드 실행
