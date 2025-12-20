@@ -20,7 +20,4 @@ public class RequestUserDto {
     @NotNull(message = "생년월일은 필수입니다.")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
-
-    private Sex sex;
-
 }

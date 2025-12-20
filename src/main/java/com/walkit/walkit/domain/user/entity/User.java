@@ -50,15 +50,12 @@ public class User extends BaseTimeEntity {
     private String nickname;
     private LocalDate birthDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100)
-    private Sex sex;
-
     private String imageUrl;
 
     private boolean isMarketingConsent = false;
-    private boolean isTermAgreed = false;
-    private boolean isPrivacyAgreed = false;
+
+    @Embedded
+    private UserAgreement userAgreement;
 
     @Embedded
     private Character character;
@@ -70,7 +67,6 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private int point = 0;// 포인트 컬럼 임시 추가
 
-
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
@@ -78,15 +74,13 @@ public class User extends BaseTimeEntity {
     }
 
     public void updatePolicy(RequestPolicyDto dto) {
-        this.isTermAgreed = dto.isTermsAgreed();
-        this.isPrivacyAgreed = dto.isPrivacyAgreed();
+        this.userAgreement.update(dto);
         this.isMarketingConsent = dto.isMarketingConsent();
     }
 
     public void update(RequestUserDto dto) {
         this.nickname = dto.getNickname();
         this.birthDate = dto.getBirthDate();
-        this.sex = dto.getSex();
     }
 
     public void updateGoal(Goal goal) {
