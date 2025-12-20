@@ -54,8 +54,9 @@ public class User extends BaseTimeEntity {
 
     private boolean isMarketingConsent = false;
 
+    @Builder.Default
     @Embedded
-    private UserAgreement userAgreement;
+    private UserAgreement userAgreement = new UserAgreement();
 
     @Embedded
     private Character character;
@@ -74,6 +75,9 @@ public class User extends BaseTimeEntity {
     }
 
     public void updatePolicy(RequestPolicyDto dto) {
+        if (this.userAgreement == null) {
+            this.userAgreement = new UserAgreement();
+        }
         this.userAgreement.update(dto);
         this.isMarketingConsent = dto.isMarketingConsent();
     }

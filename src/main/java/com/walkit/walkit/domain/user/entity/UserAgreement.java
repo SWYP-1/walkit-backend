@@ -2,8 +2,12 @@ package com.walkit.walkit.domain.user.entity;
 
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserAgreement {
 
     private Boolean isTermAgreed = false;
