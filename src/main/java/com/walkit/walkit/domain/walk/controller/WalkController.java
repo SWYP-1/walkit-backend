@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
 import com.walkit.walkit.domain.walk.dto.request.WalkNoteUpdateRequestDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 import com.walkit.walkit.domain.walk.service.WalkService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,6 +78,15 @@ public class WalkController {
     }
 
 
+    @Operation(summary = "산책 기록 총합 조회", description = "사용자의 산책 기록 총 횟수,시간을 조회합니다.")
+    @GetMapping("/summary")
+    public ResponseEntity<WalkTotalSummaryResponseDto> getSummary(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        WalkTotalSummaryResponseDto response =
+                walkService.getTotalSummary(userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
+    }
 
 }
 

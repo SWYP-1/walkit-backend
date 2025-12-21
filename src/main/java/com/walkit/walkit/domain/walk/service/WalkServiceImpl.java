@@ -9,6 +9,7 @@ import com.walkit.walkit.domain.walk.dto.request.WalkPointRequestDto;
 import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkPointResponseDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 import com.walkit.walkit.domain.walk.entity.Walk;
 import com.walkit.walkit.domain.walk.entity.WalkPoint;
 import com.walkit.walkit.domain.walk.repository.WalkRepository;
@@ -174,6 +175,14 @@ public class WalkServiceImpl implements WalkService {
         if (lat == null || lng == null) throw new IllegalArgumentException("lat/lng required");
         if (lat < -90 || lat > 90) throw new IllegalArgumentException("invalid latitude");
         if (lng < -180 || lng > 180) throw new IllegalArgumentException("invalid longitude");
+    }
+
+
+    // 전체 산책 기록 요약 조회(총 산책 횟수, 총 산책 시간)
+    public WalkTotalSummaryResponseDto getTotalSummary(Long userId) {
+        long count = walkRepository.countByUser_Id(userId);
+        long totalTime = walkRepository.sumTotalTimeByUserId(userId);
+        return new WalkTotalSummaryResponseDto(count, totalTime);
     }
 
 
