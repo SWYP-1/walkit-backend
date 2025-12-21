@@ -1,5 +1,6 @@
 package com.walkit.walkit.global.security.oauth;
 
+import com.walkit.walkit.domain.character.service.CharacterService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final CharacterService characterService;
 
     @Override
     @Transactional
@@ -52,14 +54,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User saveOrUpdate(OAuthAttributes attributes) {
-        User user = userRepository.findByAuthProviderAndProviderId(
+        return userRepository.findByAuthProviderAndProviderId(
                 attributes.getAuthProvider(),
                 attributes.getOauth2UserInfo().getProviderId()
-        ).map(existingUser -> existingUser.updateOauth(
-                attributes.getOauth2UserInfo().getName(),
-                attributes.getOauth2UserInfo().getProfileImageUrl()
-        )).orElse(attributes.toEntity());
-
-        return userRepository.save(user);
+        ).map(existingUser -> {
+            // 기존 사용자 업데이트
+            User updatedUser = existingUser.updateOauth(
+                    attributes.getOauth2UserInfo().getName(),
+                    attributes.getOauth2UserInfo().getProfileImageUrl()
+            );
+            return userRepository.save(updatedUser);
+        }).orElseGet(() -> {
+            // 신규 사용자 생성
+            User newUser = attributes.toEntity();
+            User savedUser = userRepository.save(newUser);
+            characterService.init(savedUser.getId());
+            return savedUser;
+        });
     }
 }
