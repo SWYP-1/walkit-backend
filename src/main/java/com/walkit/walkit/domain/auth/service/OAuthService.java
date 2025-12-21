@@ -5,6 +5,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.walkit.walkit.domain.auth.dto.AppleUserInfoResponse;
 import com.walkit.walkit.domain.auth.dto.KakaoUserInfoResponse;
 import com.walkit.walkit.domain.auth.dto.NaverUserInfoResponse;
+import com.walkit.walkit.domain.character.service.CharacterService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.domain.user.repository.UserRepository;
@@ -25,6 +26,7 @@ public class OAuthService {
     private final WebClient webClient;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final CharacterService characterService;
 
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
     private static final String NAVER_USER_INFO_URL = "https://openapi.naver.com/v1/nid/me";
@@ -190,7 +192,9 @@ public class OAuthService {
                 log.info("Creating new user - Provider: {}, ProviderId: {}, Email: {}",
                     provider, providerId, email);
 
-                return userRepository.save(newUser);
+                User savedUser = userRepository.save(newUser);
+                characterService.init(savedUser.getId());
+                return savedUser;
             });
     }
 }
