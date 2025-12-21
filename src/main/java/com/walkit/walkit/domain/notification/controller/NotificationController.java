@@ -8,10 +8,6 @@ import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +23,7 @@ public class NotificationController {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
-    @GetMapping("/settings")
+    @GetMapping("/setting")
     public NotificationSettingsResponseDto getSettings(@AuthenticationPrincipal UserPrincipal principal) {
         User user = userRepository.findById(principal.getUserId())
                 .orElseThrow();
@@ -41,7 +37,7 @@ public class NotificationController {
         );
     }
 
-    @PatchMapping("/settings")
+    @PatchMapping("/setting")
     @Transactional
     public NotificationSettingsResponseDto update(
             @AuthenticationPrincipal UserPrincipal principal,
