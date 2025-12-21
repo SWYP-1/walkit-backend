@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.user.entity;
 
 import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.character.entity.Character;
+import com.walkit.walkit.domain.character.entity.ItemManagement;
 import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
@@ -13,6 +14,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -54,16 +57,20 @@ public class User extends BaseTimeEntity {
 
     private boolean isMarketingConsent = false;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "character_id")
+    private Character character;
+
     @Builder.Default
     @Embedded
     private UserAgreement userAgreement = new UserAgreement();
 
-    @Embedded
-    private Character character;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goal_id")
     private Goal goal;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ItemManagement> itemManagements = new ArrayList<>();
 
     @Column(nullable = false)
     private int point = 0;// 포인트 컬럼 임시 추가
@@ -116,11 +123,15 @@ public class User extends BaseTimeEntity {
     }
 
 
-    public void addPoints(int amount) {
-        if (amount <= 0) return;
-        this.point += amount;
+    public void addPoints(int point) {
+        if (point <= 0) return;
+        this.point += point;
     }
 
+    public void minusPoints(int point) {
+        if (point <= 0) return;
+        this.point -= point;
+    }
     // == 알림 설정 ==
 
     // 기기 알림 켜기/끄기 (전체 알림)
@@ -181,6 +192,9 @@ public class User extends BaseTimeEntity {
     }
 
 
+    public void initCharacter(Character character) {
+        this.character = character;
+    }
 }
 
 
