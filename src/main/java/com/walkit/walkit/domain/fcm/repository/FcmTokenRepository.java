@@ -24,4 +24,8 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
     List<FcmToken> findByUserIdAndEnabled(Long userId, Boolean enabled);
 
+    // 가장 최근 토큰 1개
+    Optional<FcmToken> findTop1ByUserIdOrderByModifiedDateDesc(Long userId);
 }
+
+

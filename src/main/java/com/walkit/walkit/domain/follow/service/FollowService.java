@@ -5,6 +5,10 @@ import com.walkit.walkit.domain.follow.dto.response.ResponseFollowingDto;
 import com.walkit.walkit.domain.follow.entity.Follow;
 import com.walkit.walkit.domain.follow.enums.FollowStatus;
 import com.walkit.walkit.domain.follow.repository.FollowRepository;
+import com.walkit.walkit.domain.notification.entity.Notification;
+import com.walkit.walkit.domain.notification.entity.NotificationType;
+import com.walkit.walkit.domain.notification.repository.NotificationRepository;
+import com.walkit.walkit.domain.notification.service.WalkNotificationService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.exception.CustomException;
@@ -25,6 +29,8 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final WalkNotificationService walkNotificationService;
+    private final NotificationRepository notificationRepository;
 
     public void sendFollow(Long userId, String nickname) {
         User sender = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -35,6 +41,20 @@ public class FollowService {
 
         Follow follow = Follow.builder().sender(sender).receiver(receiver).build();
         followRepository.save(follow);
+
+        notificationRepository.save(
+                Notification.userNotification(
+                        receiver,
+                        sender,
+                        NotificationType.FOLLOW,
+                        "새 팔로워",
+                        sender.getNickname() + "님이 팔로우했어요",
+                        String.valueOf(sender.getId())
+                )
+        );
+
+
+        walkNotificationService.notifyFollowRequest(receiver, sender);
     }
 
     private void checkOneSelfFollow(User sender, User receiver) {
