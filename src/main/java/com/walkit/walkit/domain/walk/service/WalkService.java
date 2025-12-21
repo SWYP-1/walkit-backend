@@ -3,6 +3,7 @@ package com.walkit.walkit.domain.walk.service;
 
 import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
+import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 
 
 public interface WalkService {
@@ -20,6 +21,8 @@ public interface WalkService {
     // 산책 기록 수정
     void updateNote(Long userId, Long walkId, String note);
 
+    // 산책 기록 총합 조회
+    WalkTotalSummaryResponseDto getTotalSummary(Long userId);
 
 
 

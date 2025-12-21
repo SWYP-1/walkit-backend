@@ -60,6 +60,10 @@ public class Walk extends BaseTimeEntity {
     @Column(name = "end_time")
     private Long endTime;
 
+    // 산책 시간 총합
+    @Column(name = "total_time")
+    private Long totalTime;
+
 
     // 산책 위치 (경도,위도)
     @Builder.Default

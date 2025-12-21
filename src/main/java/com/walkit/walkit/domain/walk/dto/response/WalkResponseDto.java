@@ -21,6 +21,7 @@ public class WalkResponseDto {
     private String imageUrl;
     private Long startTime;
     private Long endTime;
+    private Long totalTime;
     private Integer stepCount;
     private Double totalDistance;
     private LocalDateTime createdDate;
