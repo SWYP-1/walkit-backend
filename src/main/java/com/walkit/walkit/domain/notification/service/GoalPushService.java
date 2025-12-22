@@ -24,7 +24,7 @@ public class GoalPushService {
         int before = goal.getCurrentWalkCount();
 
         // 산책 1회 추가
-        goal.plusCurrentWalks();
+//        goal.plusCurrentWalks();
 
         int after = goal.getCurrentWalkCount();
 

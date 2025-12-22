@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.walk.service;
 
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.service.ImageService;
+import com.walkit.walkit.domain.goal.service.GoalService;
 import com.walkit.walkit.domain.notification.service.GoalPushService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
@@ -35,6 +36,7 @@ public class WalkServiceImpl implements WalkService {
     private final GoalPushService goalPushService;
 
     private static final ZoneId ZONE = ZoneId.of("Asia/Seoul");
+    private final GoalService goalService;
 
 
     // 산책 기록 저장
@@ -97,8 +99,11 @@ public class WalkServiceImpl implements WalkService {
             walk.updateImageUrl(imageUrl); // 대표 이미지 - 필요 없으면 주석 처리
         }
 
+        goalService.checkAchieveGoal(user, walk.getStepCount());
+
         // 목표(산책 횟수) 50%/100% 체크 후 알림 호출
         goalPushService.onWalkCompleted(user);
+
 
         return toDetailResponse(walk);
 
