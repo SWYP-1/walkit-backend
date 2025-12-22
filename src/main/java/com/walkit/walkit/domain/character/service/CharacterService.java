@@ -1,9 +1,11 @@
 package com.walkit.walkit.domain.character.service;
 
+import com.walkit.walkit.common.image.entity.CharacterWearImage;
 import com.walkit.walkit.common.image.enums.Season;
 import com.walkit.walkit.common.image.enums.Weather;
 import com.walkit.walkit.common.image.repository.BackgroundImageRepository;
 import com.walkit.walkit.common.image.repository.CharacterImageRepository;
+import com.walkit.walkit.common.image.repository.CharacterWearImageRepository;
 import com.walkit.walkit.common.image.repository.ImageRepository;
 import com.walkit.walkit.domain.character.dto.request.RequestItemWearDto;
 import com.walkit.walkit.domain.character.dto.response.ResponseCharacterDto;
@@ -43,6 +45,7 @@ public class CharacterService {
     private final ImageRepository imageRepository;
     private final BackgroundImageRepository backgroundImageRepository;
     private final CharacterImageRepository characterImageRepository;
+    private final CharacterWearImageRepository characterWearImageRepository;
 
     public void init(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -58,6 +61,8 @@ public class CharacterService {
         String backgroundImage = findNotLongBackGroundImage(lat, lon);
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
 
+        log.info("background image is {}", backgroundImage);
+
         return ResponseCharacterDto.from(character, user, characterImage, backgroundImage);
     }
 
@@ -67,6 +72,8 @@ public class CharacterService {
 
         String backgroundImage = findLongBackGroundImage(lat, lon);
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
+
+        log.info("background image is {}", backgroundImage);
 
         return ResponseCharacterDto.from(character, user, characterImage, backgroundImage);
     }
@@ -136,6 +143,10 @@ public class CharacterService {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
+            } else if (sky == SkyStatus.CLOUDY_MANY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
+            } else {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
             }
         } else if (month >= 6 && month <= 8) { // 여름
             if (sky == SkyStatus.SUNNY) {
@@ -144,6 +155,10 @@ public class CharacterService {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
+            } else if (sky == SkyStatus.CLOUDY_MANY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
+            } else {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
             }
         } else if (month >= 9 && month <= 11) { // 가을
             if (sky == SkyStatus.SUNNY) {
@@ -152,6 +167,10 @@ public class CharacterService {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
+            } else if (sky == SkyStatus.CLOUDY_MANY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
+            } else {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
             }
         } else { // 겨울
             if (sky == SkyStatus.SUNNY) {
@@ -162,11 +181,12 @@ public class CharacterService {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
             }  else if (precipType == PrecipType.SNOW) {
                 return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SNOWY, false).getImageName();
+            } else if (sky == SkyStatus.CLOUDY_MANY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
+            } else {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
             }
         }
-
-
-        return null;
     }
 
     private String findLongBackGroundImage(double lat, double lon) {
@@ -222,7 +242,9 @@ public class CharacterService {
         ItemManagement itemManagement = itemManagementRepository.findByUserAndItem(user, item).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_OWNED));
         itemManagement.active();
 
-        character.updateImage(item);
+        CharacterWearImage characterWearImage = characterWearImageRepository.findByPositionAndGradeAndItemName(item.getPosition(), character.getGrade(), item.getItemName());
+
+        character.updateImage(characterWearImage);
     }
 
     private void saveCharacterWear(User user, Item item) {
