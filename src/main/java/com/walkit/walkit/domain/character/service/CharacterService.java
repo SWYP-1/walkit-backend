@@ -1,5 +1,10 @@
 package com.walkit.walkit.domain.character.service;
 
+import com.walkit.walkit.common.image.enums.Season;
+import com.walkit.walkit.common.image.enums.Weather;
+import com.walkit.walkit.common.image.repository.BackgroundImageRepository;
+import com.walkit.walkit.common.image.repository.CharacterImageRepository;
+import com.walkit.walkit.common.image.repository.ImageRepository;
 import com.walkit.walkit.domain.character.dto.request.RequestItemWearDto;
 import com.walkit.walkit.domain.character.dto.response.ResponseCharacterDto;
 import com.walkit.walkit.domain.character.entity.Item;
@@ -12,12 +17,17 @@ import com.walkit.walkit.domain.character.repository.ItemRepository;
 import com.walkit.walkit.domain.character.repository.CharacterWearRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
+import com.walkit.walkit.domain.weather.entity.PrecipType;
+import com.walkit.walkit.domain.weather.entity.SkyStatus;
+import com.walkit.walkit.domain.weather.service.WeatherService;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -29,6 +39,10 @@ public class CharacterService {
     private final ItemRepository itemRepository;
     private final ItemManagementRepository itemManagementRepository;
     private final CharacterWearRepository characterWearRepository;
+    private final WeatherService weatherService;
+    private final ImageRepository imageRepository;
+    private final BackgroundImageRepository backgroundImageRepository;
+    private final CharacterImageRepository characterImageRepository;
 
     public void init(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -41,9 +55,20 @@ public class CharacterService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Character character = user.getCharacter();
 
-        String backgroundImage = findBackGroundImage(lat, lon);
+        String backgroundImage = findNotLongBackGroundImage(lat, lon);
+        String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
 
-        return ResponseCharacterDto.from(character, user, backgroundImage);
+        return ResponseCharacterDto.from(character, user, characterImage, backgroundImage);
+    }
+
+    public ResponseCharacterDto findWalkCharacter(Long userId, double lat, double lon) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Character character = user.getCharacter();
+
+        String backgroundImage = findLongBackGroundImage(lat, lon);
+        String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
+
+        return ResponseCharacterDto.from(character, user, characterImage, backgroundImage);
     }
 
     public void wearOrTakeOff(Long userId, Long itemId, RequestItemWearDto dto) {
@@ -98,9 +123,100 @@ public class CharacterService {
         }
     }
 
-    private String findBackGroundImage(double lat, double lon) {
+    private String findNotLongBackGroundImage(double lat, double lon) {
+        SkyStatus sky = weatherService.getCurrent(lat, lon).getSky();
+        PrecipType precipType = weatherService.getCurrent(lat, lon).getPrecipType();
+
+        int month = LocalDate.now().getMonthValue();
+
+        if (month >= 3 && month <= 5) { // 봄
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.RAINY, false).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
+            }
+        } else if (month >= 6 && month <= 8) { // 여름
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.RAINY, false).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
+            }
+        } else if (month >= 9 && month <= 11) { // 가을
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.RAINY, false).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
+            }
+        } else { // 겨울
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.RAINY, false).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
+            }  else if (precipType == PrecipType.SNOW) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SNOWY, false).getImageName();
+            }
+        }
+
+
         return null;
     }
+
+    private String findLongBackGroundImage(double lat, double lon) {
+        SkyStatus sky = weatherService.getCurrent(lat, lon).getSky();
+        PrecipType precipType = weatherService.getCurrent(lat, lon).getPrecipType();
+
+        int month = LocalDate.now().getMonthValue();
+
+        if (month >= 3 && month <= 5) { // 봄
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, true).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.RAINY, true).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, true).getImageName();
+            }
+        } else if (month >= 6 && month <= 8) { // 여름
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, true).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.RAINY, true).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, true).getImageName();
+            }
+        } else if (month >= 9 && month <= 11) { // 가을
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, true).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.RAINY, true).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, true).getImageName();
+            }
+        } else { // 겨울
+            if (sky == SkyStatus.SUNNY) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, true).getImageName();
+            } else if (precipType == PrecipType.RAIN) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.RAINY, true).getImageName();
+            } else if (sky == SkyStatus.OVERCAST) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, true).getImageName();
+            } else if (precipType == PrecipType.SNOW) {
+                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SNOWY, true).getImageName();
+            }
+
+        }
+
+
+        return null;
+    }
+
+
 
     private void wearItem(User user, Item item, Character character) {
         ItemManagement itemManagement = itemManagementRepository.findByUserAndItem(user, item).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_OWNED));
