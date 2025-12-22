@@ -25,6 +25,14 @@ public class CharacterController {
         return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
+    @GetMapping("/walks")
+    public ResponseEntity<ResponseCharacterDto> findWalkCharacter(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                     @RequestParam double lat, @RequestParam double lon
+    ) {
+        ResponseCharacterDto dto = characterService.findWalkCharacter(userPrincipal.getUserId(), lat, lon);
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
+    }
+
     @PatchMapping("/items/{itemId}")
     public ResponseEntity<Void> wearOrTakeOff(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                               @RequestBody RequestItemWearDto dto, @PathVariable Long itemId

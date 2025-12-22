@@ -19,11 +19,12 @@ public class ResponseCharacterDto {
     private Grade grade;
     private String nickName;
 
-    public static ResponseCharacterDto from(Character character, User user,String backgroundImage) {
+    public static ResponseCharacterDto from(Character character, User user, String characterImageName, String backgroundImage) {
         return ResponseCharacterDto.builder()
                 .headImageName(character.getHeadImageName())
                 .bodyImageName(character.getBodyImageName())
                 .feetImageName(character.getFeetImageName())
+                .characterImageName(characterImageName)
                 .backgroundImageName(backgroundImage)
                 .level(character.getLevel())
                 .grade(character.getGrade())
