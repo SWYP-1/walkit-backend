@@ -25,6 +25,5 @@ public interface WalkService {
     WalkTotalSummaryResponseDto getTotalSummary(Long userId);
 
 
-
-
+    WalkResponseDto getWalkFollower(Long userId, String nickname);
 }

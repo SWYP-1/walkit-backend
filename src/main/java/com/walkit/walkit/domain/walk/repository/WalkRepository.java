@@ -66,4 +66,5 @@ where w.id = :walkId and w.user.id = :userId
     """)
     long sumTotalTimeByUserId(@Param("userId") Long userId);
 
+    Optional<Walk> findFirstByOrderByCreatedDateDesc();
 }

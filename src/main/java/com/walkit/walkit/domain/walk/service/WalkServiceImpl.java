@@ -2,6 +2,8 @@ package com.walkit.walkit.domain.walk.service;
 
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.service.ImageService;
+import com.walkit.walkit.domain.follow.enums.FollowStatus;
+import com.walkit.walkit.domain.follow.repository.FollowRepository;
 import com.walkit.walkit.domain.goal.service.GoalService;
 import com.walkit.walkit.domain.notification.service.GoalPushService;
 import com.walkit.walkit.domain.user.entity.User;
@@ -14,6 +16,8 @@ import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 import com.walkit.walkit.domain.walk.entity.Walk;
 import com.walkit.walkit.domain.walk.entity.WalkPoint;
 import com.walkit.walkit.domain.walk.repository.WalkRepository;
+import com.walkit.walkit.global.exception.CustomException;
+import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +41,7 @@ public class WalkServiceImpl implements WalkService {
 
     private static final ZoneId ZONE = ZoneId.of("Asia/Seoul");
     private final GoalService goalService;
+    private final FollowRepository followRepository;
 
 
     // 산책 기록 저장
@@ -119,8 +124,23 @@ public class WalkServiceImpl implements WalkService {
         return toDetailResponse(walk);
     }
 
+    @Override
+    public WalkResponseDto getWalkFollower(Long userId, String nickname) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User follower = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!(followRepository.existsBySenderAndReceiverAndFollowStatus(user, follower, FollowStatus.ACCEPTED)
+        || followRepository.existsBySenderAndReceiverAndFollowStatus(follower, user, FollowStatus.ACCEPTED))
+        ) {
+            throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
+        }
+
+        Walk walk = walkRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(() -> new RuntimeException("Walk not found"));
+        return toDetailResponse(walk);
+    }
 
     // 산책 기록 조회(날짜)
+
     public WalkResponseDto getWalkByDay(Long userId, long anchorMillis) {
 
         // millis를 KST 기준의 날짜(LocalDate)로 변환 (연-월-일 추출)
@@ -139,8 +159,8 @@ public class WalkServiceImpl implements WalkService {
         return toDetailResponse(walk);
     }
 
-
     // 산책 기록 수정
+
     @Override
     @Transactional
     public void updateNote(Long userId, Long walkId, String note) {
@@ -149,8 +169,8 @@ public class WalkServiceImpl implements WalkService {
 
         walk.updateNote(note);
     }
-
     // 상세 응답
+
     private WalkResponseDto toDetailResponse(Walk walk) {
         List<WalkPointResponseDto> points = walk.getPoints().stream()
                 .map(p -> new WalkPointResponseDto(
@@ -182,8 +202,8 @@ public class WalkServiceImpl implements WalkService {
         if (lng < -180 || lng > 180) throw new IllegalArgumentException("invalid longitude");
     }
 
-
     // 전체 산책 기록 요약 조회(총 산책 횟수, 총 산책 시간)
+
     public WalkTotalSummaryResponseDto getTotalSummary(Long userId) {
         long count = walkRepository.countByUser_Id(userId);
         long totalTime = walkRepository.sumTotalTimeByUserId(userId);

@@ -53,6 +53,16 @@ public class WalkController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "팔로워의 가장 최신 산책 기록 단건 조회", description = "닉네임으로 팔로워를 찾아 산책 기록 1건을 조회합니다.")
+    @GetMapping("/follower/{nickname}")
+    public ResponseEntity<WalkResponseDto> getWalkFollower(
+            @AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
+
+        Long userId = userPrincipal.getUserId();
+        WalkResponseDto response = walkService.getWalkFollower(userId, nickname);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "산책 기록 날짜 조회", description = "startTime(epoch millis)이 속한 날짜(KST) 기준으로 내 산책 기록 1건을 조회합니다.")
     @GetMapping()
     public ResponseEntity<WalkResponseDto> getDailyWalk(
