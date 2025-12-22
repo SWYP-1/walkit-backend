@@ -2,6 +2,8 @@ package com.walkit.walkit.domain.walk.service;
 
 import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.service.ImageService;
+import com.walkit.walkit.domain.character.dto.response.ResponseCharacterDto;
+import com.walkit.walkit.domain.character.service.CharacterService;
 import com.walkit.walkit.domain.follow.enums.FollowStatus;
 import com.walkit.walkit.domain.follow.repository.FollowRepository;
 import com.walkit.walkit.domain.goal.service.GoalService;
@@ -10,6 +12,7 @@ import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walk.dto.request.WalkPointRequestDto;
 import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.FollowerWalkResponseDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkPointResponseDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
@@ -42,6 +45,7 @@ public class WalkServiceImpl implements WalkService {
     private static final ZoneId ZONE = ZoneId.of("Asia/Seoul");
     private final GoalService goalService;
     private final FollowRepository followRepository;
+    private final CharacterService characterService;
 
 
     // 산책 기록 저장
@@ -125,7 +129,7 @@ public class WalkServiceImpl implements WalkService {
     }
 
     @Override
-    public WalkResponseDto getWalkFollower(Long userId, String nickname) {
+    public FollowerWalkResponseDto getWalkFollower(Long userId, String nickname, double lat, double lon) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         User follower = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -136,7 +140,12 @@ public class WalkServiceImpl implements WalkService {
         }
 
         Walk walk = walkRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(() -> new RuntimeException("Walk not found"));
-        return toDetailResponse(walk);
+
+        ResponseCharacterDto characterDto = characterService.find(follower.getId(), lat, lon);
+        String walkProgressPercentage = goalService.findGoalProcess(follower.getId()).getWalkProgressPercentage();
+
+
+        return FollowerWalkResponseDto.from(characterDto, walkProgressPercentage, walk);
     }
 
     // 산책 기록 조회(날짜)
