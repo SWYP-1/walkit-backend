@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.walk.service;
 
 
 import com.walkit.walkit.domain.walk.dto.request.WalkRequestDto;
+import com.walkit.walkit.domain.walk.dto.response.FollowerWalkResponseDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
 import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 
@@ -25,5 +26,5 @@ public interface WalkService {
     WalkTotalSummaryResponseDto getTotalSummary(Long userId);
 
 
-    WalkResponseDto getWalkFollower(Long userId, String nickname);
+    FollowerWalkResponseDto getWalkFollower(Long userId, String nickname, double lat, double lon);
 }
