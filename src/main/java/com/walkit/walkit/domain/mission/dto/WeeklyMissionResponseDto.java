@@ -7,7 +7,7 @@ import com.walkit.walkit.domain.mission.entity.Mission;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record WeeklyMissionResponse(
+public record WeeklyMissionResponseDto(
         Long userWeeklyMissionId,
         Long missionId,
         String title,
@@ -22,9 +22,9 @@ public record WeeklyMissionResponse(
         LocalDateTime completedAt,
         LocalDateTime failedAt
 ) {
-    public static WeeklyMissionResponse from(UserWeeklyMission uwm) {
+    public static WeeklyMissionResponseDto from(UserWeeklyMission uwm) {
         Mission m = uwm.getMission();
-        return new WeeklyMissionResponse(
+        return new WeeklyMissionResponseDto(
                 uwm.getId(),
                 m.getId(),
                 m.getTitle(),
