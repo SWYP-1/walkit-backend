@@ -27,34 +27,38 @@ public class InactiveUserPushScheduler {
     @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void notifyInactiveUsers48h() {
-
-        log.info("[Inactive48h] scheduler fired");
-
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime threshold = now.minusHours(48);
 
-        List<User> users = userRepository.findInactive48hTargets(
-                threshold,
-                PageRequest.of(0, BATCH_SIZE)
-        );
+        int totalFetched = 0;
+        int totalSent = 0;
+        int totalMarked = 0;
 
-        if (users.isEmpty()) {
-            log.info("[Inactive48h] fetched=0 (no targets)");
-            return;
+        while (true) {
+            List<User> users = userRepository.findInactive48hTargets(
+                    threshold, PageRequest.of(0, BATCH_SIZE)
+            );
+            if (users.isEmpty()) break;
+
+            totalFetched += users.size();
+
+            List<Long> successIds = new java.util.ArrayList<>();
+            for (User user : users) {
+                boolean sent = walkNotificationService.notifyInactiveUser(user);
+                if (sent) successIds.add(user.getId());
+            }
+
+            totalSent += successIds.size();
+
+            if (!successIds.isEmpty()) {
+                userRepository.markInactive48hNotified(successIds, now);
+                totalMarked += successIds.size();
+            } else {
+                break;
+            }
         }
 
-        List<Long> successIds = new java.util.ArrayList<>();
-
-        for (User user : users) {
-            boolean sent = walkNotificationService.notifyInactiveUser(user);
-            if (sent) successIds.add(user.getId());
-        }
-
-        log.info("[Inactive48h] fetched={}, sent={}", users.size(), successIds.size());
-
-        if (!successIds.isEmpty()) {
-            userRepository.markInactive48hNotified(successIds, now);
-            log.info("[Inactive48h] marked={}", successIds.size());
-        }
+        log.info("[Inactive48h] fetchedTotal={}, sentTotal={}, markedTotal={}",
+                totalFetched, totalSent, totalMarked);
     }
 }

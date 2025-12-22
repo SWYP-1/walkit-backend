@@ -55,4 +55,15 @@ where w.id = :walkId and w.user.id = :userId
             Long userId, Long dayEnd, Long dayStart
     );
 
+    // 사용자 산책 기록 횟수 조회
+    long countByUser_Id(Long userId);
+
+    // 사용자 전체 산책 시간 조회
+    @Query("""
+        select coalesce(sum(w.totalTime), 0)
+        from Walk w
+        where w.user.id = :userId
+    """)
+    long sumTotalTimeByUserId(@Param("userId") Long userId);
+
 }

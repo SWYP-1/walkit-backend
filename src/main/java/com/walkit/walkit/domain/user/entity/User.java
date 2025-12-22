@@ -149,6 +149,16 @@ public class User extends BaseTimeEntity {
     @Column(name = "new_mission_notification_enabled", nullable = false)
     private Boolean newMissionNotificationEnabled = true;
 
+    // 친구 팔로우 알림
+    @Builder.Default
+    @Column(name = "friend_notification_enabled", nullable = false)
+    private Boolean friendNotificationEnabled = true;
+
+    // 마케팅 푸시 알림 (프로모션/이벤트)
+    @Builder.Default
+    @Column(name = "marketing_push_enabled", nullable = false)
+    private Boolean marketingPushEnabled = true;
+
     @Column(name = "last_access_at")
     private LocalDateTime lastAccessAt;
 
@@ -159,7 +169,7 @@ public class User extends BaseTimeEntity {
     }
 
 
-     // 전체 알림 수신 가능 여부
+    // 전체 알림 수신 가능 여부
     public boolean canReceiveNotification() {
         return notificationEnabled != null && notificationEnabled;
     }
@@ -179,6 +189,13 @@ public class User extends BaseTimeEntity {
                 newMissionNotificationEnabled;
     }
 
+    // 친구 알림 수신 가능 여부
+    public boolean canReceiveFriendNotification() {
+        return canReceiveNotification() &&
+                friendNotificationEnabled != null &&
+                friendNotificationEnabled;
+    }
+
     public void updateNotificationEnabled(Boolean enabled) {
         this.notificationEnabled = enabled;
     }
@@ -190,6 +207,10 @@ public class User extends BaseTimeEntity {
     public void updateNewMissionNotificationEnabled(Boolean enabled) {
         this.newMissionNotificationEnabled = enabled;
     }
+
+    public void updateFriendNotificationEnabled(Boolean enabled) { this.friendNotificationEnabled = enabled;}
+
+    public void updateMarketingPushEnabled(Boolean enabled) { this.marketingPushEnabled = enabled; }
 
 
     public void initCharacter(Character character) {

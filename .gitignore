@@ -45,3 +45,6 @@ application.yml
 
 ###
 *.json
+
+###
+insert.sql
