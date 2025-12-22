@@ -6,7 +6,6 @@ import com.walkit.walkit.domain.character.entity.ItemManagement;
 import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
-import com.walkit.walkit.domain.user.enums.Sex;
 import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.common.enums.AuthProvider;
 import jakarta.persistence.*;
@@ -74,6 +73,31 @@ public class User extends BaseTimeEntity {
 
     @Column(nullable = false)
     private int point = 0;// 포인트 컬럼 임시 추가
+
+    private boolean isAchieveThisWeekGoal = false;
+    private int achieveGoalTotalWeeks;
+    private int achieveGoalConsecutiveWeeks;
+
+    public void plusAchieveTotalWeeks() {
+        this.achieveGoalTotalWeeks += 1;
+    }
+
+    public void plusAchieveConsecutiveWeeks() {
+        this.achieveGoalConsecutiveWeeks += 1;
+    }
+
+    public void initAchieveConsecutiveWeeks() {
+        this.achieveGoalConsecutiveWeeks = 0;
+    }
+
+    public void initAchieveThisWeekGoal() {
+        this.isAchieveThisWeekGoal = false;
+    }
+
+    public void achieveThisWeekGoal() {
+        this.isAchieveThisWeekGoal = true;
+    }
+
 
     public User updateOauth(String name, String profileImageUrl) {
         this.name = name;
@@ -216,6 +240,7 @@ public class User extends BaseTimeEntity {
     public void initCharacter(Character character) {
         this.character = character;
     }
+
 }
 
 

@@ -1,5 +1,12 @@
 package com.walkit.walkit.domain.goal.service;
 
+import com.walkit.walkit.common.image.entity.CharacterWearImage;
+import com.walkit.walkit.common.image.repository.CharacterWearImageRepository;
+import com.walkit.walkit.domain.character.entity.Character;
+import com.walkit.walkit.domain.character.entity.CharacterWear;
+import com.walkit.walkit.domain.character.enums.Grade;
+import com.walkit.walkit.domain.character.enums.ItemName;
+import com.walkit.walkit.domain.character.enums.Position;
 import com.walkit.walkit.domain.goal.dto.request.RequestGoalDto;
 import com.walkit.walkit.domain.goal.dto.response.ResponseGoalDto;
 import com.walkit.walkit.domain.goal.dto.response.ResponseGoalProcessDto;
@@ -10,9 +17,11 @@ import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -20,6 +29,7 @@ public class GoalService {
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
+    private final CharacterWearImageRepository characterWearImageRepository;
 
     public ResponseGoalDto findGoal(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -58,18 +68,116 @@ public class GoalService {
     public void checkAchieveGoal(User user, int stepCount) {
         Goal goal = user.getGoal();
 
-        isAchieveTargetStepCount(stepCount, goal);
-        isAchieveGoal(goal);
+        checkAchieveTargetStepCount(stepCount, goal);
+        checkAchieveGoal(user, goal);
     }
 
-    private static void isAchieveGoal(Goal goal) {
-        if (goal.getCurrentWalkCount() >= goal.getTargetWalkCount()) {
-            // todo 경험치 증가시키기
+    private void checkAchieveGoal(User user, Goal goal) {
+
+        log.info("checkAchieveGoal, currentWalkCount: {}, targetWalkCount: {}, isAchieveThisWeekGoal, {}", goal.getCurrentWalkCount(), goal.getTargetWalkCount(), user.isAchieveThisWeekGoal());
+
+        if (goal.getCurrentWalkCount() >= goal.getTargetWalkCount() && !user.isAchieveThisWeekGoal()) {
+
+            log.info("checkAchieveGoal");
+
+            Character character = user.getCharacter();
+            int level = character.getLevel();
+
+            log.info("level: " + level);
+
+            if (level >= 6) {
+                log.info("checkAchieveGoal");
+                achieveConsecutiveWeeksGoal(user);
+            } else {
+                achieveTotalWeeksGoal(user);
+            }
+
+            user.achieveThisWeekGoal();
         }
     }
 
-    private static void isAchieveTargetStepCount(int stepCount, Goal goal) {
+    private void achieveConsecutiveWeeksGoal(User user) {
+        user.plusAchieveConsecutiveWeeks();
+
+        int achieveGoalConsecutiveWeeks = user.getAchieveGoalConsecutiveWeeks();
+        Character character = user.getCharacter();
+
+        log.info("achieveGoalConsecutiveWeeks: " + achieveGoalConsecutiveWeeks);
+
+        if (achieveGoalConsecutiveWeeks >= 2 && achieveGoalConsecutiveWeeks <= 10) {
+            levelUpByConsecutiveWeeks(user, achieveGoalConsecutiveWeeks, character);
+        }
+    }
+
+    private void achieveTotalWeeksGoal(User user) {
+        user.plusAchieveTotalWeeks();
+
+        int achieveGoalTotalWeeks = user.getAchieveGoalTotalWeeks();
+        Character character = user.getCharacter();
+
+        if (achieveGoalTotalWeeks >= 1 && achieveGoalTotalWeeks <= 10) {
+            levelUpByTotalWeeks(achieveGoalTotalWeeks, character);
+        }
+    }
+
+    private void levelUpByConsecutiveWeeks(User user, int achieveGoalConsecutiveWeeks, Character character) {
+        if (achieveGoalConsecutiveWeeks == 2) {
+            character.updateLevel(6);
+            user.initAchieveConsecutiveWeeks();
+        } else if (achieveGoalConsecutiveWeeks == 4) {
+            character.updateLevel(7);
+            user.initAchieveConsecutiveWeeks();
+        } else if (achieveGoalConsecutiveWeeks == 6) {
+            character.updateLevel(8);
+            user.initAchieveConsecutiveWeeks();
+        } else if (achieveGoalConsecutiveWeeks == 8) {
+            character.updateLevel(9);
+            user.initAchieveConsecutiveWeeks();
+        } else if (achieveGoalConsecutiveWeeks == 10) {
+            character.updateLevel(10);
+            user.initAchieveConsecutiveWeeks();
+        }
+
+        changeCharacterWearByGradeUp(character);
+    }
+
+    private void changeCharacterWearByGradeUp(Character character) {
+        boolean gradeUp = character.gradeUp();
+
+        if (gradeUp) {
+            Grade grade = character.getGrade();
+            for (CharacterWear characterWear : character.getCharacterWears()) {
+                Position position = characterWear.getItem().getPosition();
+                ItemName itemName = characterWear.getItem().getItemName();
+
+                CharacterWearImage characterWearImage = characterWearImageRepository.findByPositionAndGradeAndItemName(position, grade, itemName);
+
+                character.updateImage(characterWearImage);
+            }
+
+        }
+    }
+
+    private void levelUpByTotalWeeks(int achieveGoalTotalWeeks, Character character) {
+        if (achieveGoalTotalWeeks == 1) {
+            character.updateLevel(1);
+        } else if (achieveGoalTotalWeeks == 4) {
+            character.updateLevel(2);
+        } else if (achieveGoalTotalWeeks == 6) {
+            character.updateLevel(3);
+        } else if (achieveGoalTotalWeeks == 8) {
+            character.updateLevel(4);
+        } else if (achieveGoalTotalWeeks == 10) {
+            character.updateLevel(5);
+        }
+
+        changeCharacterWearByGradeUp(character);
+    }
+
+    private static void checkAchieveTargetStepCount(int stepCount, Goal goal) {
+        log.info("checkAchieveTargetStepCount: stepCount = " + stepCount);
         if (goal.getTargetStepCount() <= stepCount) {
+            log.info("plushCurrenetWalks");
             goal.plusCurrentWalks();
         }
     }

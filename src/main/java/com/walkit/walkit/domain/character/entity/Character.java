@@ -1,11 +1,13 @@
 package com.walkit.walkit.domain.character.entity;
 
+import com.walkit.walkit.common.image.entity.CharacterWearImage;
 import com.walkit.walkit.domain.character.enums.Grade;
 import com.walkit.walkit.domain.character.enums.Position;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -36,15 +38,15 @@ public class Character {
         this.grade = grade;
     }
 
-    public void updateImage(Item item) {
-        Position position = item.getPosition();
+    public void updateImage(CharacterWearImage characterWearImage) {
+        Position position = characterWearImage.getPosition();
 
         if (position == Position.HEAD) {
-            this.headImageName = item.getImageName();
+            this.headImageName = characterWearImage.getImageName();
         } else if (position == Position.BODY) {
-            this.bodyImageName = item.getImageName();
+            this.bodyImageName = characterWearImage.getImageName();
         } else if (position == Position.FEET) {
-            this.feetImageName = item.getImageName();
+            this.feetImageName = characterWearImage.getImageName();
         }
     }
 
@@ -63,4 +65,25 @@ public class Character {
     public void removeCharacterWear(CharacterWear characterWear) {
         this.characterWears.remove(characterWear);
     }
+
+    public void updateLevel(int level) {
+        this.level = level;
+        gradeUp();
+    }
+
+    public boolean gradeUp() {
+        if (this.level >= 1 && this.level <= 3) {
+            this.grade = Grade.SEED;
+            return true;
+        } else if (this.level >= 4 && this.level <= 7) {
+            this.grade = Grade.SPROUT;
+            return true;
+        } else if (this.level >= 8 && this.level <= 10) {
+            this.grade = Grade.TREE;
+            return true;
+        }
+
+        return false;
+    }
+
 }
