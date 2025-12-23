@@ -22,6 +22,7 @@ import com.walkit.walkit.domain.walk.repository.WalkRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -114,7 +115,7 @@ public class WalkServiceImpl implements WalkService {
         goalPushService.onWalkCompleted(user);
 
 
-        return toDetailResponse(walk);
+        return WalkResponseDto.fromDetail(walk);
 
     }
 
@@ -125,8 +126,21 @@ public class WalkServiceImpl implements WalkService {
         Walk walk = walkRepository.findDetailByIdAndUserId(walkId, userId)
                 .orElseThrow(() -> new RuntimeException("Walk not found"));
 
-        return toDetailResponse(walk);
+        return WalkResponseDto.fromDetail(walk);
+
     }
+
+    // 최근 산책 기록 7개 조회
+    @Override
+    public List<WalkResponseDto> getRecentWalks(Long userId) {
+        return walkRepository
+                .findTopByUserIdOrderByStartTimeDesc(userId, PageRequest.of(0, 7))
+                .stream()
+                .map(WalkResponseDto::fromDetail)
+                .toList();
+    }
+
+
 
     @Override
     public FollowerWalkResponseDto getWalkFollower(Long userId, String nickname, double lat, double lon) {
@@ -149,7 +163,6 @@ public class WalkServiceImpl implements WalkService {
     }
 
     // 산책 기록 조회(날짜)
-
     public WalkResponseDto getWalkByDay(Long userId, long anchorMillis) {
 
         // millis를 KST 기준의 날짜(LocalDate)로 변환 (연-월-일 추출)
@@ -165,11 +178,10 @@ public class WalkServiceImpl implements WalkService {
                 .findFirstByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeDesc(userId, dayStart, dayEnd)
                 .orElseThrow(() -> new RuntimeException("Walk not found"));
 
-        return toDetailResponse(walk);
+        return WalkResponseDto.fromDetail(walk);
     }
 
     // 산책 기록 수정
-
     @Override
     @Transactional
     public void updateNote(Long userId, Long walkId, String note) {
@@ -178,32 +190,7 @@ public class WalkServiceImpl implements WalkService {
 
         walk.updateNote(note);
     }
-    // 상세 응답
 
-    private WalkResponseDto toDetailResponse(Walk walk) {
-        List<WalkPointResponseDto> points = walk.getPoints().stream()
-                .map(p -> new WalkPointResponseDto(
-                        p.getLatitude(),
-                        p.getLongitude(),
-                        p.getRecordedAt() == null ? null : p.getRecordedAt()
-                ))
-                .toList();
-
-        return WalkResponseDto.builder()
-                .id(walk.getId())
-                .preWalkEmotion(walk.getPreWalkEmotion())
-                .postWalkEmotion(walk.getPostWalkEmotion())
-                .note(walk.getNote())
-                .stepCount(walk.getStepCount())
-                .totalDistance(walk.getTotalDistance())
-                .startTime(walk.getStartTime())
-                .endTime(walk.getEndTime())
-                .totalTime(walk.getTotalTime())
-                .imageUrl(walk.getImageUrl())
-                .createdDate(walk.getCreatedDate())
-                .points(points)
-                .build();
-    }
 
     private void validateLatLng(Double lat, Double lng) {
         if (lat == null || lng == null) throw new IllegalArgumentException("lat/lng required");
@@ -212,11 +199,23 @@ public class WalkServiceImpl implements WalkService {
     }
 
     // 전체 산책 기록 요약 조회(총 산책 횟수, 총 산책 시간)
-
     public WalkTotalSummaryResponseDto getTotalSummary(Long userId) {
         long count = walkRepository.countByUser_Id(userId);
         long totalTime = walkRepository.sumTotalTimeByUserId(userId);
         return new WalkTotalSummaryResponseDto(count, totalTime);
+    }
+
+    // 오늘 산책 1건 조회
+    public int getTodayStepCount(Long userId) {
+        ZoneId zone = ZoneId.of("Asia/Seoul");
+        LocalDate today = LocalDate.now(zone);
+
+        long startMillis = today.atStartOfDay(zone).toInstant().toEpochMilli();
+        long endMillis = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
+
+        return walkRepository.findTodayWalk(userId, startMillis, endMillis)
+                .map(w -> w.getStepCount() == null ? 0 : w.getStepCount())
+                .orElse(0);
     }
 
 

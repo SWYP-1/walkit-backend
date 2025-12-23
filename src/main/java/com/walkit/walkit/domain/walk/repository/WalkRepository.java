@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.walk.repository;
 
 
 import com.walkit.walkit.domain.walk.entity.Walk;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -67,4 +68,27 @@ where w.id = :walkId and w.user.id = :userId
     long sumTotalTimeByUserId(@Param("userId") Long userId);
 
     Optional<Walk> findFirstByOrderByCreatedDateDesc();
+
+    // 최근 N개 산책 기록 조회
+    @Query("""
+select w from Walk w
+where w.user.id = :userId
+order by w.startTime desc
+""")
+    List<Walk> findTopByUserIdOrderByStartTimeDesc(Long userId, Pageable pageable);
+
+    // 오늘 산책 1건 조회
+    @Query("""
+        select w
+        from Walk w
+        where w.user.id = :userId
+          and w.startTime >= :startMillis
+          and w.startTime < :endMillis
+    """)
+    Optional<Walk> findTodayWalk(
+            @Param("userId") Long userId,
+            @Param("startMillis") long startMillis,
+            @Param("endMillis") long endMillis
+    );
+
 }

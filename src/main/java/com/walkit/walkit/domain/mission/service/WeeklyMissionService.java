@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.mission.service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
 import com.walkit.walkit.domain.mission.entity.*;
 import com.walkit.walkit.domain.mission.repository.MissionRepository;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
@@ -136,5 +137,19 @@ public class WeeklyMissionService {
         } catch (Exception e) {
             throw new RuntimeException("JSON 변환 실패", e);
         }
+    }
+
+    public WeeklyMissionResponseDto getEnsureAssignedForThisWeek(Long userId) {
+        LocalDate weekStart = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
+
+        ensureAssignedForThisWeek(userId);
+
+        List<UserWeeklyMission> list = userWeeklyMissionRepository.findWeeklyWithMission(userId, weekStart);
+
+        UserWeeklyMission uwm = list.stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("이번 주 주간미션 조회 실패"));
+
+        return WeeklyMissionResponseDto.from(uwm);
     }
 }
