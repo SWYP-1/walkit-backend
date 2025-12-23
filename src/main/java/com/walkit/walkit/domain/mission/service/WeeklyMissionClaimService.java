@@ -1,6 +1,6 @@
 package com.walkit.walkit.domain.mission.service;
 
-import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponse;
+import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
 import com.walkit.walkit.domain.mission.entity.UserWeeklyMission;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
 import com.walkit.walkit.domain.user.entity.User;
@@ -18,7 +18,7 @@ public class WeeklyMissionClaimService {
     private final UserRepository userRepository;
 
     @Transactional
-    public WeeklyMissionResponse claim(Long loginUserId, Long uwmId) {
+    public WeeklyMissionResponseDto claim(Long loginUserId, Long uwmId) {
 
         UserWeeklyMission uwm = userWeeklyMissionRepository.findByIdWithUserAndMission(uwmId)
                 .orElseThrow(() -> new IllegalArgumentException("미션 없음"));
@@ -59,6 +59,6 @@ public class WeeklyMissionClaimService {
         userRepository.save(user);
 
 
-        return WeeklyMissionResponse.from(uwm);
+        return WeeklyMissionResponseDto.fromActive(uwm);
     }
 }

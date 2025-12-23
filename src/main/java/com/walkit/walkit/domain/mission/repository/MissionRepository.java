@@ -13,5 +13,6 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
 
     List<Mission> findByCategoryAndActiveTrue(MissionCategory category);
 
+    List<Mission> findByActiveTrue();
 
 }

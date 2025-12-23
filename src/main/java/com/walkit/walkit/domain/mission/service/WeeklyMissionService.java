@@ -2,6 +2,8 @@ package com.walkit.walkit.domain.mission.service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.walkit.walkit.domain.mission.dto.WeeklyMissionListResponseDto;
+import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
 import com.walkit.walkit.domain.mission.entity.*;
 import com.walkit.walkit.domain.mission.repository.MissionRepository;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
@@ -13,9 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -124,7 +127,7 @@ public class WeeklyMissionService {
         }
     }
 
-  /*  private MissionColor pickColorForWeek(LocalDate weekStart) {
+   /* private MissionColor pickColorForWeek(LocalDate weekStart) {
         long weeks = java.time.temporal.ChronoUnit.WEEKS.between(BASE_WEEK_START, weekStart);
         int idx = (int) Math.floorMod(weeks, COLORS.length);
         return COLORS[idx];
@@ -137,4 +140,59 @@ public class WeeklyMissionService {
             throw new RuntimeException("JSON 변환 실패", e);
         }
     }
+
+    // 월별 완료한 미션 조회
+    public List<WeeklyMissionResponseDto> getMonthlyCompletedMissions(Long userId, int year, int month) {
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDateTime start = ym.atDay(1).atStartOfDay();
+        LocalDateTime end = ym.plusMonths(1).atDay(1).atStartOfDay();
+
+        return userWeeklyMissionRepository.findCompletedMissionsInMonth(userId, start, end)
+                .stream()
+                .map(WeeklyMissionResponseDto::fromActive)
+                .toList();
+    }
+
+
+    // 미션 목록 조회
+    public WeeklyMissionListResponseDto getWeeklyMissionList(Long userId) {
+
+        // 이번 주 1개 배정 (있으면 조회)
+        ensureAssignedForThisWeek(userId);
+
+        LocalDate weekStart = LocalDate.now()
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate weekEnd = weekStart.plusDays(6);
+
+        // 상단 1개 조회 (이번주 active 미션)
+        WeeklyMissionResponseDto active = userWeeklyMissionRepository
+                .findWeeklyWithMission(userId, weekStart)
+                .stream()
+                .findFirst()
+                .map(WeeklyMissionResponseDto::fromActive)
+                .orElseThrow(() -> new IllegalStateException("이번 주 미션이 없습니다."));
+
+        Long activeMissionId = active.missionId();
+
+        // 미션 목록 전체 조회
+        List<Mission> all =  missionRepository.findByActiveTrue();
+
+        // 아래 목록 (active 제외 나머지)
+        List<WeeklyMissionResponseDto> others = all.stream()
+                .filter(m -> !m.getId().equals(activeMissionId))
+                .map(m -> WeeklyMissionResponseDto.fromUnActive(
+                        m,
+                        m.getCategory().name(),
+                        weekStart,
+                        weekEnd
+                ))
+                .toList();
+
+        return WeeklyMissionListResponseDto.builder()
+                .active(active)
+                .others(others)
+                .build();
+    }
+
+
 }
