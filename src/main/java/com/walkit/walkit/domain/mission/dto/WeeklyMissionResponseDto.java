@@ -22,8 +22,10 @@ public record WeeklyMissionResponseDto(
         LocalDateTime completedAt,
         LocalDateTime failedAt
 ) {
+
     // 이번 주 실제 배정된 미션
     public static WeeklyMissionResponseDto fromActive(UserWeeklyMission uwm) {
+
         Mission m = uwm.getMission();
         return new WeeklyMissionResponseDto(
                 uwm.getId(),
@@ -41,6 +43,7 @@ public record WeeklyMissionResponseDto(
                 uwm.getFailedAt()
         );
     }
+
 
     // 이번 주 제공 안 된 미션 (mission 기반, 표시용)
     public static WeeklyMissionResponseDto fromUnActive(
@@ -65,4 +68,5 @@ public record WeeklyMissionResponseDto(
                 null                       // failedAt 없음
         );
     }
+
 }
