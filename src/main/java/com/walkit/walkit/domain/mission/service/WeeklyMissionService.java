@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -130,7 +129,7 @@ public class WeeklyMissionService {
         }
     }
 
-  /*  private MissionColor pickColorForWeek(LocalDate weekStart) {
+   /* private MissionColor pickColorForWeek(LocalDate weekStart) {
         long weeks = java.time.temporal.ChronoUnit.WEEKS.between(BASE_WEEK_START, weekStart);
         int idx = (int) Math.floorMod(weeks, COLORS.length);
         return COLORS[idx];
