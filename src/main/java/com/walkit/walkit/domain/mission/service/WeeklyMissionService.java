@@ -6,6 +6,7 @@ import com.walkit.walkit.domain.mission.dto.WeeklyMissionListResponseDto;
 import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
 import com.walkit.walkit.domain.mission.entity.*;
 import com.walkit.walkit.domain.mission.repository.MissionRepository;
+import com.walkit.walkit.domain.mission.repository.UserMissionHistoryRepository;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
@@ -27,6 +28,7 @@ import java.util.Map;
 public class WeeklyMissionService {
 
     private final MissionRepository missionRepository;
+    private final UserMissionHistoryRepository userMissionHistoryRepository;
     private final UserWeeklyMissionRepository userWeeklyMissionRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -141,17 +143,20 @@ public class WeeklyMissionService {
         }
     }
 
-    // 월별 완료한 미션 조회
-    public List<WeeklyMissionResponseDto> getMonthlyCompletedMissions(Long userId, int year, int month) {
+
+    // 월별 완료한 미션 날짜 조회
+    public List<LocalDate> getMonthlyCompletedMissions(Long userId, int year, int month) {
         YearMonth ym = YearMonth.of(year, month);
         LocalDateTime start = ym.atDay(1).atStartOfDay();
         LocalDateTime end = ym.plusMonths(1).atDay(1).atStartOfDay();
 
-        return userWeeklyMissionRepository.findCompletedMissionsInMonth(userId, start, end)
+        return userMissionHistoryRepository.findCompletedAtInMonth(userId, start, end)
                 .stream()
-                .map(WeeklyMissionResponseDto::fromActive)
+                .map(LocalDateTime::toLocalDate)
+                .distinct()
                 .toList();
     }
+
 
 
     // 미션 목록 조회

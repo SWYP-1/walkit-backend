@@ -62,8 +62,9 @@ public class MissionController {
     }
 
 
+    // 월간 완성한 미션 조회
     @GetMapping("/completed/monthly")
-    public List<WeeklyMissionResponseDto> monthlyCompleted(
+    public List<LocalDate> monthlyCompleted(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam int year,
             @RequestParam int month

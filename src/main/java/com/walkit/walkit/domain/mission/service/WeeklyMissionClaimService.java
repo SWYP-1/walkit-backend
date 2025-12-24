@@ -1,13 +1,17 @@
 package com.walkit.walkit.domain.mission.service;
 
 import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
+import com.walkit.walkit.domain.mission.entity.UserMissionHistory;
 import com.walkit.walkit.domain.mission.entity.UserWeeklyMission;
+import com.walkit.walkit.domain.mission.repository.UserMissionHistoryRepository;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +20,8 @@ public class WeeklyMissionClaimService {
     private final UserWeeklyMissionRepository userWeeklyMissionRepository;
     private final UserMissionVerifyService missionVerifyService;
     private final UserRepository userRepository;
+    private final UserMissionHistoryRepository userMissionHistoryRepository;
+
 
     @Transactional
     public WeeklyMissionResponseDto claim(Long loginUserId, Long uwmId) {
@@ -51,7 +57,13 @@ public class WeeklyMissionClaimService {
         }
 
         // 완료 처리
-        uwm.complete();
+        LocalDateTime now = LocalDateTime.now();
+        uwm.complete(now);
+
+        // 미션 완료 히스토리 저장
+        userMissionHistoryRepository.save(
+                UserMissionHistory.from(uwm, now)
+        );
 
         // 포인트 지급
         User user = uwm.getUser();
