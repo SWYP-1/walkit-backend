@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -129,7 +130,7 @@ public class WeeklyMissionService {
         }
     }
 
-   /* private MissionColor pickColorForWeek(LocalDate weekStart) {
+  /*  private MissionColor pickColorForWeek(LocalDate weekStart) {
         long weeks = java.time.temporal.ChronoUnit.WEEKS.between(BASE_WEEK_START, weekStart);
         int idx = (int) Math.floorMod(weeks, COLORS.length);
         return COLORS[idx];
@@ -200,4 +201,18 @@ public class WeeklyMissionService {
     }
 
 
+
+    public WeeklyMissionResponseDto getEnsureAssignedForThisWeek(Long userId) {
+        LocalDate weekStart = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
+
+        ensureAssignedForThisWeek(userId);
+
+        List<UserWeeklyMission> list = userWeeklyMissionRepository.findWeeklyWithMission(userId, weekStart);
+
+        UserWeeklyMission uwm = list.stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("이번 주 주간미션 조회 실패"));
+
+        return WeeklyMissionResponseDto.fromActive(uwm);
+    }
 }

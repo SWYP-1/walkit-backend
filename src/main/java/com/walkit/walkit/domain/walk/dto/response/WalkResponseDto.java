@@ -1,6 +1,7 @@
 package com.walkit.walkit.domain.walk.dto.response;
 
 import com.walkit.walkit.domain.walk.entity.Emotion;
+import com.walkit.walkit.domain.walk.entity.Walk;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,4 +27,29 @@ public class WalkResponseDto {
     private Double totalDistance;
     private LocalDateTime createdDate;
     private List<WalkPointResponseDto> points;
+
+    public static WalkResponseDto fromDetail(Walk walk) {
+        return WalkResponseDto.builder()
+                .id(walk.getId())
+                .preWalkEmotion(walk.getPreWalkEmotion())
+                .postWalkEmotion(walk.getPostWalkEmotion())
+                .note(walk.getNote())
+                .stepCount(walk.getStepCount())
+                .totalDistance(walk.getTotalDistance())
+                .startTime(walk.getStartTime())
+                .endTime(walk.getEndTime())
+                .totalTime(walk.getTotalTime())
+                .imageUrl(walk.getImageUrl())
+                .createdDate(walk.getCreatedDate())
+                .points(
+                        walk.getPoints().stream()
+                                .map(p -> new WalkPointResponseDto(
+                                        p.getLatitude(),
+                                        p.getLongitude(),
+                                        p.getRecordedAt()
+                                ))
+                                .toList()
+                )
+                .build();
+    }
 }
