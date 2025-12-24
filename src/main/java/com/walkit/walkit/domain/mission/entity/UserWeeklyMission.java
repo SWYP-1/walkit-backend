@@ -47,9 +47,9 @@ public class UserWeeklyMission  extends BaseTimeEntity { // 사용자의 미션 
 
 
 
-    public void complete() {
+    public void complete(LocalDateTime now) {
         this.status = MissionStatus.COMPLETED;
-        this.completedAt = LocalDateTime.now();
+        this.completedAt = now;
     }
 
     public void fail() {

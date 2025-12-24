@@ -7,7 +7,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 
 @Slf4j
 @Component
@@ -21,7 +23,7 @@ public class UserWeeklyMissionCloseScheduler {
     @Transactional
     public void closeWeeklyMissions() {
         LocalDate today = LocalDate.now();
-        LocalDate weekStart = today.with(java.time.DayOfWeek.MONDAY);
+        LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         int updated = userWeeklyMissionRepository.closeWeek(weekStart);
         log.info("주간 마감 처리 완료: weekStart={}, FAILED 처리 건수={}", weekStart, updated);
