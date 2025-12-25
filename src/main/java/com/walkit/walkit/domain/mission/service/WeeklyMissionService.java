@@ -187,7 +187,7 @@ public class WeeklyMissionService {
                 .filter(m -> !m.getId().equals(activeMissionId))
                 .map(m -> WeeklyMissionResponseDto.fromUnActive(
                         m,
-                        m.getCategory().name(),
+                        m.getCategory(),
                         weekStart,
                         weekEnd
                 ))

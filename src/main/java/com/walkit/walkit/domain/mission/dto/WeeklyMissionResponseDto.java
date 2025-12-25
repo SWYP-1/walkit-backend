@@ -44,7 +44,7 @@ public record WeeklyMissionResponseDto(
     // 이번 주 제공 안 된 미션 (mission 기반, 표시용)
     public static WeeklyMissionResponseDto fromUnActive(
             Mission m,
-            String category,
+            MissionCategory category,
             LocalDate weekStart,
             LocalDate weekEnd
     ) {
@@ -53,7 +53,7 @@ public record WeeklyMissionResponseDto(
                 m.getId(),
                 m.getTitle(),
                 m.getDescription(),
-                m.getCategory(),
+                category,
                 m.getType(),
                 null,               // 제공 안 된 미션 (진행 상태 없음)
                 m.getRewardPoints(),
