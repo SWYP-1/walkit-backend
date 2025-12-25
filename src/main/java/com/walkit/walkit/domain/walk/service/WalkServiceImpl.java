@@ -56,7 +56,7 @@ public class WalkServiceImpl implements WalkService {
             Long userId, WalkRequestDto request) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Long start = request.getStartTime();
         Long end   = request.getEndTime();
@@ -65,7 +65,7 @@ public class WalkServiceImpl implements WalkService {
         if (start != null && end != null) {
             long diff = end - start;
             if (diff < 0) {
-                throw new IllegalArgumentException("endTime must be >= startTime");
+                throw new CustomException(ErrorCode.INVALID_WALK_TIME);
             }
             totalTime = diff;
         }
@@ -83,7 +83,7 @@ public class WalkServiceImpl implements WalkService {
                 .note(request.getNote())
                 .build();
 
-        Walk saved = walkRepository.save(walk);
+        walkRepository.save(walk);
 
 
         // points 저장
@@ -92,7 +92,7 @@ public class WalkServiceImpl implements WalkService {
             for (int i = 0; i < request.getPoints().size(); i++) {
                 WalkPointRequestDto p = request.getPoints().get(i);
                 validateLatLng(p.getLatitude(), p.getLongitude());
-                if (p.getTimestampMillis() == null) throw new IllegalArgumentException("timestampMillis required");
+                if (p.getTimestampMillis() == null) throw new CustomException(ErrorCode.INVALID_TIMESTAMP);
 
                 Long recordedAt = p.getTimestampMillis();
                 newPoints.add(WalkPoint.of(walk, p.getLatitude(), p.getLongitude(), recordedAt));
@@ -124,7 +124,7 @@ public class WalkServiceImpl implements WalkService {
     @Override
     public WalkResponseDto getWalk(Long userId, Long walkId) {
         Walk walk = walkRepository.findDetailByIdAndUserId(walkId, userId)
-                .orElseThrow(() -> new RuntimeException("Walk not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
 
         return WalkResponseDto.fromDetail(walk);
 
@@ -153,7 +153,7 @@ public class WalkServiceImpl implements WalkService {
             throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
         }
 
-        Walk walk = walkRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(() -> new RuntimeException("Walk not found"));
+        Walk walk = walkRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
 
         ResponseCharacterDto characterDto = characterService.find(follower.getId(), lat, lon);
         String walkProgressPercentage = goalService.findGoalProcess(follower.getId()).getWalkProgressPercentage();
@@ -161,6 +161,7 @@ public class WalkServiceImpl implements WalkService {
 
         return FollowerWalkResponseDto.from(characterDto, walkProgressPercentage, walk);
     }
+
 
     // 산책 기록 조회(날짜)
     public WalkResponseDto getWalkByDay(Long userId, long anchorMillis) {
@@ -176,7 +177,7 @@ public class WalkServiceImpl implements WalkService {
 
         Walk walk = walkRepository
                 .findFirstByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeDesc(userId, dayStart, dayEnd)
-                .orElseThrow(() -> new RuntimeException("Walk not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
 
         return WalkResponseDto.fromDetail(walk);
     }
@@ -186,17 +187,11 @@ public class WalkServiceImpl implements WalkService {
     @Transactional
     public void updateNote(Long userId, Long walkId, String note) {
         Walk walk = walkRepository.findByIdAndUser_Id(walkId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("산책 기록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
 
         walk.updateNote(note);
     }
 
-
-    private void validateLatLng(Double lat, Double lng) {
-        if (lat == null || lng == null) throw new IllegalArgumentException("lat/lng required");
-        if (lat < -90 || lat > 90) throw new IllegalArgumentException("invalid latitude");
-        if (lng < -180 || lng > 180) throw new IllegalArgumentException("invalid longitude");
-    }
 
     // 전체 산책 기록 요약 조회(총 산책 횟수, 총 산책 시간)
     public WalkTotalSummaryResponseDto getTotalSummary(Long userId) {
@@ -204,6 +199,7 @@ public class WalkServiceImpl implements WalkService {
         long totalTime = walkRepository.sumTotalTimeByUserId(userId);
         return new WalkTotalSummaryResponseDto(count, totalTime);
     }
+
 
     // 오늘 산책 1건 조회
     public int getTodayStepCount(Long userId) {
@@ -216,6 +212,14 @@ public class WalkServiceImpl implements WalkService {
         return walkRepository.findTodayWalk(userId, startMillis, endMillis)
                 .map(w -> w.getStepCount() == null ? 0 : w.getStepCount())
                 .orElse(0);
+    }
+
+
+
+    private void validateLatLng(Double lat, Double lng) {
+        if (lat == null || lng == null) throw new CustomException(ErrorCode.INVALID_LAT_LNG);
+        if (lat < -90 || lat > 90) throw new CustomException(ErrorCode.INVALID_LAT_LNG);
+        if (lng < -180 || lng > 180) throw new CustomException(ErrorCode.INVALID_LAT_LNG);
     }
 
 
