@@ -99,8 +99,8 @@ public class FollowService {
     public List<ResponseFollowerDto> findFollowers(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        List<Follow> follows1 = followRepository.findBySender(user);
-        List<Follow> follows2 = followRepository.findByReceiver(user);
+        List<Follow> follows1 = followRepository.findBySenderAndFollowStatus(user, FollowStatus.ACCEPTED);
+        List<Follow> follows2 = followRepository.findByReceiverAndFollowStatus(user, FollowStatus.ACCEPTED);
 
         List<User> user1 = follows1.stream().map(Follow::getReceiver).toList();
         List<User> user2 = follows2.stream().map(Follow::getSender).toList();
@@ -117,6 +117,17 @@ public class FollowService {
         return followRepository.findByReceiverAndFollowStatus(user, FollowStatus.PENDING).stream()
                 .map(ResponseFollowingDto::of)
                 .toList();
+    }
+
+    public void deleteFollowing(Long userId, String nickname) {
+        User sender = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        User receiver = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        if (followRepository.existsBySenderAndReceiverAndFollowStatus(sender, receiver, FollowStatus.PENDING)) {
+            followRepository.deleteBySenderAndReceiver(sender, receiver);
+        } else {
+            throw new CustomException(NOT_EXISTS_PENDING_FOLLOW);
+        }
     }
 
     private void checkAlreadyFollow(User sender, User receiver) {
