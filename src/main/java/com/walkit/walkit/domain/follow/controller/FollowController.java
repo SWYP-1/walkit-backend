@@ -49,4 +49,10 @@ public class FollowController {
         followService.deleteFollow(userPrincipal.getUserId(), nickname);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @DeleteMapping("/following/nickname/{nickname}")
+    public ResponseEntity<Void> deleteFollowing(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
+        followService.deleteFollowing(userPrincipal.getUserId(), nickname);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

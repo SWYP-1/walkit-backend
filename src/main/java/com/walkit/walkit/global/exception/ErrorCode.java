@@ -23,6 +23,7 @@ public enum ErrorCode {
     ALREADY_EXISTS_PENDING_FOLLOW(CONFLICT, 2002, "[Follow] 이미 요청 중인 팔로우가 존재합니다."),
     ALREADY_EXISTS_ACCEPTED_FOLLOW(CONFLICT, 2003, "[Follow] 이미 완료된 팔로우가 존재합니다."),
     CANT_FOLLOW_ONESELF(BAD_REQUEST, 2004, "[Follow] 자기 자신은 팔로우 할 수 없습니다."),
+    NOT_EXISTS_PENDING_FOLLOW(NOT_FOUND, 2005, "[Follow] 해당 유저에 요청중인 팔로우가 존재하지 않습니다"),
 
     // WALK_LIKE
     ALREADY_EXISTS_WALK_LIKE(CONFLICT, 3001, "[WalkLike] 해당 산책기록에 이미 좋아요를 눌렀습니다."),
