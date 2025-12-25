@@ -1,8 +1,7 @@
 package com.walkit.walkit.domain.mission.dto;
 
 
-import com.walkit.walkit.domain.mission.entity.UserWeeklyMission;
-import com.walkit.walkit.domain.mission.entity.Mission;
+import com.walkit.walkit.domain.mission.entity.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,9 +11,9 @@ public record WeeklyMissionResponseDto(
         Long missionId,
         String title,
         String description,
-        String category,
-        String type,
-        String status,
+        MissionCategory category,
+        MissionType type,
+        MissionStatus status,
         Integer rewardPoints,
         String assignedConfigJson,
         LocalDate weekStart,
@@ -30,9 +29,9 @@ public record WeeklyMissionResponseDto(
                 m.getId(),
                 m.getTitle(),
                 m.getDescription(),
-                uwm.getCategory().name(),
-                m.getType().name(),
-                uwm.getStatus().name(),
+                uwm.getCategory(),
+                m.getType(),
+                uwm.getStatus(),
                 m.getRewardPoints(),
                 uwm.getAssignedConfigJson(),
                 uwm.getWeekStart(),
@@ -54,9 +53,9 @@ public record WeeklyMissionResponseDto(
                 m.getId(),
                 m.getTitle(),
                 m.getDescription(),
-                category,
-                m.getType().name(),
-                "NONE",             // 제공 안 된 미션 (진행 상태 없음)
+                m.getCategory(),
+                m.getType(),
+                null,               // 제공 안 된 미션 (진행 상태 없음)
                 m.getRewardPoints(),
                 null,     // assignedConfigJson 없음
                 weekStart,
