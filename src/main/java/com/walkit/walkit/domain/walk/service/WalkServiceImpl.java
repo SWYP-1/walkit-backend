@@ -19,6 +19,7 @@ import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 import com.walkit.walkit.domain.walk.entity.Walk;
 import com.walkit.walkit.domain.walk.entity.WalkPoint;
 import com.walkit.walkit.domain.walk.repository.WalkRepository;
+import com.walkit.walkit.domain.walkLike.repository.WalkLikeRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class WalkServiceImpl implements WalkService {
     private final GoalService goalService;
     private final FollowRepository followRepository;
     private final CharacterService characterService;
+    private final WalkLikeRepository walkLikeRepository;
 
 
     // 산책 기록 저장
@@ -153,13 +155,18 @@ public class WalkServiceImpl implements WalkService {
             throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
         }
 
-        Walk walk = walkRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(() -> new RuntimeException("Walk not found"));
+        Walk walk = walkRepository.findFirstByUserIdOrderByCreatedDateDesc(follower.getId()).orElseThrow(() -> new RuntimeException("Walk not found"));
 
         ResponseCharacterDto characterDto = characterService.find(follower.getId(), lat, lon);
         String walkProgressPercentage = goalService.findGoalProcess(follower.getId()).getWalkProgressPercentage();
 
+        int likeCount = walkLikeRepository.findByWalk(walk).size();
 
-        return FollowerWalkResponseDto.from(characterDto, walkProgressPercentage, walk);
+        if (walkLikeRepository.existsByUserAndWalk(user, walk)) {
+            return FollowerWalkResponseDto.from(characterDto, walkProgressPercentage, walk, true, likeCount);
+        }
+
+        return FollowerWalkResponseDto.from(characterDto, walkProgressPercentage, walk, false, likeCount);
     }
 
     // 산책 기록 조회(날짜)

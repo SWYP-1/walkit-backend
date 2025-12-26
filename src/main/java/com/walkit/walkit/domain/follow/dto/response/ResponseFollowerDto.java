@@ -11,11 +11,13 @@ public class ResponseFollowerDto {
 
     private String nickname;
     private Long userId;
+    private String imageName;
 
     public static ResponseFollowerDto of(User user) {
         return ResponseFollowerDto.builder()
                 .nickname(user.getNickname())
                 .userId(user.getId())
+                .imageName(user.getUserImage().getImageName())
                 .build();
     }
 }

@@ -33,7 +33,10 @@ public enum ErrorCode {
     ITEM_NOT_FOUND(NOT_FOUND, 4001, "[ITEM] 아이템을 찾을 수 없습니다."),
     ITEM_NOT_OWNED(FORBIDDEN, 4002, "[ITEM] 유저는 해당 아이템을 가지고 있지 않습니다."),
     INSUFFICIENT_FUNDS(BAD_REQUEST, 4004, "[ITEM] 아이템을 구매할 포인트가 부족합니다."),
-    ALREADY_ITEM_OWNED(CONFLICT, 4005, "[ITEM] 해당 아이템을 이미 구매했습니다.");
+    ALREADY_ITEM_OWNED(CONFLICT, 4005, "[ITEM] 해당 아이템을 이미 구매했습니다."),
+
+    // WALK
+    WALK_NOT_FOUND(NOT_FOUND, 5001, "[Walk] 해당 산책기록을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final Integer code;
