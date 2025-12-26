@@ -46,12 +46,15 @@ public class WalkLikeService {
     }
 
     public void delete(Long userId, Long walkId) {
+        Walk walk = walkRepository.findById(walkId).orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
+        User follower = walk.getUser();
+
         if (!walkLikeRepository.existsByUserIdAndWalkId(userId, walkId)) {
             throw new CustomException(ErrorCode.WALK_LIKE_NOT_FOUND);
         }
 
-        if (!(followRepository.existsBySenderIdAndReceiverIdAndFollowStatus(userId, walkId, FollowStatus.ACCEPTED)
-                || followRepository.existsBySenderIdAndReceiverIdAndFollowStatus(walkId, userId, FollowStatus.ACCEPTED)
+        if (!(followRepository.existsBySenderIdAndReceiverIdAndFollowStatus(userId, follower.getId(), FollowStatus.ACCEPTED)
+                || followRepository.existsBySenderIdAndReceiverIdAndFollowStatus(follower.getId(), userId, FollowStatus.ACCEPTED)
         )) {
             throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
         }

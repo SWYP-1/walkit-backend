@@ -47,11 +47,6 @@ public enum ErrorCode {
 
     // WEATHER
 
-
-
-
-
-
     private final HttpStatus httpStatus;
     private final Integer code;
     private final String message;

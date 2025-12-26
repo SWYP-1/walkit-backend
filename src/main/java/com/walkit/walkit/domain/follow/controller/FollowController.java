@@ -2,7 +2,6 @@ package com.walkit.walkit.domain.follow.controller;
 
 import com.walkit.walkit.domain.follow.dto.response.ResponseFollowerDto;
 import com.walkit.walkit.domain.follow.dto.response.ResponseFollowingDto;
-import com.walkit.walkit.domain.follow.entity.Follow;
 import com.walkit.walkit.domain.follow.service.FollowService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -20,21 +19,21 @@ public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/nickname/{nickname}")
-    public ResponseEntity<Void> sendFollow(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
-        followService.sendFollow(userPrincipal.getUserId(), nickname);
+    @PostMapping("/following/nickname/{nickname}")
+    public ResponseEntity<Void> sendFollowing(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
+        followService.sendFollowing(userPrincipal.getUserId(), nickname);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/follower")
-    public ResponseEntity<List<ResponseFollowerDto>> findFollowers(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        List<ResponseFollowerDto> dto = followService.findFollowers(userPrincipal.getUserId());
+    @GetMapping
+    public ResponseEntity<List<ResponseFollowerDto>> findFollow(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        List<ResponseFollowerDto> dto = followService.findFollow(userPrincipal.getUserId());
         return  ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
-    @GetMapping("/following")
-    public ResponseEntity<List<ResponseFollowingDto>> findRequestFollowing(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        List<ResponseFollowingDto> dto = followService.findRequestFollowing(userPrincipal.getUserId());
+    @GetMapping("/follower")
+    public ResponseEntity<List<ResponseFollowingDto>> findRequestFollower(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        List<ResponseFollowingDto> dto = followService.findRequestFollower(userPrincipal.getUserId());
         return  ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
@@ -50,9 +49,9 @@ public class FollowController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @DeleteMapping("/following/nickname/{nickname}")
-    public ResponseEntity<Void> deleteFollowing(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
-        followService.deleteFollowing(userPrincipal.getUserId(), nickname);
+    @DeleteMapping("/follower/nickname/{nickname}")
+    public ResponseEntity<Void> deleteFollower(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String nickname) {
+        followService.deleteFollower(userPrincipal.getUserId(), nickname);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

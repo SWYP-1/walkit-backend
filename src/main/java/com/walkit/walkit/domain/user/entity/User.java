@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.user.entity;
 
+import com.walkit.walkit.common.image.entity.UserImage;
 import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.character.entity.Character;
 import com.walkit.walkit.domain.character.entity.ItemManagement;
@@ -70,6 +71,9 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ItemManagement> itemManagements = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserImage userImage;
 
     @Column(nullable = false)
     private int point = 0;// 포인트 컬럼 임시 추가

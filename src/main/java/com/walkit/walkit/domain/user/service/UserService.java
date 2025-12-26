@@ -67,9 +67,11 @@ public class UserService {
         if (image != null && !image.isEmpty()) {
 
             if (userImageRepository.findByUserId(user.getId()).isPresent()) {
+                log.info("user image already exists");
                 String oldImageName = userImageService.delete(userId);
-                entityManager.flush();
+                log.info("oldImageName : " + oldImageName);
                 imageService.deleteFile(oldImageName);
+                entityManager.flush();
             }
 
             imageService.uploadFile(ImageType.USER, image, userId);

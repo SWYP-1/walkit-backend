@@ -16,17 +16,24 @@ public class FollowerWalkResponseDto {
     private ResponseCharacterDto characterDto;
     private String walkProgressPercentage;
 
+    private Long walkId;
     private LocalDateTime createdDate;
     private Integer stepCount;
     private Double totalDistance;
 
-    public static FollowerWalkResponseDto from(ResponseCharacterDto characterDto, String walkProgressPercentage, Walk walk) {
+    private boolean isLiked;
+    private int likeCount;
+
+    public static FollowerWalkResponseDto from(ResponseCharacterDto characterDto, String walkProgressPercentage, Walk walk, boolean liked, int likeCount) {
         return FollowerWalkResponseDto.builder()
                 .characterDto(characterDto)
                 .walkProgressPercentage(walkProgressPercentage)
+                .walkId(walk.getId())
                 .createdDate(walk.getCreatedDate())
                 .stepCount(walk.getStepCount())
                 .totalDistance(walk.getTotalDistance())
+                .isLiked(liked)
+                .likeCount(likeCount)
                 .build();
     }
 }

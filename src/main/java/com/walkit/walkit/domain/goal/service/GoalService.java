@@ -68,8 +68,10 @@ public class GoalService {
     public void checkAchieveGoal(User user, int stepCount) {
         Goal goal = user.getGoal();
 
-        checkAchieveTargetStepCount(stepCount, goal);
-        checkAchieveGoal(user, goal);
+        if (goal != null) {
+            checkAchieveTargetStepCount(stepCount, goal);
+            checkAchieveGoal(user, goal);
+        }
     }
 
     private void checkAchieveGoal(User user, Goal goal) {

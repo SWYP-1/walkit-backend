@@ -91,4 +91,6 @@ order by w.startTime desc
             @Param("endMillis") long endMillis
     );
 
+    Optional<Walk> findFirstByUserIdOrderByCreatedDateDesc(Long userId);
+
 }
