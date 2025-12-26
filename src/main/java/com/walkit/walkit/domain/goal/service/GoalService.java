@@ -87,7 +87,7 @@ public class GoalService {
 
             log.info("level: " + level);
 
-            if (level >= 6) {
+            if (level >= 5) {
                 log.info("checkAchieveGoal");
                 achieveConsecutiveWeeksGoal(user);
             } else {
@@ -100,6 +100,7 @@ public class GoalService {
 
     private void achieveConsecutiveWeeksGoal(User user) {
         user.plusAchieveConsecutiveWeeks();
+        user.plusAchieveTotalWeeks();
 
         int achieveGoalConsecutiveWeeks = user.getAchieveGoalConsecutiveWeeks();
         Character character = user.getCharacter();
@@ -108,6 +109,7 @@ public class GoalService {
 
         if (achieveGoalConsecutiveWeeks >= 2 && achieveGoalConsecutiveWeeks <= 10) {
             levelUpByConsecutiveWeeks(user, achieveGoalConsecutiveWeeks, character);
+            user.initAchieveConsecutiveWeeks();
         }
     }
 

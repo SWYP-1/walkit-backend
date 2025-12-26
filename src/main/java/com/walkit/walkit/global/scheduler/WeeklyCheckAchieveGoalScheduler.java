@@ -14,13 +14,10 @@ public class WeeklyCheckAchieveGoalScheduler {
 
     private final UserRepository userRepository;
 
-    @Scheduled(cron = "0 1 0 * * MON")
+    @Scheduled(cron = "0 40 * * * *")
     @Transactional
     public void initializeAchieveGoal() {
         for (User user : userRepository.findAll()) {
-            if (!user.isAchieveThisWeekGoal()) {
-                user.initAchieveConsecutiveWeeks();
-            }
             user.initAchieveThisWeekGoal();
         }
 

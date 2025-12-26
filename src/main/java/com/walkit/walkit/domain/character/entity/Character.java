@@ -31,7 +31,7 @@ public class Character {
     private String bodyImageName;
     private String feetImageName;
 
-    private int level = 1;
+    private int level = 0;
 
     @Builder
     public Character(Grade grade) {
