@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.item.service;
 
+import com.walkit.walkit.domain.item.dto.request.RequestBuyDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseItemDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseMyItemDto;
 import com.walkit.walkit.domain.item.entity.Item;
@@ -28,12 +29,11 @@ public class ItemService {
     private final UserRepository userRepository;
     private final ItemManagementRepository itemManagementRepository;
 
-    public void buy(Long userId, Long assetId) {
+    public void buy(Long userId, RequestBuyDto dto) {
         User user = findUser(userId);
-        Item item = itemRepository.findById(assetId).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
 
-        checkPurchase(user, item);
-        purchaseItem(user, item);
+        checkPurchase(user, dto);
+        purchaseItem(user, dto);
     }
 
     public List<ResponseItemDto> findAll(UserPrincipal userPrincipal, Position position) {
@@ -81,13 +81,19 @@ public class ItemService {
         return responseMyItemDtos;
     }
 
-    private void checkPurchase(User user, Item item) {
-        if (user.getPoint() < item.getPoint()) {
+    private void checkPurchase(User user, RequestBuyDto dto) {
+        if (user.getPoint() < dto.getTotalPrice()) {
             throw new CustomException(ErrorCode.INSUFFICIENT_FUNDS);
         }
 
-        if (itemManagementRepository.existsByUserAndItem(user, item)) {
-            throw new CustomException(ErrorCode.ALREADY_ITEM_OWNED);
+        for (RequestBuyDto.BuyItemDto item : dto.getItems()) {
+            Long itemId = item.getItemId();
+
+            Item findItem = itemRepository.findById(itemId).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+
+            if (itemManagementRepository.existsByUserAndItem(user, findItem)) {
+                throw new CustomException(ErrorCode.ALREADY_ITEM_OWNED);
+            }
         }
     }
 
@@ -104,13 +110,18 @@ public class ItemService {
         return isOwned;
     }
 
-    private void purchaseItem(User user, Item item) {
-        ItemManagement itemManagement = ItemManagement.from(user, item);
-        itemManagementRepository.save(itemManagement);
+    private void purchaseItem(User user, RequestBuyDto dto) {
 
-        user.minusPoints(item.getPoint());
+        for (RequestBuyDto.BuyItemDto item : dto.getItems()) {
+            Item findItem = itemRepository.findById(item.getItemId()).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
 
-        item.plusSaleCount();
+            ItemManagement itemManagement = ItemManagement.from(user, findItem);
+            itemManagementRepository.save(itemManagement);
+
+            user.minusPoints(findItem.getPoint());
+
+            findItem.plusSaleCount();
+        }
     }
 
     private User findUser(Long userId) {

@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ItemManagementRepository extends JpaRepository<ItemManagement, Long> {
     Optional<ItemManagement> findByUserAndItem(User user, Item item);
     boolean existsByUserAndItem(User user, Item item);
+
+    boolean existsByUserAndItemId(User user, Long itemId);
 }

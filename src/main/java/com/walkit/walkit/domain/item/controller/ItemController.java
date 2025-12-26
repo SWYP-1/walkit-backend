@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.item.controller;
 
+import com.walkit.walkit.domain.item.dto.request.RequestBuyDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseItemDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseMyItemDto;
 import com.walkit.walkit.domain.item.enums.Position;
@@ -20,9 +21,9 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    @PostMapping("/{itemId}")
-    public ResponseEntity<Void> buy(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long itemId) {
-        itemService.buy(userPrincipal.getUserId(), itemId);
+    @PostMapping
+    public ResponseEntity<Void> buy(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody RequestBuyDto dto) {
+        itemService.buy(userPrincipal.getUserId(), dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
