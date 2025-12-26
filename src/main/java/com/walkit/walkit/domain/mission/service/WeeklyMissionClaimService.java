@@ -7,6 +7,8 @@ import com.walkit.walkit.domain.mission.repository.UserMissionHistoryRepository;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
+import com.walkit.walkit.global.exception.CustomException;
+import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,33 +29,29 @@ public class WeeklyMissionClaimService {
     public WeeklyMissionResponseDto claim(Long loginUserId, Long uwmId) {
 
         UserWeeklyMission uwm = userWeeklyMissionRepository.findByIdWithUserAndMission(uwmId)
-                .orElseThrow(() -> new IllegalArgumentException("미션 없음"));
+                .orElseThrow(() -> new CustomException(ErrorCode.MISSION_NOT_FOUND));
 
         // 권한 체크 (가장 중요)
         if (!uwm.getUser().getId().equals(loginUserId)) {
-            throw new org.springframework.security.access.AccessDeniedException("본인 미션이 아닙니다.");
+            throw new CustomException(ErrorCode.MISSION_NOT_OWNED);
         }
 
         // 이미 완료면 중복 지급 방지
         if (uwm.isCompleted()) {
-            throw new IllegalStateException("이미 보상을 수령했습니다.");
+            throw new CustomException(ErrorCode.MISSION_ALREADY_COMPLETED);
         }
 
-        // 도전 가능 여부 확인
-        if (!uwm.canAttempt()) {
-            throw new IllegalStateException("현재 상태에서는 보상 수령이 불가합니다.");
-        }
 
         // 미션 타입별 검증
         boolean achieved = switch (uwm.getMission().getType()) {
             case CHALLENGE_STEPS -> missionVerifyService.verifyWeeklyStepChallenge(uwm);
             case CHALLENGE_ATTENDANCE -> missionVerifyService.verifyWeeklyAttendanceChallenge(uwm);
             //case PHOTO_COLOR -> missionVerifyService.verifyPhotoColor(uwm);
-            default -> throw new IllegalStateException("지원하지 않는 미션 타입");
+            default ->  throw new CustomException(ErrorCode.MISSION_TYPE_NOT_SUPPORTED);
         };
 
         if (!achieved) {
-            throw new IllegalStateException("아직 미션 목표를 달성하지 못했습니다.");
+            throw new CustomException(ErrorCode.MISSION_NOT_ACHIEVED);
         }
 
         // 완료 처리

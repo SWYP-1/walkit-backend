@@ -10,6 +10,8 @@ import com.walkit.walkit.domain.mission.repository.UserMissionHistoryRepository;
 import com.walkit.walkit.domain.mission.repository.UserWeeklyMissionRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
+import com.walkit.walkit.global.exception.CustomException;
+import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,7 @@ public class WeeklyMissionService {
     @Transactional
     public void ensureAssignedForThisWeek(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         LocalDate weekStart = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
@@ -86,7 +88,7 @@ public class WeeklyMissionService {
 
     private Mission pickRandomChallengeExcludingCompleted(Long userId) {
         List<Mission> all = missionRepository.findByCategoryAndActiveTrue(MissionCategory.CHALLENGE);
-        if (all.isEmpty()) throw new IllegalStateException("활성 챌린지 미션 없음");
+        if (all.isEmpty()) throw new CustomException(ErrorCode.MISSION_NOT_FOUND);
 
         List<Long> completedIds = userWeeklyMissionRepository.findCompletedMissionIds(userId);
 
@@ -100,7 +102,7 @@ public class WeeklyMissionService {
                 : candidates;
 
         if (pool.isEmpty()) {
-            throw new IllegalStateException("챌린지 후보 풀이 비었습니다. (weeklyValid도 없음)");
+            throw new CustomException(ErrorCode.MISSION_ASSIGN_FAILED);
         }
 
         return pool.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(pool.size()));
@@ -139,7 +141,7 @@ public class WeeklyMissionService {
         try {
             return objectMapper.writeValueAsString(map);
         } catch (Exception e) {
-            throw new RuntimeException("JSON 변환 실패", e);
+            throw new CustomException(ErrorCode.MISSION_CONFIG_INVALID);
         }
     }
 
@@ -175,7 +177,7 @@ public class WeeklyMissionService {
                 .stream()
                 .findFirst()
                 .map(WeeklyMissionResponseDto::fromActive)
-                .orElseThrow(() -> new IllegalStateException("이번 주 미션이 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.WEEKLY_MISSION_NOT_FOUND));
 
         Long activeMissionId = active.missionId();
 
@@ -210,7 +212,7 @@ public class WeeklyMissionService {
 
         UserWeeklyMission uwm = list.stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("이번 주 주간미션 조회 실패"));
+                .orElseThrow(() -> new CustomException(ErrorCode.WEEKLY_MISSION_NOT_FOUND));
 
         return WeeklyMissionResponseDto.fromActive(uwm);
     }
