@@ -39,13 +39,21 @@ public enum ErrorCode {
     WALK_NOT_FOUND(NOT_FOUND, 5001, "[Walk] 산책 기록을 찾을 수 없습니다."),
     INVALID_WALK_TIME(BAD_REQUEST, 5002, "[Walk] 종료 시간은 시작 시간보다 빠를 수 없습니다."),
     INVALID_LAT_LNG(BAD_REQUEST, 5003, "[Walk] 위치 좌표가 올바르지 않습니다."),
-    INVALID_TIMESTAMP(BAD_REQUEST, 5004, "[Walk] 위치 시간이 존재하지 않습니다.");
+    INVALID_TIMESTAMP(BAD_REQUEST, 5004, "[Walk] 위치 시간이 존재하지 않습니다."),
 
     // MISSION
+    MISSION_NOT_FOUND(NOT_FOUND, 6001, "[Mission] 미션을 찾을 수 없습니다."),
+    WEEKLY_MISSION_NOT_FOUND(NOT_FOUND, 6002, "[Mission] 이번 주 미션이 존재하지 않습니다."),
+    MISSION_NOT_OWNED(FORBIDDEN, 6003, "[Mission] 본인의 미션이 아닙니다."),
+    MISSION_ALREADY_COMPLETED(CONFLICT, 6004, "[Mission] 이미 완료한 미션입니다."),
+    MISSION_NOT_ACHIEVED(BAD_REQUEST, 6005, "[Mission] 미션 목표를 아직 달성하지 못했습니다."),
+    MISSION_TYPE_NOT_SUPPORTED(BAD_REQUEST, 6006, "[Mission] 지원하지 않는 미션 타입입니다."),
+    MISSION_ASSIGN_FAILED(INTERNAL_SERVER_ERROR, 6007, "[Mission] 주간 미션 배정에 실패했습니다."),
+    MISSION_CONFIG_INVALID(BAD_REQUEST, 6008, "[Mission] 미션 설정이 올바르지 않습니다.");
+
 
     // NOTIFICATION
 
-    // WEATHER
 
     private final HttpStatus httpStatus;
     private final Integer code;

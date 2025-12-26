@@ -5,6 +5,8 @@ import com.walkit.walkit.domain.mission.entity.MissionType;
 import com.walkit.walkit.domain.mission.entity.UserWeeklyMission;
 import com.walkit.walkit.domain.walk.entity.Walk;
 import com.walkit.walkit.domain.walk.repository.WalkRepository;
+import com.walkit.walkit.global.exception.CustomException;
+import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ public class UserMissionVerifyService {
     // 걸음수 챌린지 검증
     public boolean verifyWeeklyStepChallenge(UserWeeklyMission userMission) {
         if (userMission.getMission().getType() != MissionType.CHALLENGE_STEPS) {
-            throw new IllegalArgumentException("걸음수 챌린지가 아닙니다.");
+            throw new CustomException(ErrorCode.MISSION_TYPE_NOT_SUPPORTED);
         }
 
         int missionSteps = getMissionSteps(userMission);
@@ -58,7 +60,7 @@ public class UserMissionVerifyService {
     // 연속 출석 챌린지 검증
     public boolean verifyWeeklyAttendanceChallenge(UserWeeklyMission userMission) {
         if (userMission.getMission().getType() != MissionType.CHALLENGE_ATTENDANCE) {
-            throw new IllegalArgumentException("출석 챌린지가 아닙니다.");
+            throw new CustomException(ErrorCode.MISSION_TYPE_NOT_SUPPORTED);
         }
 
         int requiredDays = getRequiredDays(userMission);
@@ -132,11 +134,11 @@ public class UserMissionVerifyService {
 
             Object raw = config.get("requiredDays");
             if (raw == null) {
-                throw new IllegalStateException("assignedConfigJson에 requiredDays 없음");
+                throw new CustomException(ErrorCode.MISSION_CONFIG_INVALID);
             }
             return ((Number) raw).intValue();
         } catch (Exception e) {
-            throw new RuntimeException("설정 파싱 실패", e);
+            throw new CustomException(ErrorCode.MISSION_CONFIG_INVALID);
         }
     }
 
@@ -149,12 +151,12 @@ public class UserMissionVerifyService {
 
             Object raw = config.get("missionSteps");
             if (raw == null) {
-                throw new IllegalStateException("assignedConfigJson에 missionSteps 없음");
+                throw new CustomException(ErrorCode.MISSION_CONFIG_INVALID);
             }
 
             return ((Number) raw).intValue();
         } catch (Exception e) {
-            throw new RuntimeException("설정 파싱 실패", e);
+            throw new CustomException(ErrorCode.MISSION_CONFIG_INVALID);
         }
     }
 }
