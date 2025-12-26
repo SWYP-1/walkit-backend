@@ -10,6 +10,7 @@ import com.walkit.walkit.domain.follow.repository.FollowRepository;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseMarketingConsentDto;
+import com.walkit.walkit.domain.user.dto.response.ResponsePointDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseUserNickNameFindDto;
 import com.walkit.walkit.domain.user.entity.User;
@@ -173,5 +174,15 @@ public class UserService {
 
     public LocalDateTime findLastAccessAt(Long userId) {
         return userRepository.findLastAccessAt(userId);
+    }
+
+    public ResponsePointDto findPoint(UserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            return ResponsePointDto.builder().point(0).build();
+        }
+
+        User user = findUserById(userPrincipal.getUserId());
+
+        return ResponsePointDto.builder().point(user.getPoint()).build();
     }
 }

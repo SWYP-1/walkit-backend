@@ -3,6 +3,7 @@ package com.walkit.walkit.domain.user.controller;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseMarketingConsentDto;
+import com.walkit.walkit.domain.user.dto.response.ResponsePointDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseUserDto;
 import com.walkit.walkit.domain.user.dto.response.ResponseUserNickNameFindDto;
 import com.walkit.walkit.domain.user.repository.UserRepository;
@@ -74,6 +75,11 @@ public class UserController {
         return ResponseEntity.status(OK).body(dto);
     }
 
+    @GetMapping("/point")
+    public ResponseEntity<ResponsePointDto> findPoint(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ResponsePointDto dto = userService.findPoint(userPrincipal);
+        return ResponseEntity.status(OK).body(dto);
+    }
     @PatchMapping("/marketing-consent/{marketingConsent}")
     public ResponseEntity<Void> updateMarketingConsent(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable boolean marketingConsent) {
         userService.updateMarketingConsent(userPrincipal.getUserId(), marketingConsent);
