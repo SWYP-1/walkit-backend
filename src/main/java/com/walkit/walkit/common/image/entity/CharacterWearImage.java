@@ -1,10 +1,8 @@
 package com.walkit.walkit.common.image.entity;
 
-import com.walkit.walkit.common.image.enums.Season;
-import com.walkit.walkit.common.image.enums.Weather;
 import com.walkit.walkit.domain.character.enums.Grade;
-import com.walkit.walkit.domain.character.enums.ItemName;
-import com.walkit.walkit.domain.character.enums.Position;
+import com.walkit.walkit.domain.item.enums.ItemName;
+import com.walkit.walkit.domain.item.enums.Position;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

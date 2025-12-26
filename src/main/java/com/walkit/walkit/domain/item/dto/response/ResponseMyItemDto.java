@@ -1,8 +1,8 @@
-package com.walkit.walkit.domain.character.dto.response;
+package com.walkit.walkit.domain.item.dto.response;
 
-import com.walkit.walkit.domain.character.entity.Item;
-import com.walkit.walkit.domain.character.enums.ItemName;
-import com.walkit.walkit.domain.character.enums.Position;
+import com.walkit.walkit.domain.item.entity.Item;
+import com.walkit.walkit.domain.item.enums.ItemName;
+import com.walkit.walkit.domain.item.enums.Position;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +14,7 @@ public class ResponseMyItemDto {
     private ItemName name;
     private Position position;
     private String imageName;
+    private int point;
 
     public static ResponseMyItemDto of(Item item) {
         return ResponseMyItemDto.builder()
@@ -21,6 +22,7 @@ public class ResponseMyItemDto {
                 .name(item.getItemName())
                 .position(item.getPosition())
                 .imageName(item.getImageName())
+                .point(item.getPoint())
                 .build();
     }
 

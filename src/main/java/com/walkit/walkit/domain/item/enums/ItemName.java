@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.character.enums;
+package com.walkit.walkit.domain.item.enums;
 
 public enum ItemName {
 

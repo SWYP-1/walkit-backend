@@ -3,7 +3,7 @@ package com.walkit.walkit.domain.user.entity;
 import com.walkit.walkit.common.image.entity.UserImage;
 import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.character.entity.Character;
-import com.walkit.walkit.domain.character.entity.ItemManagement;
+import com.walkit.walkit.domain.item.entity.ItemManagement;
 import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;

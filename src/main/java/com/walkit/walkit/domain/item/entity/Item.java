@@ -1,7 +1,7 @@
-package com.walkit.walkit.domain.character.entity;
+package com.walkit.walkit.domain.item.entity;
 
-import com.walkit.walkit.domain.character.enums.Position;
-import com.walkit.walkit.domain.character.enums.ItemName;
+import com.walkit.walkit.domain.item.enums.Position;
+import com.walkit.walkit.domain.item.enums.ItemName;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
