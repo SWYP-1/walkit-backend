@@ -14,6 +14,7 @@ public class ResponseMyItemDto {
     private ItemName name;
     private Position position;
     private String imageName;
+    private int point;
 
     public static ResponseMyItemDto of(Item item) {
         return ResponseMyItemDto.builder()
@@ -21,6 +22,7 @@ public class ResponseMyItemDto {
                 .name(item.getItemName())
                 .position(item.getPosition())
                 .imageName(item.getImageName())
+                .point(item.getPoint())
                 .build();
     }
 

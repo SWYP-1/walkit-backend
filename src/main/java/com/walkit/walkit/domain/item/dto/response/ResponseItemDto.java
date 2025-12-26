@@ -15,6 +15,7 @@ public class ResponseItemDto {
     private Position position;
     private boolean isOwned;
     private String imageName;
+    private int point;
 
     public static ResponseItemDto from(Item item, boolean isOwned) {
         return ResponseItemDto.builder()
@@ -23,6 +24,7 @@ public class ResponseItemDto {
                 .position(item.getPosition())
                 .isOwned(isOwned)
                 .imageName(item.getImageName())
+                .point(item.getPoint())
                 .build();
     }
 }
