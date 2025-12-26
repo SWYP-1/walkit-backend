@@ -1,4 +1,4 @@
-package com.walkit.walkit.domain.character.entity;
+package com.walkit.walkit.domain.item.entity;
 
 import com.walkit.walkit.domain.user.entity.User;
 import jakarta.persistence.*;

@@ -1,6 +1,6 @@
 package com.walkit.walkit.domain.character.controller;
 
-import com.walkit.walkit.domain.character.dto.request.RequestItemWearDto;
+import com.walkit.walkit.domain.item.dto.request.RequestItemWearDto;
 import com.walkit.walkit.domain.character.dto.response.ResponseCharacterDto;
 import com.walkit.walkit.domain.character.service.CharacterService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;

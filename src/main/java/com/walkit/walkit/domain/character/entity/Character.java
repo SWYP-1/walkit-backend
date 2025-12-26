@@ -2,12 +2,12 @@ package com.walkit.walkit.domain.character.entity;
 
 import com.walkit.walkit.common.image.entity.CharacterWearImage;
 import com.walkit.walkit.domain.character.enums.Grade;
-import com.walkit.walkit.domain.character.enums.Position;
+import com.walkit.walkit.domain.item.enums.Position;
+import com.walkit.walkit.domain.item.entity.Item;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 

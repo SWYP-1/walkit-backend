@@ -1,7 +1,7 @@
-package com.walkit.walkit.domain.character.repository;
+package com.walkit.walkit.domain.item.repository;
 
-import com.walkit.walkit.domain.character.entity.Item;
-import com.walkit.walkit.domain.character.enums.Position;
+import com.walkit.walkit.domain.item.entity.Item;
+import com.walkit.walkit.domain.item.enums.Position;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

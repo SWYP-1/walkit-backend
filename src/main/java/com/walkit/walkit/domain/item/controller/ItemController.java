@@ -1,11 +1,10 @@
-package com.walkit.walkit.domain.character.controller;
+package com.walkit.walkit.domain.item.controller;
 
-import com.walkit.walkit.domain.character.dto.response.ResponseItemDto;
-import com.walkit.walkit.domain.character.dto.response.ResponseMyItemDto;
-import com.walkit.walkit.domain.character.enums.Position;
-import com.walkit.walkit.domain.character.service.ItemService;
+import com.walkit.walkit.domain.item.dto.response.ResponseItemDto;
+import com.walkit.walkit.domain.item.dto.response.ResponseMyItemDto;
+import com.walkit.walkit.domain.item.enums.Position;
+import com.walkit.walkit.domain.item.service.ItemService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

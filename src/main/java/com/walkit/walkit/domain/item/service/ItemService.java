@@ -1,12 +1,12 @@
-package com.walkit.walkit.domain.character.service;
+package com.walkit.walkit.domain.item.service;
 
-import com.walkit.walkit.domain.character.dto.response.ResponseItemDto;
-import com.walkit.walkit.domain.character.dto.response.ResponseMyItemDto;
-import com.walkit.walkit.domain.character.entity.Item;
-import com.walkit.walkit.domain.character.entity.ItemManagement;
-import com.walkit.walkit.domain.character.enums.Position;
-import com.walkit.walkit.domain.character.repository.ItemManagementRepository;
-import com.walkit.walkit.domain.character.repository.ItemRepository;
+import com.walkit.walkit.domain.item.dto.response.ResponseItemDto;
+import com.walkit.walkit.domain.item.dto.response.ResponseMyItemDto;
+import com.walkit.walkit.domain.item.entity.Item;
+import com.walkit.walkit.domain.item.entity.ItemManagement;
+import com.walkit.walkit.domain.item.enums.Position;
+import com.walkit.walkit.domain.item.repository.ItemManagementRepository;
+import com.walkit.walkit.domain.item.repository.ItemRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.exception.CustomException;
