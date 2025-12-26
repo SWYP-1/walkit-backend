@@ -12,7 +12,6 @@ import com.walkit.walkit.domain.notification.service.WalkNotificationService;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.exception.CustomException;
-import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +31,7 @@ public class FollowService {
     private final WalkNotificationService walkNotificationService;
     private final NotificationRepository notificationRepository;
 
-    public void sendFollow(Long userId, String nickname) {
+    public void sendFollowing(Long userId, String nickname) {
         User sender = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         User receiver = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
@@ -96,7 +95,7 @@ public class FollowService {
 
     }
 
-    public List<ResponseFollowerDto> findFollowers(Long userId) {
+    public List<ResponseFollowerDto> findFollow(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         List<Follow> follows1 = followRepository.findBySenderAndFollowStatus(user, FollowStatus.ACCEPTED);
@@ -112,14 +111,14 @@ public class FollowService {
         return allUser.stream().map(ResponseFollowerDto::of).toList();
     }
 
-    public List<ResponseFollowingDto> findRequestFollowing(Long userId) {
+    public List<ResponseFollowingDto> findRequestFollower(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         return followRepository.findByReceiverAndFollowStatus(user, FollowStatus.PENDING).stream()
                 .map(ResponseFollowingDto::of)
                 .toList();
     }
 
-    public void deleteFollowing(Long userId, String nickname) {
+    public void deleteFollower(Long userId, String nickname) {
         User sender = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         User receiver = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
