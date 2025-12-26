@@ -26,6 +26,7 @@ public class UserMissionVerifyService {
 
     private final WalkRepository walkRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     // 걸음수 챌린지 검증
     public boolean verifyWeeklyStepChallenge(UserWeeklyMission userMission) {
@@ -36,13 +37,21 @@ public class UserMissionVerifyService {
         int missionSteps = getMissionSteps(userMission);
 
 
-        LocalDateTime start = userMission.getWeekStart().atStartOfDay();
-        LocalDateTime end = userMission.getWeekEnd().plusDays(1).atStartOfDay();
+        long startMillis = userMission.getWeekStart()
+                .atStartOfDay(KST)
+                .toInstant()
+                .toEpochMilli();
+
+        long endMillis = userMission.getWeekEnd()
+                .plusDays(1)
+                .atStartOfDay(KST)
+                .toInstant()
+                .toEpochMilli();
 
         long totalSteps = walkRepository.sumStepsBetween(
                 userMission.getUser().getId(),
-                start,
-                end
+                startMillis,
+                endMillis
         );
 
         boolean achieved = totalSteps >= missionSteps;
@@ -50,7 +59,7 @@ public class UserMissionVerifyService {
         log.info(
                 "주간 걸음수 검증: userId={}, 기간={}~{}, 현재={}, 목표={}, 달성={}",
                 userMission.getUser().getId(),
-                start, end, totalSteps, missionSteps, achieved
+                startMillis, endMillis, totalSteps, missionSteps, achieved
         );
 
         return achieved;
@@ -66,13 +75,13 @@ public class UserMissionVerifyService {
         int requiredDays = getRequiredDays(userMission);
 
         long startMillis = userMission.getWeekStart()
-                .atStartOfDay(ZoneId.of("Asia/Seoul"))
+                .atStartOfDay(KST)
                 .toInstant()
                 .toEpochMilli();
 
         long endMillis = userMission.getWeekEnd()
-                .plusDays(1) // 일요일 24:00 까지 포함
-                .atStartOfDay(ZoneId.of("Asia/Seoul"))
+                .plusDays(1)
+                .atStartOfDay(KST)
                 .toInstant()
                 .toEpochMilli();
 
@@ -101,13 +110,13 @@ public class UserMissionVerifyService {
 
         for (LocalDate d : dates) {
             if (prev == null) {
-                streak = 1;
+                streak = 1;  // 첫 날
             } else if (d.equals(prev.plusDays(1))) {
-                streak++;
+                streak++;    // 연속이면 +1
             } else {
-                streak = 1;
+                streak = 1;  // 끊기면 리셋
             }
-            maxStreak = Math.max(maxStreak, streak);
+            maxStreak = Math.max(maxStreak, streak);  // 최대값 갱신
             prev = d;
         }
 

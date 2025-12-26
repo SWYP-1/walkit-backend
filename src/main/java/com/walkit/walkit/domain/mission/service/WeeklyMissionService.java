@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -37,14 +38,16 @@ public class WeeklyMissionService {
 
     private static final LocalDate BASE_WEEK_START = LocalDate.of(2025, 1, 6);
     private static final MissionColor[] COLORS = MissionColor.values();
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     @Transactional
     public void ensureAssignedForThisWeek(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        LocalDate weekStart = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
-        LocalDate weekEnd = weekStart.plusDays(6);
+        LocalDate today = LocalDate.now(KST);  // 오늘 날짜
+        LocalDate weekStart = today.with(java.time.DayOfWeek.MONDAY);  // 이번 주 월요일
+        LocalDate weekEnd = weekStart.plusDays(6);  // 이번 주 일요일
 
         // 챌린지 1개
         if (!userWeeklyMissionRepository.existsByUser_IdAndWeekStartAndCategory(userId, weekStart, MissionCategory.CHALLENGE)) {

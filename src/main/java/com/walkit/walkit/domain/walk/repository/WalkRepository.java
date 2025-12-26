@@ -25,16 +25,16 @@ where w.id = :walkId and w.user.id = :userId
 
     // 주간 걸음수 합
     @Query("""
-        select coalesce(sum(w.stepCount), 0)
-        from Walk w
-        where w.user.id = :userId
-          and w.createdDate >= :start
-          and w.createdDate < :end
-    """)
+    select coalesce(sum(w.stepCount), 0)
+    from Walk w
+    where w.user.id = :userId
+      and w.startTime >= :startMillis
+      and w.startTime < :endMillis
+""")
     long sumStepsBetween(
             @Param("userId") Long userId,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end
+            @Param("startMillis") Long startMillis,
+            @Param("endMillis") Long endMillis
     );
 
     // startTime(millis) 기준으로 기간 내 산책 시작 '날짜' 목록
