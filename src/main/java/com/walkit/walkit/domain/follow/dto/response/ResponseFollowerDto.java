@@ -20,4 +20,12 @@ public class ResponseFollowerDto {
                 .imageName(user.getUserImage().getImageName())
                 .build();
     }
+
+    public static ResponseFollowerDto from(User user, String imageName) {
+        return ResponseFollowerDto.builder()
+                .nickname(user.getNickname())
+                .userId(user.getId())
+                .imageName(imageName)
+                .build();
+    }
 }
