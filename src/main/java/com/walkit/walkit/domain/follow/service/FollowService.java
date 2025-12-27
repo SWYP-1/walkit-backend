@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.follow.service;
 
+import com.walkit.walkit.common.image.service.UserImageService;
 import com.walkit.walkit.domain.follow.dto.response.ResponseFollowerDto;
 import com.walkit.walkit.domain.follow.dto.response.ResponseFollowingDto;
 import com.walkit.walkit.domain.follow.entity.Follow;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -30,6 +32,7 @@ public class FollowService {
     private final UserRepository userRepository;
     private final WalkNotificationService walkNotificationService;
     private final NotificationRepository notificationRepository;
+    private final UserImageService userImageService;
 
     public void sendFollowing(Long userId, String nickname) {
         User sender = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -108,7 +111,15 @@ public class FollowService {
                 .distinct()
                 .toList();
 
-        return allUser.stream().map(ResponseFollowerDto::of).toList();
+
+        List<ResponseFollowerDto> followerDtos = new ArrayList<>();
+        for (User findUser : allUser) {
+            String imageName = userImageService.findUserImageName(findUser.getId());
+            ResponseFollowerDto from = ResponseFollowerDto.from(findUser, imageName);
+            followerDtos.add(from);
+        }
+
+        return followerDtos;
     }
 
     public List<ResponseFollowingDto> findRequestFollower(Long userId) {
