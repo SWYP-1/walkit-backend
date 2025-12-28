@@ -4,17 +4,18 @@ import com.walkit.walkit.common.image.enums.ImageType;
 import com.walkit.walkit.common.image.repository.UserImageRepository;
 import com.walkit.walkit.common.image.service.ImageService;
 import com.walkit.walkit.common.image.service.UserImageService;
+import com.walkit.walkit.domain.character.dto.response.ResponseCharacterDto;
+import com.walkit.walkit.domain.character.service.CharacterService;
 import com.walkit.walkit.domain.follow.entity.Follow;
 import com.walkit.walkit.domain.follow.enums.FollowStatus;
 import com.walkit.walkit.domain.follow.repository.FollowRepository;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseMarketingConsentDto;
-import com.walkit.walkit.domain.user.dto.response.ResponsePointDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseUserDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseUserNickNameFindDto;
+import com.walkit.walkit.domain.user.dto.response.*;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
+import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
+import com.walkit.walkit.domain.walk.service.WalkService;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
@@ -40,6 +41,8 @@ public class UserService {
     private final UserImageRepository userImageRepository;
     private final EntityManager entityManager;
     private final FollowRepository followRepository;
+    private final CharacterService characterService;
+    private final WalkService walkService;
 
     public void savePolicy(Long userId, RequestPolicyDto dto) {
         User user = findUserById(userId);
@@ -184,5 +187,14 @@ public class UserService {
         User user = findUserById(userPrincipal.getUserId());
 
         return ResponsePointDto.builder().point(user.getPoint()).build();
+    }
+
+
+    public ResponseUserSummaryDto findUserSummary(String nickname, double lat, double lon) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        ResponseCharacterDto responseCharacterDto = characterService.find(user.getId(), lat, lon);
+        WalkTotalSummaryResponseDto totalSummary = walkService.getTotalSummary(user.getId());
+
+        return ResponseUserSummaryDto.builder().responseCharacterDto(responseCharacterDto).walkTotalSummaryResponseDto(totalSummary).build();
     }
 }

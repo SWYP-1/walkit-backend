@@ -2,10 +2,7 @@ package com.walkit.walkit.domain.user.controller;
 
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseMarketingConsentDto;
-import com.walkit.walkit.domain.user.dto.response.ResponsePointDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseUserDto;
-import com.walkit.walkit.domain.user.dto.response.ResponseUserNickNameFindDto;
+import com.walkit.walkit.domain.user.dto.response.*;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.user.service.UserService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
@@ -66,6 +63,12 @@ public class UserController {
     @GetMapping("/nickname")
     public ResponseEntity<ResponseUserNickNameFindDto> findUserByNickname(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String nickname) {
         ResponseUserNickNameFindDto dto = userService.findUserByNickname(userPrincipal, nickname);
+        return  ResponseEntity.status(OK).body(dto);
+    }
+
+    @GetMapping("/summary/nickname")
+    public ResponseEntity<ResponseUserSummaryDto> findUserSummary(@RequestParam String nickname, @RequestParam double lat, @RequestParam double lon) {
+        ResponseUserSummaryDto dto = userService.findUserSummary(nickname, lat, lon);
         return  ResponseEntity.status(OK).body(dto);
     }
 
