@@ -9,6 +9,7 @@ import com.walkit.walkit.global.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,8 @@ public class UserImageService {
     private final UserRepository userRepository;
     private final EntityManager entityManager;
 
-    private final static String DEFAULT_USER_IMAGE_NAME = "USER_DEFAULT_IMAGE.png";
+    @Value("${user.default-image}")
+    private String DEFAULT_USER_IMAGE_NAME;
 
     public void saveUserImage(String imageName, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
