@@ -17,9 +17,6 @@ public class Mission extends BaseTimeEntity { // 미션 템플릿
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false, length = 500)
-    private String description;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable=false, length=20)
     private MissionCategory category;

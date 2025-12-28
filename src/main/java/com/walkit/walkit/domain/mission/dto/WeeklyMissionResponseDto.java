@@ -10,7 +10,6 @@ public record WeeklyMissionResponseDto(
         Long userWeeklyMissionId,
         Long missionId,
         String title,
-        String description,
         MissionCategory category,
         MissionType type,
         MissionStatus status,
@@ -28,7 +27,6 @@ public record WeeklyMissionResponseDto(
                 uwm.getId(),
                 m.getId(),
                 m.getTitle(),
-                m.getDescription(),
                 uwm.getCategory(),
                 m.getType(),
                 uwm.getStatus(),
@@ -52,7 +50,6 @@ public record WeeklyMissionResponseDto(
                 null,    // userWeeklyMissionId 없음
                 m.getId(),
                 m.getTitle(),
-                m.getDescription(),
                 category,
                 m.getType(),
                 null,               // 제공 안 된 미션 (진행 상태 없음)
