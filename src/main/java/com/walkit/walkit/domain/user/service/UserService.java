@@ -197,4 +197,8 @@ public class UserService {
 
         return ResponseUserSummaryDto.builder().responseCharacterDto(responseCharacterDto).walkTotalSummaryResponseDto(totalSummary).build();
     }
+
+    public void deleteUserImage(Long userId) {
+        userImageRepository.deleteByUserId(userId);
+    }
 }
