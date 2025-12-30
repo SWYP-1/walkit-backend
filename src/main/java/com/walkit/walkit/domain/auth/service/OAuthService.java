@@ -56,7 +56,7 @@ public class OAuthService {
             .accessToken(jwtAccessToken)
             .refreshToken(jwtRefreshToken)
             .tokenType("Bearer")
-            .expiresIn(3600L)
+            .expiresIn(36000L)
             .isRegistered(isRegistered)
             .build();
     }
@@ -80,7 +80,7 @@ public class OAuthService {
             .accessToken(jwtAccessToken)
             .refreshToken(jwtRefreshToken)
             .tokenType("Bearer")
-            .expiresIn(3600L)
+            .expiresIn(36000L)
             .build();
     }
 
@@ -147,7 +147,7 @@ public class OAuthService {
             .accessToken(jwtAccessToken)
             .refreshToken(jwtRefreshToken)
             .tokenType("Bearer")
-            .expiresIn(3600L)
+            .expiresIn(36000L)
             .isRegistered(isRegistered)
             .build();
     }

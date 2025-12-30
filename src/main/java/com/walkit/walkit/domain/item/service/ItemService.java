@@ -1,5 +1,7 @@
 package com.walkit.walkit.domain.item.service;
 
+import com.walkit.walkit.domain.character.entity.Character;
+import com.walkit.walkit.domain.character.repository.CharacterWearRepository;
 import com.walkit.walkit.domain.item.dto.request.RequestBuyDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseItemDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseMyItemDto;
@@ -28,6 +30,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final ItemManagementRepository itemManagementRepository;
+    private final CharacterWearRepository characterWearRepository;
 
     public void buy(Long userId, RequestBuyDto dto) {
         User user = findUser(userId);
@@ -42,8 +45,8 @@ public class ItemService {
         if (position == null) {
             for (Item item : itemRepository.findAll()) {
                 boolean isOwned = isOwned(userPrincipal, item);
-
-                ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned);
+                boolean isWorn = isWorn(userPrincipal, item);
+                ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned, isWorn);
                 responseItemDtos.add(responseItemDto);
             }
 
@@ -51,13 +54,41 @@ public class ItemService {
         } else {
             for (Item item : itemRepository.findAllByPosition(position)) {
                 boolean isOwned = isOwned(userPrincipal, item);
+                boolean isWorn = isWorn(userPrincipal, item);
 
-                ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned);
+                ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned, isWorn);
                 responseItemDtos.add(responseItemDto);
             }
 
             return responseItemDtos;
         }
+    }
+
+    private boolean isWorn(UserPrincipal userPrincipal, Item item) {
+        boolean isWorn = false;
+
+        if (userPrincipal != null) {
+            User user = findUser(userPrincipal.getUserId());
+            Character character = user.getCharacter();
+
+            if (characterWearRepository.existsByCharacterAndItem(character, item)) {
+                isWorn = true;
+            }
+        }
+        return isWorn;
+    }
+
+    private boolean isWorn(Long userId, Item item) {
+        boolean isWorn = false;
+
+        User user = findUser(userId);
+        Character character = user.getCharacter();
+
+        if (characterWearRepository.existsByCharacterAndItem(character, item)) {
+            isWorn = true;
+        }
+
+        return isWorn;
     }
 
     public List<ResponseMyItemDto> findItemsByUser(Long userId, Position position) {
@@ -68,11 +99,13 @@ public class ItemService {
         for (ItemManagement itemManagement : user.getItemManagements()) {
             Item item = itemManagement.getItem();
             if (position == null) {
-                ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.of(item);
+                boolean isWorn = isWorn(userId, item);
+                ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.from(item, isWorn);
                 responseMyItemDtos.add(responseMyItemDto);
             } else {
                 if (item.getPosition().equals(position)) {
-                    ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.of(item);
+                    boolean isWorn = isWorn(userId, item);
+                    ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.from(item, isWorn);
                     responseMyItemDtos.add(responseMyItemDto);
                 }
             }

@@ -49,11 +49,14 @@ public enum ErrorCode {
     MISSION_NOT_ACHIEVED(BAD_REQUEST, 6005, "[Mission] 미션 목표를 아직 달성하지 못했습니다."),
     MISSION_TYPE_NOT_SUPPORTED(BAD_REQUEST, 6006, "[Mission] 지원하지 않는 미션 타입입니다."),
     MISSION_ASSIGN_FAILED(INTERNAL_SERVER_ERROR, 6007, "[Mission] 주간 미션 배정에 실패했습니다."),
-    MISSION_CONFIG_INVALID(BAD_REQUEST, 6008, "[Mission] 미션 설정이 올바르지 않습니다.");
+    MISSION_CONFIG_INVALID(BAD_REQUEST, 6008, "[Mission] 미션 설정이 올바르지 않습니다."),
 
 
     // NOTIFICATION
 
+
+    // GOAL
+    GOAL_UPDATE_NOT_ALLOWED(BAD_REQUEST, 7001, "[Goal] 목표 수정은 한달에 한번만 가능합니다.");
 
     private final HttpStatus httpStatus;
     private final Integer code;

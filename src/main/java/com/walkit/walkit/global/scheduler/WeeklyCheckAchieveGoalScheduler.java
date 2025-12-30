@@ -14,7 +14,7 @@ public class WeeklyCheckAchieveGoalScheduler {
 
     private final UserRepository userRepository;
 
-    @Scheduled(cron = "0 40 * * * *")
+    @Scheduled(cron = "0 0 1 * * MON")
     @Transactional
     public void initializeAchieveGoal() {
         for (User user : userRepository.findAll()) {

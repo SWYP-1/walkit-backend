@@ -107,4 +107,10 @@ public class UserController {
         return ResponseEntity.status(OK).build();
     }
 
+    @DeleteMapping("/image")
+    public ResponseEntity<Void> deleteUserImage(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        userService.deleteUserImage(userPrincipal.getUserId());
+        return ResponseEntity.status(NO_CONTENT).build();
+    }
 }
