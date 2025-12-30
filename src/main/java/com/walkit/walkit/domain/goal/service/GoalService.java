@@ -53,7 +53,10 @@ public class GoalService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal beforeGoal = user.getGoal();
 
-        if (beforeGoal.getModifiedDate() != null) {
+        log.info("beforeGoal create {}", beforeGoal.getCreatedDate());
+        log.info("beforeGoal modi {}", beforeGoal.getModifiedDate());
+
+        if (beforeGoal.getModifiedDate() != null && !(beforeGoal.getModifiedDate().isEqual(beforeGoal.getCreatedDate()))) {
             long daySinceLastUpdate = ChronoUnit.DAYS.between(
                     beforeGoal.getModifiedDate(),
                     LocalDateTime.now()
