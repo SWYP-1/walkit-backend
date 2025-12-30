@@ -51,7 +51,7 @@ public class FollowService {
                         NotificationType.FOLLOW,
                         "새 팔로워",
                         sender.getNickname() + "님이 팔로우했어요",
-                        String.valueOf(sender.getId())
+                        String.valueOf(follow.getId())
                 )
         );
 
@@ -134,6 +134,9 @@ public class FollowService {
         User receiver = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         if (followRepository.existsBySenderAndReceiverAndFollowStatus(sender, receiver, FollowStatus.PENDING)) {
+            Follow follow = followRepository.findBySenderAndReceiver(sender, receiver);
+
+            notificationRepository.deleteByTypeAndTargetId(NotificationType.FOLLOW, String.valueOf(follow.getId()));
             followRepository.deleteBySenderAndReceiver(sender, receiver);
         } else {
             throw new CustomException(NOT_EXISTS_PENDING_FOLLOW);
