@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.goal.entity;
 
+import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.goal.dto.request.RequestGoalDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Goal {
+public class Goal extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

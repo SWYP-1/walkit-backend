@@ -21,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 @Slf4j
 @Service
 @Transactional
@@ -49,6 +52,17 @@ public class GoalService {
     public void updateGoal(Long userId, RequestGoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal beforeGoal = user.getGoal();
+
+        if (beforeGoal.getModifiedDate() != null) {
+            long daySinceLastUpdate = ChronoUnit.DAYS.between(
+                    beforeGoal.getModifiedDate(),
+                    LocalDateTime.now()
+            );
+
+            if (daySinceLastUpdate < 30) {
+                throw new CustomException(ErrorCode.GOAL_UPDATE_NOT_ALLOWED);
+            }
+        }
 
         beforeGoal.update(dto);
     }
