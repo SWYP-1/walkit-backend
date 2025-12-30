@@ -20,6 +20,7 @@ public class FollowerWalkResponseDto {
     private LocalDateTime createdDate;
     private Integer stepCount;
     private Double totalDistance;
+    private Long totalTime;
 
     private boolean isLiked;
     private int likeCount;
@@ -33,6 +34,7 @@ public class FollowerWalkResponseDto {
                 .stepCount(walk.getStepCount())
                 .totalDistance(walk.getTotalDistance())
                 .isLiked(liked)
+                .totalTime(walk.getTotalTime())
                 .likeCount(likeCount)
                 .build();
     }
