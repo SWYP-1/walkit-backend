@@ -11,4 +11,6 @@ public interface CharacterWearRepository extends JpaRepository<CharacterWear, Lo
     void deleteByCharacterAndItem(Character character, Item item);
 
     List<CharacterWear> findByCharacter(Character character);
+
+    boolean existsByCharacterAndItem(Character character, Item item);
 }

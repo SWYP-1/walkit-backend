@@ -14,15 +14,17 @@ public class ResponseItemDto {
     private ItemName name;
     private Position position;
     private boolean isOwned;
+    private boolean isWorn;
     private String imageName;
     private int point;
 
-    public static ResponseItemDto from(Item item, boolean isOwned) {
+    public static ResponseItemDto from(Item item, boolean isOwned, boolean isWorn) {
         return ResponseItemDto.builder()
                 .itemId(item.getId())
                 .name(item.getItemName())
                 .position(item.getPosition())
                 .isOwned(isOwned)
+                .isWorn(isWorn)
                 .imageName(item.getImageName())
                 .point(item.getPoint())
                 .build();
