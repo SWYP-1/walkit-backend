@@ -170,24 +170,6 @@ public class WalkServiceImpl implements WalkService {
     }
 
 
-    // 산책 기록 조회(날짜)
-    public WalkResponseDto getWalkByDay(Long userId, long anchorMillis) {
-
-        // millis를 KST 기준의 날짜(LocalDate)로 변환 (연-월-일 추출)
-        LocalDate day = Instant.ofEpochMilli(anchorMillis)
-                .atZone(ZONE) // Asia/Seoul 기준으로 변환
-                .toLocalDate();
-
-        // 조회할 날짜의 00:00 ~ 다음날 00:00 범위를 만들어 하루 조회
-        long dayStart = day.atStartOfDay(ZONE).toInstant().toEpochMilli();
-        long dayEnd = day.plusDays(1).atStartOfDay(ZONE).toInstant().toEpochMilli();
-
-        Walk walk = walkRepository
-                .findFirstByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeDesc(userId, dayStart, dayEnd)
-                .orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
-
-        return WalkResponseDto.fromDetail(walk);
-    }
 
     // 산책 기록 수정
     @Override
@@ -208,7 +190,7 @@ public class WalkServiceImpl implements WalkService {
     }
 
 
-    // 오늘 산책 1건 조회
+    // 오늘 산책 걸음수 조회
     public int getTodayStepCount(Long userId) {
         ZoneId zone = ZoneId.of("Asia/Seoul");
         LocalDate today = LocalDate.now(zone);
@@ -216,9 +198,8 @@ public class WalkServiceImpl implements WalkService {
         long startMillis = today.atStartOfDay(zone).toInstant().toEpochMilli();
         long endMillis = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
 
-        return walkRepository.findTodayWalk(userId, startMillis, endMillis)
-                .map(w -> w.getStepCount() == null ? 0 : w.getStepCount())
-                .orElse(0);
+        Integer sum = walkRepository.sumTodaySteps(userId, startMillis, endMillis);
+        return sum == null ? 0 : sum;
     }
 
 
