@@ -15,9 +15,12 @@ public class WeeklyGoalInitializeScheduler {
 
     private final GoalRepository goalRepository;
 
-    @Scheduled(cron = "0 0 1 * * MON")
+    @Scheduled(cron = "0 50 18 * * *")
     @Transactional
     public void executeWeeklyGoalInitialize() {
-        goalRepository.findAll().forEach(Goal::initialize);
+        goalRepository.findAll().forEach(goal -> {
+            goal.applyNextGoal();  // 예약된 목표 적용
+            goal.initialize();     // 주간 카운터 초기화
+        });
     }
 }

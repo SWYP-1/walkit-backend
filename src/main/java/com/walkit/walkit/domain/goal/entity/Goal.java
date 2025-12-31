@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -19,23 +21,38 @@ public class Goal extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int targetStepCount;
-    private int targetWalkCount;
+    private int thisWeekTargetStepCount;
+    private int thisWeekTargetWalkCount;
+
+    private Integer nextWeekTargetStepCount;
+    private Integer nextWeekTargetWalkCount;
+
+
     private int currentWalkCount;
 
     private boolean halfWalkNotified;     // 50% 알림 보냈는지
     private boolean fullWalkNotified;     // 100% 알림 보냈는지
 
+    private LocalDateTime updatedDate;
+
     @Builder
-    public Goal(int targetStepCount, int targetWalkCount, int currentWalkCount) {
-        this.targetStepCount = targetStepCount;
-        this.targetWalkCount = targetWalkCount;
+    public Goal(int thisWeekTargetStepCount, int thisWeekTargetWalkCount, int currentWalkCount) {
+        this.thisWeekTargetStepCount = thisWeekTargetStepCount;
+        this.thisWeekTargetWalkCount = thisWeekTargetWalkCount;
         this.currentWalkCount = currentWalkCount;
     }
 
     public void update(RequestGoalDto dto) {
-        this.targetStepCount = dto.getTargetStepCount();
-        this.targetWalkCount = dto.getTargetWalkCount();
+        this.thisWeekTargetStepCount = dto.getTargetStepCount();
+        this.thisWeekTargetWalkCount = dto.getTargetWalkCount();
+    }
+
+    public void updateNextTargetStepCount(int stepCount) {
+        this.nextWeekTargetStepCount = stepCount;
+    }
+
+    public void updateNextTargetWalkCount(int walkCount) {
+        this.nextWeekTargetWalkCount = walkCount;
     }
 
    public void plusCurrentWalks() {
@@ -54,4 +71,18 @@ public class Goal extends BaseTimeEntity {
     public void markWalkHalfNotified() { this.halfWalkNotified = true; }
     public void markWalkFullNotified() { this.fullWalkNotified = true; }
 
+    public void applyNextGoal() {
+        if (this.nextWeekTargetStepCount != null) {
+            this.thisWeekTargetStepCount = this.nextWeekTargetStepCount;
+            this.nextWeekTargetStepCount = null;
+        }
+        if (this.nextWeekTargetWalkCount != null) {
+            this.thisWeekTargetWalkCount = this.nextWeekTargetWalkCount;
+            this.nextWeekTargetWalkCount = null;
+        }
+    }
+
+    public void setUpdatedDate() {
+        this.updatedDate = LocalDateTime.now();
+    }
 }

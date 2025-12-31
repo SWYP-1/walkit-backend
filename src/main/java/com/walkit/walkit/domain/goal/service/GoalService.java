@@ -14,6 +14,8 @@ import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.goal.repository.GoalRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
+import com.walkit.walkit.domain.walk.entity.Walk;
+import com.walkit.walkit.domain.walk.repository.WalkRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -33,17 +39,18 @@ public class GoalService {
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
     private final CharacterWearImageRepository characterWearImageRepository;
+    private final WalkRepository walkRepository;
 
     public ResponseGoalDto findGoal(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal goal = user.getGoal();
 
-         return ResponseGoalDto.builder().targetStepCount(goal.getTargetStepCount()).targetWalkCount(goal.getTargetWalkCount()).build();
+         return ResponseGoalDto.builder().targetStepCount(goal.getThisWeekTargetStepCount()).targetWalkCount(goal.getThisWeekTargetWalkCount()).build();
     }
 
     public void saveGoal(Long userId, RequestGoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Goal goal = Goal.builder().targetStepCount(dto.getTargetStepCount()).targetWalkCount(dto.getTargetWalkCount()).build();
+        Goal goal = Goal.builder().thisWeekTargetStepCount(dto.getTargetStepCount()).thisWeekTargetWalkCount(dto.getTargetWalkCount()).build();
 
         user.updateGoal(goal);
         goalRepository.save(goal);
@@ -51,14 +58,26 @@ public class GoalService {
 
     public void updateGoal(Long userId, RequestGoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Goal beforeGoal = user.getGoal();
+        Goal goal = user.getGoal();
 
-        log.info("beforeGoal create {}", beforeGoal.getCreatedDate());
-        log.info("beforeGoal modi {}", beforeGoal.getModifiedDate());
+        checkUpdateRestriction(goal);
 
-        if (beforeGoal.getModifiedDate() != null && !(beforeGoal.getModifiedDate().isEqual(beforeGoal.getCreatedDate()))) {
+        if (hasWalksInCurrentWeek(user.getId())) {
+            goal.updateNextTargetStepCount(dto.getTargetStepCount());
+            goal.updateNextTargetWalkCount(dto.getTargetWalkCount());
+        } else {
+            goal.update(dto);
+        }
+
+        goal.setUpdatedDate();
+    }
+
+    private static void checkUpdateRestriction(Goal beforeGoal) {
+        log.info("createdDate: {}", beforeGoal.getCreatedDate());
+        log.info("modifiedDate: {}", beforeGoal.getModifiedDate());
+        if (beforeGoal.getUpdatedDate() != null) {
             long daySinceLastUpdate = ChronoUnit.DAYS.between(
-                    beforeGoal.getModifiedDate(),
+                    beforeGoal.getUpdatedDate(),
                     LocalDateTime.now()
             );
 
@@ -66,8 +85,25 @@ public class GoalService {
                 throw new CustomException(ErrorCode.GOAL_UPDATE_NOT_ALLOWED);
             }
         }
+    }
 
-        beforeGoal.update(dto);
+    private boolean hasWalksInCurrentWeek(Long userId) {
+        ZoneId kst = ZoneId.of("Asia/Seoul");
+        LocalDate today = LocalDate.now(kst);
+        LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+        LocalDate weekEnd = weekStart.plusDays(7);  // 다음 주 월요일 00:00
+
+        long startMillis = weekStart.atStartOfDay(kst).toInstant().toEpochMilli();
+        long endMillis = weekEnd.atStartOfDay(kst).toInstant().toEpochMilli();
+        long todayMillis = today.atStartOfDay(kst).toInstant().toEpochMilli();
+        List<Walk> walks = walkRepository.findWalksBetween(userId, startMillis, endMillis);
+
+        log.info("found {} walks", walks.size());
+        log.info("startMillis: {}", startMillis);
+        log.info("endMillis: {}", endMillis);
+        log.info("todayMillis: {}", todayMillis);
+
+        return !walks.isEmpty();
     }
 
     public ResponseGoalProcessDto findGoalProcess(Long userId) {
@@ -75,7 +111,7 @@ public class GoalService {
         Goal goal = user.getGoal();
 
         int currentWalks = goal.getCurrentWalkCount();
-        int targetWalks = goal.getTargetWalkCount();
+        int targetWalks = goal.getThisWeekTargetWalkCount();
 
         String walkProgressPercentage = calculatePercentage(currentWalks, targetWalks);
 
@@ -93,9 +129,9 @@ public class GoalService {
 
     private void checkAchieveGoal(User user, Goal goal) {
 
-        log.info("checkAchieveGoal, currentWalkCount: {}, targetWalkCount: {}, isAchieveThisWeekGoal, {}", goal.getCurrentWalkCount(), goal.getTargetWalkCount(), user.isAchieveThisWeekGoal());
+        log.info("checkAchieveGoal, currentWalkCount: {}, targetWalkCount: {}, isAchieveThisWeekGoal, {}", goal.getCurrentWalkCount(), goal.getThisWeekTargetWalkCount(), user.isAchieveThisWeekGoal());
 
-        if (goal.getCurrentWalkCount() >= goal.getTargetWalkCount() && !user.isAchieveThisWeekGoal()) {
+        if (goal.getCurrentWalkCount() >= goal.getThisWeekTargetWalkCount() && !user.isAchieveThisWeekGoal()) {
 
             log.info("checkAchieveGoal");
 
@@ -197,7 +233,7 @@ public class GoalService {
 
     private static void checkAchieveTargetStepCount(int stepCount, Goal goal) {
         log.info("checkAchieveTargetStepCount: stepCount = " + stepCount);
-        if (goal.getTargetStepCount() <= stepCount) {
+        if (goal.getThisWeekTargetStepCount() <= stepCount) {
             log.info("plushCurrenetWalks");
             goal.plusCurrentWalks();
         }
