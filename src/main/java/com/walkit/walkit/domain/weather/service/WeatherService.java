@@ -24,11 +24,12 @@ public class WeatherService {
     private final RedisTemplate<String, CurrentWeatherResponseDto> weatherRedisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
 
-    private static final Duration CACHE_TTL = Duration.ofMinutes(5);
+    private static final Duration CACHE_TTL = Duration.ofHours(1);
     private static final Duration FAIL_TTL  = Duration.ofSeconds(30);
 
-    private static final Duration LOCK_TTL = Duration.ofSeconds(4);
-    private static final int[] BACKOFF_MS = {80, 140};
+    private static final Duration LOCK_TTL = Duration.ofSeconds(20);
+    private static final int[] BACKOFF_MS = {100, 200, 500};
+
 
     public WeatherService(
             KmaClient kmaClient,
