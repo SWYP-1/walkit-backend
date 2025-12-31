@@ -18,7 +18,7 @@ public class GoalPushService {
         Goal goal = user.getGoal();
         if (goal == null) return;
 
-        int target = goal.getTargetWalkCount();
+        int target = goal.getThisWeekTargetWalkCount();
         if (target <= 0) return;
 
         int before = goal.getCurrentWalkCount();
