@@ -18,8 +18,6 @@ public interface WalkService {
     // 산책 기록 조회(단건)
     WalkResponseDto getWalk(Long userId, Long walkId);
 
-    // 산책 기록 조회(날짜)
-    WalkResponseDto getWalkByDay(Long userId, long anchorMillis);
 
     // 산책 기록 수정
     void updateNote(Long userId, Long walkId, String note);

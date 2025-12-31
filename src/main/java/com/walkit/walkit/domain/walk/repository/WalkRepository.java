@@ -50,12 +50,6 @@ where w.id = :walkId and w.user.id = :userId
     );
 
 
-
-    // 일간 산책 단건 조회
-    Optional<Walk> findFirstByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeDesc(
-            Long userId, Long dayEnd, Long dayStart
-    );
-
     // 사용자 산책 기록 횟수 조회
     long countByUser_Id(Long userId);
 
@@ -67,7 +61,6 @@ where w.id = :walkId and w.user.id = :userId
     """)
     long sumTotalTimeByUserId(@Param("userId") Long userId);
 
-    Optional<Walk> findFirstByOrderByCreatedDateDesc();
 
     // 최근 N개 산책 기록 조회
     @Query("""
@@ -77,19 +70,17 @@ order by w.startTime desc
 """)
     List<Walk> findTopByUserIdOrderByStartTimeDesc(Long userId, Pageable pageable);
 
-    // 오늘 산책 1건 조회
+    // 오늘 산책 걸음수 조회
     @Query("""
-        select w
-        from Walk w
-        where w.user.id = :userId
-          and w.startTime >= :startMillis
-          and w.startTime < :endMillis
-    """)
-    Optional<Walk> findTodayWalk(
-            @Param("userId") Long userId,
-            @Param("startMillis") long startMillis,
-            @Param("endMillis") long endMillis
-    );
+select coalesce(sum(w.stepCount), 0)
+from Walk w
+where w.user.id = :userId
+  and w.startTime >= :startMillis
+  and w.startTime < :endMillis
+""")
+    Integer sumTodaySteps(@Param("userId") Long userId,
+                          @Param("startMillis") long startMillis,
+                          @Param("endMillis") long endMillis);
 
     Optional<Walk> findFirstByUserIdOrderByCreatedDateDesc(Long userId);
 
