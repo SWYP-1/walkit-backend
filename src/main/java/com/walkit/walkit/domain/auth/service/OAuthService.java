@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,11 +37,12 @@ public class OAuthService {
     public TokenResponse loginWithKakao(String accessToken) {
         KakaoUserInfoResponse kakaoUser = getKakaoUserInfo(accessToken);
 
-        boolean isRegistered = false;
-        if (!userRepository.findByAuthProviderAndProviderId(AuthProvider.KAKAO, String.valueOf(kakaoUser.getId())).isEmpty()) {
-            isRegistered = true;
-        }
-
+        // 기존 가입 여부 확인 (활성 사용자 기준)
+        boolean isRegistered = userRepository.findByAuthProviderAndProviderIdAndDeleted(
+            AuthProvider.KAKAO,
+            String.valueOf(kakaoUser.getId()),
+            false
+        ).isPresent();
 
         User user = findOrCreateUser(
             AuthProvider.KAKAO,
@@ -127,10 +130,12 @@ public class OAuthService {
     public TokenResponse loginWithApple(String idToken) {
         AppleUserInfoResponse appleUser = getAppleUserInfo(idToken);
 
-        boolean isRegistered = false;
-        if (!userRepository.findByAuthProviderAndProviderId(AuthProvider.APPLE, appleUser.getId()).isEmpty()) {
-            isRegistered = true;
-        }
+        // 기존 가입 여부 확인 (활성 사용자 기준)
+        boolean isRegistered = userRepository.findByAuthProviderAndProviderIdAndDeleted(
+            AuthProvider.APPLE,
+            appleUser.getId(),
+            false
+        ).isPresent();
 
         User user = findOrCreateUser(
             AuthProvider.APPLE,
@@ -178,7 +183,23 @@ public class OAuthService {
 
     private User findOrCreateUser(AuthProvider provider, String providerId,
                                   String email, String name, String profileImageUrl) {
-        return userRepository.findByAuthProviderAndProviderId(provider, providerId)
+
+        log.info("findOrCreateUser");
+
+        log.info("providerId: {}", providerId);
+        log.info("email: {}", email);
+        log.info("name: {}", name);
+        log.info("provider: {}", provider);
+
+        // 1. 삭제된 사용자가 있는지 먼저 확인
+        Optional<User> deletedUser = userRepository.findByAuthProviderAndProviderIdAndDeleted(provider, providerId, true);
+        if (deletedUser.isPresent()) {
+            log.warn("탈퇴한 회원의 로그인 시도 - Provider: {}, ProviderId: {}", provider, providerId);
+            throw new IllegalStateException("탈퇴한 회원입니다. 재가입은 6개월 후 가능합니다.");
+        }
+
+        // 2. 활성 사용자 조회 또는 생성
+        return userRepository.findByAuthProviderAndProviderIdAndDeleted(provider, providerId, false)
             .orElseGet(() -> {
                 User newUser = User.builder()
                     .authProvider(provider)

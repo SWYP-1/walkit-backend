@@ -54,9 +54,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User saveOrUpdate(OAuthAttributes attributes) {
-        return userRepository.findByAuthProviderAndProviderId(
+        return userRepository.findByAuthProviderAndProviderIdAndDeleted(
                 attributes.getAuthProvider(),
-                attributes.getOauth2UserInfo().getProviderId()
+                attributes.getOauth2UserInfo().getProviderId(),
+                true
         ).map(existingUser -> {
             // 기존 사용자 업데이트
             User updatedUser = existingUser.updateOauth(
