@@ -20,6 +20,7 @@ import com.walkit.walkit.domain.item.repository.ItemRepository;
 import com.walkit.walkit.domain.character.repository.CharacterWearRepository;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
+import com.walkit.walkit.domain.weather.dto.CurrentWeatherResponseDto;
 import com.walkit.walkit.domain.weather.entity.PrecipType;
 import com.walkit.walkit.domain.weather.entity.SkyStatus;
 import com.walkit.walkit.domain.weather.service.WeatherService;
@@ -172,8 +173,9 @@ public class CharacterService {
     }
 
     private String findNotLongBackGroundImage(double lat, double lon) {
-        SkyStatus sky = weatherService.getCurrent(lat, lon).getSky();
-        PrecipType precipType = weatherService.getCurrent(lat, lon).getPrecipType();
+        CurrentWeatherResponseDto weather = weatherService.getCurrent(lat, lon);
+        SkyStatus sky = weather.getSky();
+        PrecipType precipType = weather.getPrecipType();
 
         int month = LocalDate.now().getMonthValue();
 
