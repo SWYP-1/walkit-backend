@@ -33,11 +33,9 @@ public class FcmMessagingService {
         try {
             Message msg = Message.builder()
                     .setToken(fcmToken.getToken())
-                    .setNotification(Notification.builder()
-                            .setTitle(title)
-                            .setBody(body)
-                            .build())
                     .putAllData(data != null ? data : Map.of())
+                    .putData("title", title)
+                    .putData("body", body)
                     .build();
 
             String messageId = FirebaseMessaging.getInstance().send(msg);
