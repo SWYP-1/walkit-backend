@@ -73,9 +73,9 @@ public class CharacterService {
         String backgroundImage = findLongBackGroundImage(lat, lon);
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
 
-        log.info("background image is {}", backgroundImage);
+        int currentGoalSequence = user.getGoal().getCurrentWalkCount() + 1;
 
-        return ResponseCharacterDto.from(character, user, characterImage, backgroundImage);
+        return ResponseCharacterDto.from(character, user, characterImage, backgroundImage, currentGoalSequence);
     }
 
     public void wearOrTakeOff(Long userId, Long itemId, RequestItemWearDto dto) {

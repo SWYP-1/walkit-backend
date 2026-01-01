@@ -18,6 +18,7 @@ public class ResponseCharacterDto {
     private int level;
     private Grade grade;
     private String nickName;
+    private int currentGoalSequence;
 
     public static ResponseCharacterDto from(Character character, User user, String characterImageName, String backgroundImage) {
         return ResponseCharacterDto.builder()
@@ -29,6 +30,20 @@ public class ResponseCharacterDto {
                 .level(character.getLevel())
                 .grade(character.getGrade())
                 .nickName(user.getNickname())
+                .build();
+    }
+
+    public static ResponseCharacterDto from(Character character, User user, String characterImageName, String backgroundImage, int currentGoalSequence) {
+        return ResponseCharacterDto.builder()
+                .headImageName(character.getHeadImageName())
+                .bodyImageName(character.getBodyImageName())
+                .feetImageName(character.getFeetImageName())
+                .characterImageName(characterImageName)
+                .backgroundImageName(backgroundImage)
+                .level(character.getLevel())
+                .grade(character.getGrade())
+                .nickName(user.getNickname())
+                .currentGoalSequence(currentGoalSequence)
                 .build();
     }
 }
