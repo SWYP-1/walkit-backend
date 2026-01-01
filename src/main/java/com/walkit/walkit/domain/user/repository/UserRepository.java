@@ -18,12 +18,15 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByAuthProviderAndProviderId(AuthProvider authProvider, String providerId);
+    Optional<User> findByAuthProviderAndProviderIdAndDeleted(AuthProvider authProvider, String providerId, boolean deleted);
 
     Optional<User> findByEmail(String email);
+    Optional<User> findByIdAndDeleted(Long userId, boolean deleted);
 
     boolean existsByAuthProviderAndProviderId(AuthProvider authProvider, String providerId);
 
     Optional<User> findByNickname(String nickname);
+    Optional<User> findByNicknameAndDeleted(String nickname, boolean deleted);
 
 
     @Query("select u.lastAccessAt from User u where u.id = :userId")
@@ -57,5 +60,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     boolean existsByNickname(String nickname);
+
+    @Query("SELECT u FROM User u WHERE u.deleted = true AND u.deletedAt < :threshold")
+    List<User> findDeletedUsersOlderThan(@Param("threshold") LocalDateTime threshold);
 
 }

@@ -13,6 +13,7 @@ import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.dto.response.*;
 import com.walkit.walkit.domain.user.entity.User;
+import com.walkit.walkit.domain.user.repository.RefreshTokenRepository;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walk.dto.response.WalkTotalSummaryResponseDto;
 import com.walkit.walkit.domain.walk.service.WalkService;
@@ -43,6 +44,7 @@ public class UserService {
     private final FollowRepository followRepository;
     private final CharacterService characterService;
     private final WalkService walkService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public void savePolicy(Long userId, RequestPolicyDto dto) {
         User user = findUserById(userId);
@@ -123,7 +125,7 @@ public class UserService {
     }
 
     public ResponseUserNickNameFindDto findUserByNickname(UserPrincipal userPrincipal, String nickname) {
-        User targetUser = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User targetUser = userRepository.findByNicknameAndDeleted(nickname, false).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String targetUserImageName = userImageService.findUserImageName(targetUser.getId());
 
         if (userPrincipal == null) {
@@ -166,7 +168,7 @@ public class UserService {
     }
 
     private User findUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        return userRepository.findByIdAndDeleted(userId, false).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
 
@@ -200,5 +202,15 @@ public class UserService {
 
     public void deleteUserImage(Long userId) {
         userImageRepository.deleteByUserId(userId);
+    }
+
+    public void deleteUser(Long userId) {
+        User user = findUserById(userId);
+        refreshTokenRepository.deleteByUserId(userId);
+
+        followRepository.deleteBySender(user);
+        followRepository.deleteByReceiver(user);
+
+        user.updateDeleted(true);
     }
 }

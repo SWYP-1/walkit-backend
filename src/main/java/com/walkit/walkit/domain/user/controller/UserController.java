@@ -113,4 +113,10 @@ public class UserController {
         userService.deleteUserImage(userPrincipal.getUserId());
         return ResponseEntity.status(NO_CONTENT).build();
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        userService.deleteUser(userPrincipal.getUserId());
+        return ResponseEntity.status(NO_CONTENT).build();
+    }
 }
