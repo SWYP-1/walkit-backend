@@ -4,6 +4,7 @@ import com.walkit.walkit.common.image.entity.CharacterWearImage;
 import com.walkit.walkit.domain.character.enums.Grade;
 import com.walkit.walkit.domain.item.enums.Position;
 import com.walkit.walkit.domain.item.entity.Item;
+import com.walkit.walkit.domain.item.enums.Tag;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,10 @@ public class Character {
     private List<CharacterWear> characterWears;
 
     private String headImageName;
+
+    @Enumerated(EnumType.STRING)
+    private Tag headTag;
+
     private String bodyImageName;
     private String feetImageName;
 
