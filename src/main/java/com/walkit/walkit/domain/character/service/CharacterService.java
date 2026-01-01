@@ -70,8 +70,8 @@ public class CharacterService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Character character = user.getCharacter();
 
-//        String backgroundImage = findNotLongBackGroundImage(lat, lon);
-        String backgroundImage = "";
+        String backgroundImage = findNotLongBackGroundImage(lat, lon);
+//        String backgroundImage = "";
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
 
         Tag headTag = findHeadTag(character);
@@ -106,8 +106,8 @@ public class CharacterService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Character character = user.getCharacter();
 
-//      String backgroundImage = findNotLongBackGroundImage(lat, lon);
-        String backgroundImage = "";
+        String backgroundImage = findNotLongBackGroundImage(lat, lon);
+//        String backgroundImage = "";
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
 
         int currentGoalSequence = user.getGoal().getCurrentWalkCount() + 1;
