@@ -5,6 +5,7 @@ import com.walkit.walkit.common.image.repository.CharacterWearImageRepository;
 import com.walkit.walkit.domain.character.entity.Character;
 import com.walkit.walkit.domain.character.entity.CharacterWear;
 import com.walkit.walkit.domain.character.enums.Grade;
+import com.walkit.walkit.domain.character.repository.CharacterWearRepository;
 import com.walkit.walkit.domain.item.enums.ItemName;
 import com.walkit.walkit.domain.item.enums.Position;
 import com.walkit.walkit.domain.goal.dto.request.RequestGoalDto;
@@ -12,6 +13,7 @@ import com.walkit.walkit.domain.goal.dto.response.ResponseGoalDto;
 import com.walkit.walkit.domain.goal.dto.response.ResponseGoalProcessDto;
 import com.walkit.walkit.domain.goal.entity.Goal;
 import com.walkit.walkit.domain.goal.repository.GoalRepository;
+import com.walkit.walkit.domain.item.enums.Tag;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walk.entity.Walk;
@@ -40,6 +42,7 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final CharacterWearImageRepository characterWearImageRepository;
     private final WalkRepository walkRepository;
+    private final CharacterWearRepository characterWearRepository;
 
     public ResponseGoalDto findGoal(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -210,8 +213,24 @@ public class GoalService {
                 CharacterWearImage characterWearImage = characterWearImageRepository.findByPositionAndGradeAndItemName(position, grade, itemName);
 
                 character.updateImage(characterWearImage);
+
+                if (position == Position.HEAD) {
+                    changeHeadTag(grade, characterWear, Position.HEAD);
+                }
             }
 
+        }
+    }
+
+    private void changeHeadTag(Grade grade, CharacterWear characterWear, Position position) {
+        ItemName itemName = characterWear.getItem().getItemName();
+
+        List<CharacterWearImage> characterWearImages = characterWearImageRepository.findByItemNameAndGradeAndPosition(itemName, grade, position);
+
+        if (!characterWearImages.isEmpty()) {
+            Tag tag = characterWearImages.get(0).getTag();
+
+            characterWear.updateTag(tag);
         }
     }
 
