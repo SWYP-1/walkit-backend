@@ -155,7 +155,7 @@ public class WalkServiceImpl implements WalkService {
             throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
         }
 
-        Walk walk = walkRepository.findFirstByUserIdOrderByCreatedDateDesc(follower.getId()).orElseThrow(() -> new RuntimeException("Walk not found"));
+        Walk walk = walkRepository.findFirstByUserIdOrderByCreatedDateDesc(follower.getId()).orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
       
         ResponseCharacterDto characterDto = characterService.find(follower.getId(), lat, lon);
         String walkProgressPercentage = goalService.findGoalProcess(follower.getId()).getWalkProgressPercentage();
