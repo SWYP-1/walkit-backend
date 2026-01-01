@@ -17,6 +17,7 @@ public enum ErrorCode {
     ALREADY_EXISTS_USER(CONFLICT, 1003, "[User] 사용자가 이미 존재합니다."),
     INVALID_NICKNAME_FORMAT(BAD_REQUEST, 1004, "[User] 닉네임은 1~20자의 한글 또는 영문만 가능합니다."),
     INVALID_DATE_FORMAT(BAD_REQUEST, 1005, "[User] 날짜 형식이 올바르지 않습니다. (yyyy-MM-dd)"),
+    INVALID_REQUEST(BAD_REQUEST,1006, "[User] 요청 값이 올바르지 않습니다."),
 
     // FOLLOW
     FOLLOW_NOT_FOUND(NOT_FOUND, 2001, "[Follow] 팔로우를 찾을 수 없습니다"),

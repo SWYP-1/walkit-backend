@@ -33,8 +33,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponseEntity> handleConstraintViolationException(ConstraintViolationException ex) {
-        log.warn("ConstraintViolationException 발생: {}", ex.getMessage());
-        return ErrorResponseEntity.toResponseEntity(ErrorCode.INVALID_NICKNAME_FORMAT);
+        log.warn("ConstraintViolationException: {}", ex.getMessage());
+        return ErrorResponseEntity.toResponseEntity(ErrorCode.INVALID_REQUEST);
     }
 
 }

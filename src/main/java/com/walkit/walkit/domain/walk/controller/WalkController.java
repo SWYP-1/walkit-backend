@@ -32,7 +32,7 @@ public class WalkController {
     @PostMapping(value="/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<WalkResponseDto> saveWalk(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestPart("data") WalkRequestDto requestDto,
+            @Valid @RequestPart("data") WalkRequestDto requestDto,
             @RequestPart(value="image", required=false) MultipartFile image){
 
         requestDto.setImage(image);
