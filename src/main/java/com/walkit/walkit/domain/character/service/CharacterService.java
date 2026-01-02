@@ -18,6 +18,8 @@ import com.walkit.walkit.domain.item.enums.Tag;
 import com.walkit.walkit.domain.item.repository.ItemManagementRepository;
 import com.walkit.walkit.domain.item.repository.ItemRepository;
 import com.walkit.walkit.domain.character.repository.CharacterWearRepository;
+import com.walkit.walkit.domain.page.dto.HomeDto;
+import com.walkit.walkit.domain.page.dto.HomeWeatherDto;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.weather.dto.CurrentWeatherResponseDto;
@@ -73,11 +75,10 @@ public class CharacterService {
 
         String backgroundImage = null;
         try {
-            backgroundImage = findNotLongBackGroundImage(lat, lon);
+            backgroundImage = findNotLongBackGroundImage(lat, lon).getImageName();
         } catch (Exception e) {
             log.info("기상청 오류");
             backgroundImage = findNotLongDefaultBackGroundImage();
-            backgroundImage = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
         }
 //        String backgroundImage = "";
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
@@ -88,6 +89,30 @@ public class CharacterService {
 
         return ResponseCharacterDto.from(character, user, characterImage, backgroundImage, headTag, feetImage);
     }
+
+    public HomeDto findHomeCharacter(Long userId, double lat, double lon) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Character character = user.getCharacter();
+
+        HomeWeatherDto homeWeatherDto = null;
+        try {
+            homeWeatherDto = findNotLongBackGroundImage(lat, lon);
+        } catch (Exception e) {
+            log.info("기상청 오류");
+            String backgroundImage = findNotLongDefaultBackGroundImage();
+            homeWeatherDto = HomeWeatherDto.builder().imageName(backgroundImage).build();
+        }
+//        String backgroundImage = "";
+        String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
+
+        Tag headTag = findHeadTag(character);
+
+        String feetImage = findFeetImage(character);
+
+        ResponseCharacterDto characterDto = ResponseCharacterDto.from(character, user, characterImage, homeWeatherDto.getImageName(), headTag, feetImage);
+        return HomeDto.from(characterDto, homeWeatherDto);
+    }
+
 
     public ResponseCharacterDto findWalkCharacter(Long userId, double lat, double lon) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -213,64 +238,67 @@ public class CharacterService {
         }
     }
 
-    private String findNotLongBackGroundImage(double lat, double lon) {
+    private HomeWeatherDto findNotLongBackGroundImage(double lat, double lon) {
         CurrentWeatherResponseDto weather = weatherService.getCurrent(lat, lon);
         SkyStatus sky = weather.getSky();
         PrecipType precipType = weather.getPrecipType();
-
+        double temperature = weather.getTempC();
+        String imageName = null;
         int month = LocalDate.now().getMonthValue();
 
         if (month >= 3 && month <= 5) { // 봄
             if (sky == SkyStatus.SUNNY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
             } else if (precipType == PrecipType.RAIN) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.RAINY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
             } else if (sky == SkyStatus.CLOUDY_MANY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.OVERCAST, false).getImageName();
             } else {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
             }
         } else if (month >= 6 && month <= 8) { // 여름
             if (sky == SkyStatus.SUNNY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
             } else if (precipType == PrecipType.RAIN) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.RAINY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
             } else if (sky == SkyStatus.CLOUDY_MANY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.OVERCAST, false).getImageName();
             } else {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
             }
         } else if (month >= 9 && month <= 11) { // 가을
             if (sky == SkyStatus.SUNNY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
             } else if (precipType == PrecipType.RAIN) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.RAINY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
             } else if (sky == SkyStatus.CLOUDY_MANY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.OVERCAST, false).getImageName();
             } else {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
             }
         } else { // 겨울
             if (sky == SkyStatus.SUNNY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
             } else if (precipType == PrecipType.RAIN) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.RAINY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.RAINY, false).getImageName();
             } else if (sky == SkyStatus.OVERCAST) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
             }  else if (precipType == PrecipType.SNOW) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SNOWY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SNOWY, false).getImageName();
             } else if (sky == SkyStatus.CLOUDY_MANY) {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.OVERCAST, false).getImageName();
             } else {
-                return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
+                imageName = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
             }
         }
+
+        return HomeWeatherDto.builder().imageName(imageName).sky(sky).precipType(precipType).temperature(temperature).build();
     }
 
     private String findLongBackGroundImage(double lat, double lon) {

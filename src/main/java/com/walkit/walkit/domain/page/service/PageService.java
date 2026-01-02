@@ -6,6 +6,7 @@ import com.walkit.walkit.domain.goal.dto.response.ResponseGoalProcessDto;
 import com.walkit.walkit.domain.goal.service.GoalService;
 import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
 import com.walkit.walkit.domain.mission.service.WeeklyMissionService;
+import com.walkit.walkit.domain.page.dto.HomeDto;
 import com.walkit.walkit.domain.page.dto.ResponseHomeDto;
 import com.walkit.walkit.domain.page.enums.HomeWeather;
 import com.walkit.walkit.domain.user.entity.User;
@@ -42,7 +43,7 @@ public class PageService {
     public ResponseHomeDto getHomePage(Long userId, double lat, double lon) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        ResponseCharacterDto characterDto = findCharacterDto(user, lat, lon);
+        HomeDto homeDto = findCharacterDto(user, lat, lon);
         String walkProgressPercentage = goalService.findGoalProcess(user.getId()).getWalkProgressPercentage();
 
         int todaySteps = walkService.getTodayStepCount(userId);
@@ -50,16 +51,15 @@ public class PageService {
 
         List<WalkResponseDto> walkResponseDto = walkService.getRecentWalks(userId);
 
-        CurrentWeatherResponseDto weatherDto = null;
         HomeWeather homeWeather = HomeWeather.SUNNY;
 
         try {
-            weatherDto = weatherService.getCurrent(lat, lon);
-            if (weatherDto.getPrecipType() == PrecipType.RAIN) {
+//            weatherDto = weatherService.getCurrent(lat, lon);
+            if (homeDto.getPrecipType() == PrecipType.RAIN) {
                 homeWeather = HomeWeather.RAIN;
-            } else if (weatherDto.getPrecipType() == PrecipType.SNOW) {
+            } else if (homeDto.getPrecipType() == PrecipType.SNOW) {
                 homeWeather = HomeWeather.SNOW;
-            } else if (weatherDto.getSky() == SkyStatus.OVERCAST) {
+            } else if (homeDto.getSky() == SkyStatus.OVERCAST) {
                 homeWeather = HomeWeather.OVERCAST;
             }
         } catch (Exception e) {
@@ -67,10 +67,10 @@ public class PageService {
         }
 
         return ResponseHomeDto.builder()
-                .characterDto(characterDto)
+                .characterDto(homeDto.getResponseCharacterDto())
                 .walkProgressPercentage(walkProgressPercentage)
                 .todaySteps(todaySteps)
-                .temperature(weatherDto == null ? null : weatherDto.getTempC())
+                .temperature(homeDto.getTemperature())
                 .weather(homeWeather)
                 .weeklyMissionDto(weeklyMissionDto)
                 .walkResponseDto(walkResponseDto)
@@ -78,7 +78,7 @@ public class PageService {
 
     }
 
-    private ResponseCharacterDto findCharacterDto(User user, double lat, double lon) {
-        return characterService.find(user.getId(), lat, lon);
+    private HomeDto findCharacterDto(User user, double lat, double lon) {
+        return characterService.findHomeCharacter(user.getId(), lat, lon);
     }
 }
