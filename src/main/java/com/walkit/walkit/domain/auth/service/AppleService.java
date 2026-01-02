@@ -10,6 +10,7 @@ import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.global.config.AppleProperties;
+import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.security.jwt.JwtService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -35,6 +36,8 @@ import java.security.PrivateKey;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+
+import static com.walkit.walkit.global.exception.ErrorCode.USER_DELETED;
 
 @Slf4j
 @Service
@@ -208,7 +211,7 @@ public class AppleService {
         Optional<User> deletedUser = userRepository.findByAuthProviderAndProviderIdAndDeleted(AuthProvider.APPLE, providerId, true);
         if (deletedUser.isPresent()) {
             log.warn("탈퇴한 회원의 로그인 시도 - Provider: APPLE, ProviderId: {}", providerId);
-            throw new IllegalStateException("탈퇴한 회원입니다. 재가입은 6개월 후 가능합니다.");
+            throw new CustomException(USER_DELETED);
         }
 
         // 2. 활성 사용자 조회 또는 생성

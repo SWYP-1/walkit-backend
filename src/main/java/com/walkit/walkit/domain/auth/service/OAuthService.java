@@ -11,6 +11,7 @@ import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.common.dto.TokenResponse;
 import com.walkit.walkit.common.enums.AuthProvider;
+import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Optional;
+
+import static com.walkit.walkit.global.exception.ErrorCode.USER_DELETED;
 
 @Service
 @RequiredArgsConstructor
@@ -195,7 +198,7 @@ public class OAuthService {
         Optional<User> deletedUser = userRepository.findByAuthProviderAndProviderIdAndDeleted(provider, providerId, true);
         if (deletedUser.isPresent()) {
             log.warn("탈퇴한 회원의 로그인 시도 - Provider: {}, ProviderId: {}", provider, providerId);
-            throw new IllegalStateException("탈퇴한 회원입니다. 재가입은 6개월 후 가능합니다.");
+            throw new CustomException(USER_DELETED);
         }
 
         // 2. 활성 사용자 조회 또는 생성
