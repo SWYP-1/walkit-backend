@@ -19,11 +19,13 @@ import com.walkit.walkit.domain.weather.service.WeatherService;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,27 +46,31 @@ public class PageService {
         String walkProgressPercentage = goalService.findGoalProcess(user.getId()).getWalkProgressPercentage();
 
         int todaySteps = walkService.getTodayStepCount(userId);
-        CurrentWeatherResponseDto weatherDto = weatherService.getCurrent(lat, lon);
         WeeklyMissionResponseDto weeklyMissionDto = weeklyMissionService.getEnsureAssignedForThisWeek(userId);
 
         List<WalkResponseDto> walkResponseDto = walkService.getRecentWalks(userId);
 
+        CurrentWeatherResponseDto weatherDto = null;
         HomeWeather homeWeather = HomeWeather.SUNNY;
 
-        if (weatherDto.getPrecipType() == PrecipType.RAIN) {
-            homeWeather = HomeWeather.RAIN;
-        } else if (weatherDto.getPrecipType() == PrecipType.SNOW) {
-            homeWeather = HomeWeather.SNOW;
-        } else if (weatherDto.getSky() == SkyStatus.OVERCAST) {
-            homeWeather = HomeWeather.OVERCAST;
+        try {
+            weatherDto = weatherService.getCurrent(lat, lon);
+            if (weatherDto.getPrecipType() == PrecipType.RAIN) {
+                homeWeather = HomeWeather.RAIN;
+            } else if (weatherDto.getPrecipType() == PrecipType.SNOW) {
+                homeWeather = HomeWeather.SNOW;
+            } else if (weatherDto.getSky() == SkyStatus.OVERCAST) {
+                homeWeather = HomeWeather.OVERCAST;
+            }
+        } catch (Exception e) {
+            log.info("기상청 오류");
         }
-
 
         return ResponseHomeDto.builder()
                 .characterDto(characterDto)
                 .walkProgressPercentage(walkProgressPercentage)
                 .todaySteps(todaySteps)
-                .temperature(weatherDto.getTempC())
+                .temperature(weatherDto == null ? null : weatherDto.getTempC())
                 .weather(homeWeather)
                 .weeklyMissionDto(weeklyMissionDto)
                 .walkResponseDto(walkResponseDto)

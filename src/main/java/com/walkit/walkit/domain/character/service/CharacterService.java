@@ -71,7 +71,14 @@ public class CharacterService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Character character = user.getCharacter();
 
-        String backgroundImage = findNotLongBackGroundImage(lat, lon);
+        String backgroundImage = null;
+        try {
+            backgroundImage = findNotLongBackGroundImage(lat, lon);
+        } catch (Exception e) {
+            log.info("기상청 오류");
+            backgroundImage = findNotLongDefaultBackGroundImage();
+            backgroundImage = backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
+        }
 //        String backgroundImage = "";
         String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
 
@@ -80,6 +87,65 @@ public class CharacterService {
         String feetImage = findFeetImage(character);
 
         return ResponseCharacterDto.from(character, user, characterImage, backgroundImage, headTag, feetImage);
+    }
+
+    public ResponseCharacterDto findWalkCharacter(Long userId, double lat, double lon) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Character character = user.getCharacter();
+
+        String backgroundImage = null;
+        try {
+            backgroundImage = findLongBackGroundImage(lat, lon);
+        } catch (Exception e) {
+            log.info("기상청 오류");
+            backgroundImage = findLongDefaultBackGroundImage();
+        }
+//        String backgroundImage = "";
+        String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
+
+        int currentGoalSequence = user.getGoal().getCurrentWalkCount() + 1;
+
+        Tag headTag = findHeadTag(character);
+
+        String feetImage = findFeetImage(character);
+
+        return ResponseCharacterDto.from(character, user, characterImage, backgroundImage, currentGoalSequence, headTag, feetImage);
+    }
+
+    public void wearOrTakeOff(Long userId, Long itemId, RequestItemWearDto dto) {
+        if (dto.isWorn()) {
+            wear(userId, itemId);
+        } else {
+            takeOff(userId, itemId);
+        }
+    }
+
+    private String findNotLongDefaultBackGroundImage() {
+        int month = LocalDate.now().getMonthValue();
+
+        if (month >= 3 && month <= 5) { // 봄
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, false).getImageName();
+        } else if (month >= 6 && month <= 8) { // 여름
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, false).getImageName();
+        } else if (month >= 9 && month <= 11) { // 가을
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, false).getImageName();
+        } else { // 겨울
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, false).getImageName();
+        }
+    }
+
+    private String findLongDefaultBackGroundImage() {
+        int month = LocalDate.now().getMonthValue();
+
+        if (month >= 3 && month <= 5) { // 봄
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SPRING, Weather.SUNNY, true).getImageName();
+        } else if (month >= 6 && month <= 8) { // 여름
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.SUMMER, Weather.SUNNY, true).getImageName();
+        } else if (month >= 9 && month <= 11) { // 가을
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.FALL, Weather.SUNNY, true).getImageName();
+        } else { // 겨울
+            return backgroundImageRepository.findBySeasonAndWeatherAndIsLong(Season.WINTER, Weather.SUNNY, true).getImageName();
+        }
     }
 
     private String findFeetImage(Character character) {
@@ -101,31 +167,6 @@ public class CharacterService {
             headTag = headCharacterWear.get(0).getTag();
         }
         return headTag;
-    }
-
-    public ResponseCharacterDto findWalkCharacter(Long userId, double lat, double lon) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Character character = user.getCharacter();
-
-        String backgroundImage = findNotLongBackGroundImage(lat, lon);
-//        String backgroundImage = "";
-        String characterImage = characterImageRepository.findByGrade(character.getGrade()).getImageName();
-
-        int currentGoalSequence = user.getGoal().getCurrentWalkCount() + 1;
-
-        Tag headTag = findHeadTag(character);
-
-        String feetImage = findFeetImage(character);
-
-        return ResponseCharacterDto.from(character, user, characterImage, backgroundImage, currentGoalSequence, headTag, feetImage);
-    }
-
-    public void wearOrTakeOff(Long userId, Long itemId, RequestItemWearDto dto) {
-        if (dto.isWorn()) {
-            wear(userId, itemId);
-        } else {
-            takeOff(userId, itemId);
-        }
     }
 
     private void wear(Long userId, Long itemId) {
@@ -278,8 +319,6 @@ public class CharacterService {
 
         return null;
     }
-
-
 
     private CharacterWearImage wearItem(User user, Item item, Character character) {
         ItemManagement itemManagement = itemManagementRepository.findByUserAndItem(user, item).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_OWNED));
