@@ -23,6 +23,9 @@ public class CorsConfig {
         configuration.addAllowedOriginPattern("https://localhost:*");
         configuration.addAllowedOrigin(productionUrl);
 
+        // Apple OAuth form_post 요청을 위한 null origin 허용
+        configuration.addAllowedOriginPattern("null");
+
         // 모든 헤더와 메서드 허용
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");

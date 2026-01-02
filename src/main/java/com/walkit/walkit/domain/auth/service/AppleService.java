@@ -138,6 +138,8 @@ public class AppleService {
                     .expiresIn(3600L)
                     .build();
 
+        } catch (CustomException e) {
+            throw new CustomException(USER_DELETED);
         } catch (Exception e) {
             log.error("Apple identityToken 로그인 실패", e);
             throw new RuntimeException("Apple identityToken 로그인에 실패했습니다: " + e.getMessage(), e);
