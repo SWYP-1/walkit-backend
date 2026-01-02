@@ -54,9 +54,11 @@ public class WeatherService {
         if (cached != null) return cached;
 
         // 최근 실패 캐시가 있으면 실패 처리
+/*
         if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(fKey))) {
             throw new IllegalStateException("Weather provider temporarily unavailable");
         }
+*/
 
         // 분산락 시도 (동일 nx,ny에 대해 한 요청만 외부호출)
         String token = UUID.randomUUID().toString();
