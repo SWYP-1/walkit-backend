@@ -1,6 +1,9 @@
 package com.walkit.walkit.domain.item.service;
 
+import com.walkit.walkit.common.image.entity.CharacterWearImage;
+import com.walkit.walkit.common.image.repository.CharacterWearImageRepository;
 import com.walkit.walkit.domain.character.entity.Character;
+import com.walkit.walkit.domain.character.enums.Grade;
 import com.walkit.walkit.domain.character.repository.CharacterWearRepository;
 import com.walkit.walkit.domain.item.dto.request.RequestBuyDto;
 import com.walkit.walkit.domain.item.dto.response.ResponseItemDto;
@@ -8,6 +11,7 @@ import com.walkit.walkit.domain.item.dto.response.ResponseMyItemDto;
 import com.walkit.walkit.domain.item.entity.Item;
 import com.walkit.walkit.domain.item.entity.ItemManagement;
 import com.walkit.walkit.domain.item.enums.Position;
+import com.walkit.walkit.domain.item.enums.Tag;
 import com.walkit.walkit.domain.item.repository.ItemManagementRepository;
 import com.walkit.walkit.domain.item.repository.ItemRepository;
 import com.walkit.walkit.domain.user.entity.User;
@@ -31,6 +35,7 @@ public class ItemService {
     private final UserRepository userRepository;
     private final ItemManagementRepository itemManagementRepository;
     private final CharacterWearRepository characterWearRepository;
+    private final CharacterWearImageRepository characterWearImageRepository;
 
     public void buy(Long userId, RequestBuyDto dto) {
         User user = findUser(userId);
@@ -46,7 +51,7 @@ public class ItemService {
             for (Item item : itemRepository.findAll()) {
                 boolean isOwned = isOwned(userPrincipal, item);
                 boolean isWorn = isWorn(userPrincipal, item);
-                ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned, isWorn);
+                ResponseItemDto responseItemDto = createResponseItemDtoByUser(userPrincipal, item, isOwned, isWorn);
                 responseItemDtos.add(responseItemDto);
             }
 
@@ -56,11 +61,36 @@ public class ItemService {
                 boolean isOwned = isOwned(userPrincipal, item);
                 boolean isWorn = isWorn(userPrincipal, item);
 
-                ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned, isWorn);
+                ResponseItemDto responseItemDto = createResponseItemDtoByUser(userPrincipal, item, isOwned, isWorn);
                 responseItemDtos.add(responseItemDto);
             }
 
             return responseItemDtos;
+        }
+    }
+
+    private static ResponseItemDto createResponseItemDto(Item item, boolean isOwned, boolean isWorn) {
+        ResponseItemDto responseItemDto = ResponseItemDto.from(item, isOwned, isWorn);
+        return responseItemDto;
+    }
+
+    private ResponseItemDto createResponseItemDtoByUser(UserPrincipal userPrincipal, Item item, boolean isOwned, boolean isWorn) {
+        if (item.getPosition() == Position.HEAD) {
+            if (userPrincipal != null) {
+                User user = userRepository.findById(userPrincipal.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                Grade grade = user.getCharacter().getGrade();
+
+                Tag tag = null;
+                List<CharacterWearImage> characterWearImages = characterWearImageRepository.findByItemNameAndGradeAndPosition(item.getItemName(), grade, Position.HEAD);
+                if (!characterWearImages.isEmpty()) {
+                    tag = characterWearImages.get(0).getTag();
+                }
+
+                return ResponseItemDto.from(item, isOwned, isWorn, tag);
+            }
+            return ResponseItemDto.from(item, isOwned, isWorn);
+        } else {
+            return ResponseItemDto.from(item, isOwned, isWorn);
         }
     }
 
@@ -100,18 +130,38 @@ public class ItemService {
             Item item = itemManagement.getItem();
             if (position == null) {
                 boolean isWorn = isWorn(userId, item);
-                ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.from(item, isWorn);
+                ResponseMyItemDto responseMyItemDto = createMyItemDtoByTag(user, item, isWorn);
                 responseMyItemDtos.add(responseMyItemDto);
             } else {
                 if (item.getPosition().equals(position)) {
                     boolean isWorn = isWorn(userId, item);
-                    ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.from(item, isWorn);
+                    ResponseMyItemDto responseMyItemDto = createMyItemDtoByTag(user, item, isWorn);
                     responseMyItemDtos.add(responseMyItemDto);
                 }
             }
         }
 
         return responseMyItemDtos;
+    }
+
+    private static ResponseMyItemDto createMyItemDto(Item item, boolean isWorn) {
+        ResponseMyItemDto responseMyItemDto = ResponseMyItemDto.from(item, isWorn);
+        return responseMyItemDto;
+    }
+
+    private ResponseMyItemDto createMyItemDtoByTag(User user, Item item, boolean isWorn) {
+        if (item.getPosition() == Position.HEAD) {
+            Grade grade = user.getCharacter().getGrade();
+
+            Tag tag = null;
+            List<CharacterWearImage> characterWearImages = characterWearImageRepository.findByItemNameAndGradeAndPosition(item.getItemName(), grade, Position.HEAD);
+            if (!characterWearImages.isEmpty()) {
+                tag = characterWearImages.get(0).getTag();
+            }
+            return ResponseMyItemDto.from(item, isWorn, tag);
+        } else {
+            return ResponseMyItemDto.from(item, isWorn);
+        }
     }
 
     private void checkPurchase(User user, RequestBuyDto dto) {
