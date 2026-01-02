@@ -12,4 +12,10 @@ public interface CharacterWearImageRepository extends JpaRepository<CharacterWea
     List<CharacterWearImage> findByPositionAndGrade(Position position, Grade grade);
 
     CharacterWearImage findByPositionAndGradeAndItemName(Position position, Grade grade, ItemName itemName);
+
+    List<CharacterWearImage> findByGradeAndPosition(Grade grade, Position position);
+
+    List<CharacterWearImage> findByItemName(ItemName itemName);
+
+    List<CharacterWearImage> findByItemNameAndGradeAndPosition(ItemName itemName, Grade grade, Position position);
 }

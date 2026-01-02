@@ -25,10 +25,10 @@ public class WeatherService {
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final Duration CACHE_TTL = Duration.ofHours(1);
-    private static final Duration FAIL_TTL  = Duration.ofSeconds(30);
+    private static final Duration FAIL_TTL  = Duration.ofSeconds(30);;
 
     private static final Duration LOCK_TTL = Duration.ofSeconds(20);
-    private static final int[] BACKOFF_MS = {100, 200, 500};
+    private static final int[] BACKOFF_MS = {100, 300, 600, 1000};
 
 
     public WeatherService(
@@ -117,6 +117,7 @@ public class WeatherService {
     private String cacheKey(int nx, int ny) {
         return "weather:current:nx=" + nx + ":ny=" + ny;
     }
+
 
     private String failKey(int nx, int ny) {
         return "weather:current:fail:nx=" + nx + ":ny=" + ny;

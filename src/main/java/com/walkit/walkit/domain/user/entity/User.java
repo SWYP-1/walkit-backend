@@ -5,10 +5,14 @@ import com.walkit.walkit.domain.BaseTimeEntity;
 import com.walkit.walkit.domain.character.entity.Character;
 import com.walkit.walkit.domain.item.entity.ItemManagement;
 import com.walkit.walkit.domain.goal.entity.Goal;
+import com.walkit.walkit.domain.mission.entity.UserMissionHistory;
+import com.walkit.walkit.domain.mission.entity.UserWeeklyMission;
 import com.walkit.walkit.domain.user.dto.request.RequestPolicyDto;
 import com.walkit.walkit.domain.user.dto.request.RequestUserDto;
 import com.walkit.walkit.domain.user.enums.UserRole;
 import com.walkit.walkit.common.enums.AuthProvider;
+import com.walkit.walkit.domain.walk.entity.Walk;
+import com.walkit.walkit.domain.walkLike.entity.WalkLike;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -57,6 +61,9 @@ public class User extends BaseTimeEntity {
 
     private boolean isMarketingConsent = false;
 
+    private boolean deleted = false;
+    private LocalDateTime deletedAt;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "character_id")
     private Character character;
@@ -69,11 +76,23 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "goal_id")
     private Goal goal;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemManagement> itemManagements = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserImage userImage;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserMissionHistory> userMissionHistories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserWeeklyMission> userWeeklyMissions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Walk> walks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WalkLike> walkLikes = new ArrayList<>();
 
     @Column(nullable = false)
     private int point = 0;// 포인트 컬럼 임시 추가
@@ -243,6 +262,11 @@ public class User extends BaseTimeEntity {
 
     public void initCharacter(Character character) {
         this.character = character;
+    }
+
+    public void updateDeleted(boolean deleted) {
+        this.deleted = deleted;
+        this.deletedAt = LocalDateTime.now();
     }
 
 }

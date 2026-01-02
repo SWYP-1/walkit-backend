@@ -7,11 +7,14 @@ import com.walkit.walkit.domain.goal.service.GoalService;
 import com.walkit.walkit.domain.mission.dto.WeeklyMissionResponseDto;
 import com.walkit.walkit.domain.mission.service.WeeklyMissionService;
 import com.walkit.walkit.domain.page.dto.ResponseHomeDto;
+import com.walkit.walkit.domain.page.enums.HomeWeather;
 import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walk.dto.response.WalkResponseDto;
 import com.walkit.walkit.domain.walk.service.WalkService;
 import com.walkit.walkit.domain.weather.dto.CurrentWeatherResponseDto;
+import com.walkit.walkit.domain.weather.entity.PrecipType;
+import com.walkit.walkit.domain.weather.entity.SkyStatus;
 import com.walkit.walkit.domain.weather.service.WeatherService;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
@@ -46,12 +49,23 @@ public class PageService {
 
         List<WalkResponseDto> walkResponseDto = walkService.getRecentWalks(userId);
 
+        HomeWeather homeWeather = HomeWeather.SUNNY;
+
+        if (weatherDto.getPrecipType() == PrecipType.RAIN) {
+            homeWeather = HomeWeather.RAIN;
+        } else if (weatherDto.getPrecipType() == PrecipType.SNOW) {
+            homeWeather = HomeWeather.SNOW;
+        } else if (weatherDto.getSky() == SkyStatus.OVERCAST) {
+            homeWeather = HomeWeather.OVERCAST;
+        }
+
 
         return ResponseHomeDto.builder()
                 .characterDto(characterDto)
                 .walkProgressPercentage(walkProgressPercentage)
                 .todaySteps(todaySteps)
-                .weatherDto(weatherDto)
+                .temperature(weatherDto.getTempC())
+                .weather(homeWeather)
                 .weeklyMissionDto(weeklyMissionDto)
                 .walkResponseDto(walkResponseDto)
                 .build();

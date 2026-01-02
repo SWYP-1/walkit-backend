@@ -34,6 +34,7 @@ import java.io.StringReader;
 import java.security.PrivateKey;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -203,7 +204,15 @@ public class AppleService {
     }
 
     private User findOrCreateUser(String providerId, String email) {
-        return userRepository.findByAuthProviderAndProviderId(AuthProvider.APPLE, providerId)
+        // 1. 삭제된 사용자가 있는지 먼저 확인
+        Optional<User> deletedUser = userRepository.findByAuthProviderAndProviderIdAndDeleted(AuthProvider.APPLE, providerId, true);
+        if (deletedUser.isPresent()) {
+            log.warn("탈퇴한 회원의 로그인 시도 - Provider: APPLE, ProviderId: {}", providerId);
+            throw new IllegalStateException("탈퇴한 회원입니다. 재가입은 6개월 후 가능합니다.");
+        }
+
+        // 2. 활성 사용자 조회 또는 생성
+        return userRepository.findByAuthProviderAndProviderIdAndDeleted(AuthProvider.APPLE, providerId, false)
                 .orElseGet(() -> {
                     log.info("신규 Apple 사용자 생성 - providerId: {}, email: {}", providerId, email);
 
