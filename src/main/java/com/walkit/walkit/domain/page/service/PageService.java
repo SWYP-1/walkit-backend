@@ -53,17 +53,12 @@ public class PageService {
 
         HomeWeather homeWeather = HomeWeather.SUNNY;
 
-        try {
-//            weatherDto = weatherService.getCurrent(lat, lon);
-            if (homeDto.getPrecipType() == PrecipType.RAIN) {
-                homeWeather = HomeWeather.RAIN;
-            } else if (homeDto.getPrecipType() == PrecipType.SNOW) {
-                homeWeather = HomeWeather.SNOW;
-            } else if (homeDto.getSky() == SkyStatus.OVERCAST) {
-                homeWeather = HomeWeather.OVERCAST;
-            }
-        } catch (Exception e) {
-            log.info("기상청 오류");
+        if (homeDto.getPrecipType() == PrecipType.RAIN) {
+            homeWeather = HomeWeather.RAIN;
+        } else if (homeDto.getPrecipType() == PrecipType.SNOW) {
+            homeWeather = HomeWeather.SNOW;
+        } else if (homeDto.getSky() == SkyStatus.OVERCAST) {
+            homeWeather = HomeWeather.OVERCAST;
         }
 
         return ResponseHomeDto.builder()

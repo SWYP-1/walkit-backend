@@ -21,6 +21,6 @@ public class ResponseHomeDto {
     private WeeklyMissionResponseDto weeklyMissionDto; // 추천미션
     private List<WalkResponseDto> walkResponseDto;     // 나의 산책기록
 
-    private double temperature;
+    private Double temperature;
     private HomeWeather weather;
 }

@@ -12,5 +12,5 @@ public class HomeWeatherDto {
     private String imageName;
     private SkyStatus sky;
     private PrecipType precipType;
-    private double temperature;
+    private Double temperature;
 }
