@@ -30,9 +30,9 @@ public class WalkNotificationService {
              return false;
          }
 
-         String title = "워키가 기다리고 있어요";
+         String title = "워킷이 기다리고 있어요";
          String body = String.format(
-                 "워키가 %s 님을 기다리고 있어요. 함께 산책하러 갈까요?",
+                 "워킷이 %s 님을 기다리고 있어요. 함께 산책하러 갈까요?",
                  user.getNickname()
          );
 
@@ -75,16 +75,16 @@ public class WalkNotificationService {
         Notification n = Notification.systemNotification(
                 user,
                 NotificationType.GOAL,
-                "🏁 목표의 반을 달성했어요!",
-                "목표의 반을 달성했어요! 지금 워키와 함께 걸어보세요",
+                "목표의 반을 달성했어요!",
+                "목표의 반을 달성했어요! 지금 워킷과 함께 걸어보세요",
                 null
         );
         notificationRepository.save(n);
 
         fcmMessagingService.sendNotification(
                 user,
-                "🏁 목표의 반을 달성했어요!",
-                "목표의 반을 달성했어요! 지금 워키와 함께 걸어보세요",
+                "목표의 반을 달성했어요!",
+                "목표의 반을 달성했어요! 지금 워킷과 함께 걸어보세요",
                 Map.of(
                         "type", "GOAL_WALK_50",
                         "currentWalkCount", String.valueOf(currentWalkCount),
@@ -107,16 +107,16 @@ public class WalkNotificationService {
         Notification n = Notification.systemNotification(
                 user,
                 NotificationType.GOAL,
-                "🎉 목표를 달성했어요!",
-                "목표를 달성했어요! 워키의 성장을 함께 확인해볼까요?",
+                "목표를 달성했어요!",
+                "목표를 달성했어요! 워킷의 성장을 함께 확인해볼까요?",
                 null
         );
         notificationRepository.save(n);
 
         fcmMessagingService.sendNotification(
                 user,
-                "🎉 목표를 달성했어요!",
-                "목표를 달성했어요! 워키의 성장을 함께 확인해볼까요?",
+                "목표를 달성했어요!",
+                "목표를 달성했어요! 워킷의 성장을 함께 확인해볼까요?",
                 Map.of(
                         "type", "GOAL_WALK_100",
                         "currentWalkCount", String.valueOf(currentWalkCount),
@@ -139,8 +139,8 @@ public class WalkNotificationService {
             return;
         }
 
-        String title = "🎁 새로운 미션이 도착했어요!";
-        String body = "미션을 완료하고 보상을 받아보세요!";
+        String title = "새로운 미션이 오픈되었어요. ";
+        String body = "새로운 미션이 오픈되었어요. 워킷과 함께 도전해봐요!";
 
         Notification n = Notification.systemNotification(
                 user,
