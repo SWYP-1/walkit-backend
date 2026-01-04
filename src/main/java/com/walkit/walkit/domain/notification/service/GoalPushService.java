@@ -21,15 +21,15 @@ public class GoalPushService {
         int target = goal.getThisWeekTargetWalkCount();
         if (target <= 0) return;
 
-        int before = goal.getCurrentWalkCount();
+        //int before = goal.getCurrentWalkCount();
 
         // 산책 1회 추가
-//        goal.plusCurrentWalks();
+//       goal.plusCurrentWalks();
 
         int after = goal.getCurrentWalkCount();
 
         // 100% (완료) 알림: 처음 목표 달성했을 때 1회
-        if (!goal.isFullWalkNotified() && before < target && after >= target) {
+        if (!goal.isFullWalkNotified() && after >= target) {
             walkNotificationService.notifyGoalFullWalk(user, after, target);
             goal.markWalkFullNotified();
             return;
@@ -38,7 +38,6 @@ public class GoalPushService {
         // 50% 알림: 처음 반 넘겼을 때 1회 (완료 전)
         int half = (int) Math.ceil(target * 0.5); // target 홀수일 때, half 반올림
         if (!goal.isHalfWalkNotified()
-                && before < half
                 && after >= half
                 && after < target) {
             walkNotificationService.notifyGoalHalfWalk(user, after, target);
