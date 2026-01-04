@@ -12,8 +12,10 @@ import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -33,8 +35,12 @@ public class WalkLikeService {
         Walk walk = walkRepository.findById(walkId).orElseThrow();
         User walker = walk.getUser();
 
+        log.info("userId: {}", user.getId());
+        log.info("walkerId: {}", walker.getId());
+
+
         if (!(followRepository.existsBySenderAndReceiverAndFollowStatus(user, walker, FollowStatus.ACCEPTED)
-            || followRepository.existsBySenderAndReceiverAndFollowStatus(walker, walker, FollowStatus.ACCEPTED)
+            || followRepository.existsBySenderAndReceiverAndFollowStatus(walker, user, FollowStatus.ACCEPTED)
         )) {
             throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
         }
