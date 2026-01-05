@@ -244,7 +244,7 @@ public class WalkNotificationService {
     /**
      * 팔로우 신청 수락시 신청을 보낸 사람에게 수락 알림 보내기
      */
-    public void sendAcceptFollowNotificationToSender(User receiver, User sender) {
+    public void sendAcceptFollowNotificationToSender(User sender, User receiver) {
 
         if (!receiver.canReceiveMissionNotification()) {
             log.info("[NotifyFollowAccept] follow accept notification disabled userId={}", receiver.getId());
