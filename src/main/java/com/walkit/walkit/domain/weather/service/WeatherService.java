@@ -25,7 +25,7 @@ public class WeatherService {
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final Duration CACHE_TTL = Duration.ofHours(1);
-    private static final Duration FAIL_TTL  = Duration.ofSeconds(30);;
+    private static final Duration FAIL_TTL  = Duration.ofSeconds(20);;
 
     private static final Duration LOCK_TTL = Duration.ofSeconds(20);
     private static final int[] BACKOFF_MS = {100, 300, 600, 1000};
@@ -54,11 +54,9 @@ public class WeatherService {
         if (cached != null) return cached;
 
         // 최근 실패 캐시가 있으면 실패 처리
-/*
         if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(fKey))) {
             throw new IllegalStateException("Weather provider temporarily unavailable");
         }
-*/
 
         // 분산락 시도 (동일 nx,ny에 대해 한 요청만 외부호출)
         String token = UUID.randomUUID().toString();
@@ -94,6 +92,7 @@ public class WeatherService {
             } catch (Exception e) {
                 // 실패 캐시 저장
                 stringRedisTemplate.opsForValue().set(fKey, "1", FAIL_TTL);
+
                 throw e;
             } finally {
                 // 락 해제(토큰 매칭 후 삭제)
