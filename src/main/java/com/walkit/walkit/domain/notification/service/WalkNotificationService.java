@@ -36,14 +36,6 @@ public class WalkNotificationService {
                  user.getNickname()
          );
 
-         Notification n = Notification.systemNotification(
-                 user,
-                 NotificationType.INACTIVE_USER,
-                 title,
-                 body,
-                 null
-         );
-         notificationRepository.save(n);
 
          try {
              boolean ok = fcmMessagingService.sendNotification(
@@ -53,6 +45,17 @@ public class WalkNotificationService {
                      Map.of("type", "INACTIVE_USER", "inactiveDays", "2")
              );
              log.info("[NotifyInactive48h] pushSent={} userId={}", ok, user.getId());
+
+             if (ok) {
+                 Notification n = Notification.systemNotification(
+                         user,
+                         NotificationType.INACTIVE_USER,
+                         title,
+                         body,
+                         null
+                 );
+                 notificationRepository.save(n);
+             }
              return ok;
          } catch (Exception e) {
              log.warn("[NotifyInactive48h] push failed userId={}", user.getId(), e);
@@ -72,27 +75,37 @@ public class WalkNotificationService {
             return;
         }
 
-        Notification n = Notification.systemNotification(
-                user,
-                NotificationType.GOAL,
-                "목표의 반을 달성했어요!",
-                "목표의 반을 달성했어요! 지금 워킷과 함께 걸어보세요",
-                null
-        );
-        notificationRepository.save(n);
+        String title = "목표의 반을 달성했어요!";
+        String body = "목표의 반을 달성했어요! 지금 워킷과 함께 걸어보세요";
 
-        fcmMessagingService.sendNotification(
-                user,
-                "목표의 반을 달성했어요!",
-                "목표의 반을 달성했어요! 지금 워킷과 함께 걸어보세요",
-                Map.of(
-                        "type", "GOAL_WALK_50",
-                        "currentWalkCount", String.valueOf(currentWalkCount),
-                        "targetWalkCount", String.valueOf(targetWalkCount)
-                )
-        );
+        try {
+            boolean ok = fcmMessagingService.sendNotification(
+                    user,
+                    title,
+                    body,
+                    Map.of(
+                            "type", "GOAL_WALK_50",
+                            "currentWalkCount", String.valueOf(currentWalkCount),
+                            "targetWalkCount", String.valueOf(targetWalkCount)
+                    )
+            );
+            log.info("[NotifyGoalHalf] pushSent={} userId={}", ok, user.getId());
 
+            if (ok) {
+                Notification n = Notification.systemNotification(
+                        user,
+                        NotificationType.GOAL,
+                        title,
+                        body,
+                        null
+                );
+                notificationRepository.save(n);
+            }
+        } catch (Exception e) {
+            log.warn("[NotifyGoalHalf] push failed userId={}", user.getId(), e);
+        }
     }
+
 
     /**
      * 목표(산책 횟수) 100% 달성 알림
@@ -104,26 +117,35 @@ public class WalkNotificationService {
             return;
         }
 
-        Notification n = Notification.systemNotification(
-                user,
-                NotificationType.GOAL,
-                "목표를 달성했어요!",
-                "목표를 달성했어요! 워킷의 성장을 함께 확인해볼까요?",
-                null
-        );
-        notificationRepository.save(n);
+        String title = "목표를 달성했어요!";
+        String body = "목표를 달성했어요! 워킷의 성장을 함께 확인해볼까요?";
 
-        fcmMessagingService.sendNotification(
-                user,
-                "목표를 달성했어요!",
-                "목표를 달성했어요! 워킷의 성장을 함께 확인해볼까요?",
-                Map.of(
-                        "type", "GOAL_WALK_100",
-                        "currentWalkCount", String.valueOf(currentWalkCount),
-                        "targetWalkCount", String.valueOf(targetWalkCount)
-                )
-        );
+        try {
+            boolean ok = fcmMessagingService.sendNotification(
+                    user,
+                    title,
+                    body,
+                    Map.of(
+                            "type", "GOAL_WALK_100",
+                            "currentWalkCount", String.valueOf(currentWalkCount),
+                            "targetWalkCount", String.valueOf(targetWalkCount)
+                    )
+            );
+            log.info("[NotifyGoalFull] pushSent={} userId={}", ok, user.getId());
 
+            if (ok) {
+                Notification n = Notification.systemNotification(
+                        user,
+                        NotificationType.GOAL,
+                        title,
+                        body,
+                        null
+                );
+                notificationRepository.save(n);
+            }
+        } catch (Exception e) {
+            log.warn("[NotifyGoalFull] push failed userId={}", user.getId(), e);
+        }
     }
 
 
@@ -133,23 +155,13 @@ public class WalkNotificationService {
 
     public void notifyNewMission(User user) {
 
-        // 미션 알림 OFF면 스킵
         if (!user.canReceiveMissionNotification()) {
             log.info("[NotifyMission] mission notification disabled userId={}", user.getId());
             return;
         }
 
-        String title = "새로운 미션이 오픈되었어요. ";
+        String title = "새로운 미션이 오픈되었어요.";
         String body = "새로운 미션이 오픈되었어요. 워킷과 함께 도전해봐요!";
-
-        Notification n = Notification.systemNotification(
-                user,
-                NotificationType.MISSION_OPEN,
-                title,
-                body,
-                null
-        );
-        notificationRepository.save(n);
 
         try {
             boolean ok = fcmMessagingService.sendNotification(
@@ -159,35 +171,73 @@ public class WalkNotificationService {
                     Map.of("type", "NEW_MISSION")
             );
             log.info("[NotifyMission] pushSent={} userId={}", ok, user.getId());
+
+            if (ok) {
+                Notification n = Notification.systemNotification(
+                        user,
+                        NotificationType.MISSION_OPEN,
+                        title,
+                        body,
+                        null
+                );
+                notificationRepository.save(n);
+            }
         } catch (Exception e) {
             log.warn("[NotifyMission] push failed userId={}", user.getId(), e);
         }
     }
 
+
     /**
      * 팔로우 요청 알림
      * sender -> receiver 에게 푸시 전송
      */
-    public void notifyFollowRequest(User receiver, User sender) {
+    public boolean notifyFollowRequest(User receiver, User sender, Long followId) {
 
         if (!receiver.canReceiveFriendNotification()) {
             log.info("[NotifyFollowRequest] friend notification disabled receiverId={}", receiver.getId());
-            return;
+            return false;
         }
 
-        String title = "팔로우 요청";
-        String body = String.format("%s님이 팔로우를 요청했어요.", sender.getNickname());
+        String title = "새 팔로워";
+        String body = sender.getNickname() + "님이 팔로우했어요";
 
-        fcmMessagingService.sendNotification(
-                receiver,
-                title,
-                body,
-                Map.of(
-                        "type", "FOLLOW_REQUEST",
-                        "senderId", String.valueOf(sender.getId()),
-                        "senderNickname", sender.getNickname()
-                )
-        );
+        try {
+            boolean ok = fcmMessagingService.sendNotification(
+                    receiver,
+                    title,
+                    body,
+                    Map.of(
+                            "type", "FOLLOW",
+                            "senderId", String.valueOf(sender.getId()),
+                            "senderNickname", sender.getNickname()
+                            //"followId", String.valueOf(followId)
+                    )
+            );
+
+            log.info("[NotifyFollowRequest] pushSent={} receiverId={}, followId={}",
+                    ok, receiver.getId(), followId);
+
+            if (ok) {
+                notificationRepository.save(
+                        Notification.userNotification(
+                                receiver,
+                                sender,
+                                NotificationType.FOLLOW,
+                                title,
+                                body,
+                                String.valueOf(followId)
+                        )
+                );
+            }
+
+            return ok;
+
+        } catch (Exception e) {
+            log.warn("[NotifyFollowRequest] push failed receiverId={}, followId={}",
+                    receiver.getId(), followId, e);
+            return false;
+        }
     }
 
 

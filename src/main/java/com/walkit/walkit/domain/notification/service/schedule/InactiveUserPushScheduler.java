@@ -28,7 +28,8 @@ public class InactiveUserPushScheduler {
     @Transactional
     public void notifyInactiveUsers48h() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime threshold = now.minusHours(48);
+        //LocalDateTime threshold = now.minusHours(48);
+        LocalDateTime threshold = now.minusHours(1);
 
         int totalFetched = 0;
         int totalSent = 0;
