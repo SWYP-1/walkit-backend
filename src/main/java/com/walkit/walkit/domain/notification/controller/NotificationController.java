@@ -74,12 +74,20 @@ public class NotificationController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "20") int limit
     ) {
-        // 안전장치 (원하는 값으로 조절)
         int safeLimit = Math.min(Math.max(limit, 1), 100);
 
         return ResponseEntity.ok(
                 notificationService.getNotifications(userPrincipal.getUserId(), safeLimit)
         );
+    }
+
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<Void> deleteNotification(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long notificationId
+    ) {
+        notificationService.deleteNotification(userPrincipal.getUserId(), notificationId);
+        return ResponseEntity.noContent().build();
     }
 }
 
