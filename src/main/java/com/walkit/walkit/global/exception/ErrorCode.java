@@ -53,12 +53,13 @@ public enum ErrorCode {
     MISSION_ASSIGN_FAILED(INTERNAL_SERVER_ERROR, 6007, "[Mission] 주간 미션 배정에 실패했습니다."),
     MISSION_CONFIG_INVALID(BAD_REQUEST, 6008, "[Mission] 미션 설정이 올바르지 않습니다."),
 
-
-    // NOTIFICATION
-
-
     // GOAL
-    GOAL_UPDATE_NOT_ALLOWED(BAD_REQUEST, 7001, "[Goal] 목표 수정은 한달에 한번만 가능합니다.");
+    GOAL_UPDATE_NOT_ALLOWED(BAD_REQUEST, 7001, "[Goal] 목표 수정은 한달에 한번만 가능합니다."),
+
+    // WEATHER
+    WEATHER_PROVIDER_UNAVAILABLE(SERVICE_UNAVAILABLE, 8001,"[Weather] 외부 날씨 제공자가 일시적으로 사용 불가합니다."),
+    WEATHER_CACHE_UNAVAILABLE(SERVICE_UNAVAILABLE, 8003, "[Weather] 캐시 갱신 중 문제가 발생했습니다.");
+
 
     private final HttpStatus httpStatus;
     private final Integer code;
