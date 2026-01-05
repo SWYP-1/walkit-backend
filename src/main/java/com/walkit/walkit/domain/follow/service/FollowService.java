@@ -62,12 +62,19 @@ public class FollowService {
         if (followRepository.existsBySenderAndReceiver(user1, user2)) {
             Follow follow = followRepository.findBySenderAndReceiver(user1, user2);
             follow.accept();
+            deleteFollowNotification(follow.getId());
         }
 
         if (followRepository.existsBySenderAndReceiver(user2, user1)) {
             Follow follow = followRepository.findBySenderAndReceiver(user2, user1);
             follow.accept();
+            deleteFollowNotification(follow.getId());
         }
+
+    }
+
+    private void deleteFollowNotification(Long followId) {
+        notificationRepository.deleteByTypeAndTargetId(NotificationType.FOLLOW, String.valueOf(followId));
     }
 
     public void deleteFollow(Long userId, String nickname) {
@@ -126,6 +133,8 @@ public class FollowService {
 
             notificationRepository.deleteByTypeAndTargetId(NotificationType.FOLLOW, String.valueOf(follow.getId()));
             followRepository.deleteBySenderAndReceiver(sender, receiver);
+
+            deleteFollowNotification(follow.getId());
         } else {
             throw new CustomException(NOT_EXISTS_PENDING_FOLLOW);
         }
