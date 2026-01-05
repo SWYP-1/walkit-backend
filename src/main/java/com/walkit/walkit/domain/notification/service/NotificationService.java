@@ -2,6 +2,8 @@ package com.walkit.walkit.domain.notification.service;
 
 import com.walkit.walkit.domain.notification.dto.NotificationResponseDto;
 import com.walkit.walkit.domain.notification.repository.NotificationRepository;
+import com.walkit.walkit.global.exception.CustomException;
+import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,7 +45,7 @@ public class NotificationService {
     public void deleteNotification(Long userId, Long notificationId) {
         int deleted = notificationRepository.deleteByIdAndUserId(notificationId, userId);
         if (deleted == 0) {
-            throw new IllegalArgumentException("Notification not found");
+            throw new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND);
         }
     }
 
