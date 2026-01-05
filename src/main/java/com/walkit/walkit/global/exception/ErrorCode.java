@@ -58,7 +58,7 @@ public enum ErrorCode {
 
     // WEATHER
     WEATHER_PROVIDER_UNAVAILABLE(SERVICE_UNAVAILABLE, 8001,"[Weather] 외부 날씨 제공자가 일시적으로 사용 불가합니다."),
-    WEATHER_CACHE_UNAVAILABLE(SERVICE_UNAVAILABLE, 8003, "[Weather] 캐시 갱신 중 문제가 발생했습니다."),
+    WEATHER_CACHE_UNAVAILABLE(SERVICE_UNAVAILABLE, 8002, "[Weather] 캐시 갱신 중 문제가 발생했습니다."),
 
     // NOTIFICATION
     NOTIFICATION_NOT_FOUND(NOT_FOUND, 9001, "[Notification] 알림을 찾을 수 없습니다.");
