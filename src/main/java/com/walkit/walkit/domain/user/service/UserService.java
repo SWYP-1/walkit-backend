@@ -134,14 +134,15 @@ public class UserService {
             String targetUserImageName = userImageService.findUserImageName(targetUser.getId());
 
             if (userPrincipal == null) {
-                ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).build();
+                ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).build();
                 responseUserNickNameFindDtos.add(dto);
             } else {
                 User user = findUserById(userPrincipal.getUserId());
 
                 if (user == targetUser) {
-                    ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(FollowStatus.MYSELF).build();
+                    ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).followStatus(FollowStatus.MYSELF).build();
                     responseUserNickNameFindDtos.add(dto);
+                    continue;
                 }
 
                 FollowStatus followStatus = null;
@@ -168,7 +169,7 @@ public class UserService {
                 } else {
                     followStatus = FollowStatus.EMPTY;
                 }
-                ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(followStatus).build();
+                ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).followStatus(followStatus).build();
                 responseUserNickNameFindDtos.add(dto);
             }
         }
