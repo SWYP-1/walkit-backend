@@ -39,6 +39,14 @@ public class NotificationService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteNotification(Long userId, Long notificationId) {
+        int deleted = notificationRepository.deleteByIdAndUserId(notificationId, userId);
+        if (deleted == 0) {
+            throw new IllegalArgumentException("Notification not found");
+        }
+    }
+
 
     public long getUnreadCount(Long receiverId) {
         return notificationRepository.countByReceiverIdAndIsReadFalse(receiverId);
