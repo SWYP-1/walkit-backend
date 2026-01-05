@@ -57,7 +57,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return userRepository.findByAuthProviderAndProviderIdAndDeleted(
                 attributes.getAuthProvider(),
                 attributes.getOauth2UserInfo().getProviderId(),
-                true
+                false
         ).map(existingUser -> {
             // 기존 사용자 업데이트
             User updatedUser = existingUser.updateOauth(
