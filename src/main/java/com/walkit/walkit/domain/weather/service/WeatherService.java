@@ -5,6 +5,8 @@ import com.walkit.walkit.domain.weather.dto.KmaItem;
 import com.walkit.walkit.domain.weather.util.KmaBaseTime;
 import com.walkit.walkit.domain.weather.util.KmaClient;
 import com.walkit.walkit.domain.weather.util.KmaGridConverter;
+import com.walkit.walkit.global.exception.CustomException;
+import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -55,7 +57,7 @@ public class WeatherService {
 
         // 최근 실패 캐시가 있으면 실패 처리
         if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(fKey))) {
-            throw new IllegalStateException("Weather provider temporarily unavailable");
+            throw new CustomException(ErrorCode.WEATHER_PROVIDER_UNAVAILABLE);
         }
 
         // 분산락 시도 (동일 nx,ny에 대해 한 요청만 외부호출)
@@ -92,8 +94,7 @@ public class WeatherService {
             } catch (Exception e) {
                 // 실패 캐시 저장
                 stringRedisTemplate.opsForValue().set(fKey, "1", FAIL_TTL);
-
-                throw e;
+                throw new CustomException(ErrorCode.WEATHER_PROVIDER_UNAVAILABLE);
             } finally {
                 // 락 해제(토큰 매칭 후 삭제)
                 releaseLockSafely(lKey, token);
@@ -110,7 +111,7 @@ public class WeatherService {
         // 한 번 더 캐시 체크 후 실패 처리
         CurrentWeatherResponseDto last = weatherRedisTemplate.opsForValue().get(cKey);
         if (last != null) return last;
-        throw new IllegalStateException("Weather cache miss after lock contention");
+        throw new CustomException(ErrorCode.WEATHER_CACHE_UNAVAILABLE);
     }
 
     private String cacheKey(int nx, int ny) {
