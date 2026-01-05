@@ -64,4 +64,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.deleted = true AND u.deletedAt < :threshold")
     List<User> findDeletedUsersOlderThan(@Param("threshold") LocalDateTime threshold);
 
+    @Query("SELECT u FROM User u WHERE u.deleted = :deleted AND u.nickname LIKE %:nickname%")
+    List<User> findByNicknameLikeAndDeleted(@Param("nickname") String nickname, @Param("deleted") boolean deleted);
 }

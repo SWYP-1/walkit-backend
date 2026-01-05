@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -61,9 +62,9 @@ public class UserController {
     }
 
     @GetMapping("/nickname")
-    public ResponseEntity<ResponseUserNickNameFindDto> findUserByNickname(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String nickname) {
-        ResponseUserNickNameFindDto dto = userService.findUserByNickname(userPrincipal, nickname);
-        return  ResponseEntity.status(OK).body(dto);
+    public ResponseEntity<List<ResponseUserNickNameFindDto>> findUserByNickname(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String nickname) {
+        List<ResponseUserNickNameFindDto> dtos = userService.findUserByNickname(userPrincipal, nickname);
+        return  ResponseEntity.status(OK).body(dtos);
     }
 
     @GetMapping("/summary/nickname")

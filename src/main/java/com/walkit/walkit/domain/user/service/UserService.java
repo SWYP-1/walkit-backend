@@ -29,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -124,47 +126,54 @@ public class UserService {
         user.updateMarketingConsent(marketingConsent);
     }
 
-    public ResponseUserNickNameFindDto findUserByNickname(UserPrincipal userPrincipal, String nickname) {
-        User targetUser = userRepository.findByNicknameAndDeleted(nickname, false).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        String targetUserImageName = userImageService.findUserImageName(targetUser.getId());
+    public List<ResponseUserNickNameFindDto> findUserByNickname(UserPrincipal userPrincipal, String nickname) {
+        List<ResponseUserNickNameFindDto> responseUserNickNameFindDtos = new ArrayList<>();
 
-        if (userPrincipal == null) {
-            return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).build();
-        } else {
-            User user = findUserById(userPrincipal.getUserId());
+        List<User> findUsers = userRepository.findByNicknameLikeAndDeleted(nickname, false);
+        for (User targetUser : findUsers) {
+            String targetUserImageName = userImageService.findUserImageName(targetUser.getId());
 
-            if (user == targetUser) {
-                return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(FollowStatus.MYSELF).build();
-
-            }
-
-
-            FollowStatus followStatus = null;
-            if (followRepository.existsBySenderAndReceiver(user, targetUser)) {
-                Follow follow = followRepository.findBySenderAndReceiver(user, targetUser);
-
-                if (follow == null) {
-                    followStatus = FollowStatus.EMPTY;
-                } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
-                    followStatus = FollowStatus.PENDING;
-                } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
-                    followStatus = FollowStatus.ACCEPTED;
-                }
-            } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
-                Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
-
-                if (follow == null) {
-                    followStatus = FollowStatus.EMPTY;
-                } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
-                    followStatus = FollowStatus.PENDING;
-                } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
-                    followStatus = FollowStatus.ACCEPTED;
-                }
+            if (userPrincipal == null) {
+                ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).build();
+                responseUserNickNameFindDtos.add(dto);
             } else {
-                followStatus = FollowStatus.EMPTY;
+                User user = findUserById(userPrincipal.getUserId());
+
+                if (user == targetUser) {
+                    ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).followStatus(FollowStatus.MYSELF).build();
+                    responseUserNickNameFindDtos.add(dto);
+                    continue;
+                }
+
+                FollowStatus followStatus = null;
+                if (followRepository.existsBySenderAndReceiver(user, targetUser)) {
+                    Follow follow = followRepository.findBySenderAndReceiver(user, targetUser);
+
+                    if (follow == null) {
+                        followStatus = FollowStatus.EMPTY;
+                    } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
+                        followStatus = FollowStatus.PENDING;
+                    } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
+                        followStatus = FollowStatus.ACCEPTED;
+                    }
+                } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
+                    Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
+
+                    if (follow == null) {
+                        followStatus = FollowStatus.EMPTY;
+                    } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
+                        followStatus = FollowStatus.PENDING;
+                    } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
+                        followStatus = FollowStatus.ACCEPTED;
+                    }
+                } else {
+                    followStatus = FollowStatus.EMPTY;
+                }
+                ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).followStatus(followStatus).build();
+                responseUserNickNameFindDtos.add(dto);
             }
-            return ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(nickname).imageName(targetUserImageName).followStatus(followStatus).build();
         }
+        return responseUserNickNameFindDtos;
     }
 
     private User findUserById(Long userId) {
@@ -193,7 +202,7 @@ public class UserService {
 
 
     public ResponseUserSummaryDto findUserSummary(String nickname, double lat, double lon) {
-        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByNicknameAndDeleted(nickname, false).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ResponseCharacterDto responseCharacterDto = characterService.find(user.getId(), lat, lon);
         WalkTotalSummaryResponseDto totalSummary = walkService.getTotalSummary(user.getId());
 
