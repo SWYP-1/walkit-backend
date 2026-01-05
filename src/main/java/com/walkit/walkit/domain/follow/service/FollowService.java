@@ -44,19 +44,7 @@ public class FollowService {
         Follow follow = Follow.builder().sender(sender).receiver(receiver).build();
         followRepository.save(follow);
 
-        notificationRepository.save(
-                Notification.userNotification(
-                        receiver,
-                        sender,
-                        NotificationType.FOLLOW,
-                        "새 팔로워",
-                        sender.getNickname() + "님이 팔로우했어요",
-                        String.valueOf(follow.getId())
-                )
-        );
-
-
-        walkNotificationService.notifyFollowRequest(receiver, sender);
+        walkNotificationService.notifyFollowRequest(receiver, sender, follow.getId());
     }
 
     private void checkOneSelfFollow(User sender, User receiver) {
