@@ -241,6 +241,41 @@ public class WalkNotificationService {
     }
 
 
+    /**
+     * 팔로우 신청 수락시 신청을 보낸 사람에게 수락 알림 보내기
+     */
+    public void sendAcceptFollowNotificationToSender(User receiver, User sender) {
 
+        if (!receiver.canReceiveMissionNotification()) {
+            log.info("[NotifyFollowAccept] follow accept notification disabled userId={}", receiver.getId());
+            return;
+        }
+
+        String title = "팔로우 신청이 수락되었어요";
+        String body = sender.getNickname() + "님이 팔로우 신청을 수락했어요";
+
+        try {
+            boolean ok = fcmMessagingService.sendNotification(
+                    receiver,
+                    title,
+                    body,
+                    Map.of("type", "FOLLOW")
+            );
+            log.info("[NotifyFollowAccept] pushSent={} userId={}", ok, receiver.getId());
+
+            if (ok) {
+                Notification n = Notification.systemNotification(
+                        receiver,
+                        NotificationType.FOLLOW,
+                        title,
+                        body,
+                        null
+                );
+                notificationRepository.save(n);
+            }
+        } catch (Exception e) {
+            log.warn("[NotifyFollowAccept] push failed userId={}", receiver.getId(), e);
+        }
+    }
 }
 

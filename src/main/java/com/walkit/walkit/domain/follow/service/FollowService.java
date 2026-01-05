@@ -54,23 +54,24 @@ public class FollowService {
     }
 
     public void acceptFollow(Long userId, String nickname) {
-        User user1 = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-        User user2 = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        User followReceiver = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        User followSender = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        checkAlreadyAcceptedFollow(user1, user2);
+        checkAlreadyAcceptedFollow(followReceiver, followSender);
 
-        if (followRepository.existsBySenderAndReceiver(user1, user2)) {
-            Follow follow = followRepository.findBySenderAndReceiver(user1, user2);
+        if (followRepository.existsBySenderAndReceiver(followReceiver, followSender)) {
+            Follow follow = followRepository.findBySenderAndReceiver(followReceiver, followSender);
             follow.accept();
             deleteFollowNotification(follow.getId());
         }
 
-        if (followRepository.existsBySenderAndReceiver(user2, user1)) {
-            Follow follow = followRepository.findBySenderAndReceiver(user2, user1);
+        if (followRepository.existsBySenderAndReceiver(followSender, followReceiver)) {
+            Follow follow = followRepository.findBySenderAndReceiver(followSender, followReceiver);
             follow.accept();
             deleteFollowNotification(follow.getId());
         }
 
+        walkNotificationService.sendAcceptFollowNotificationToSender(followReceiver, followSender);
     }
 
     private void deleteFollowNotification(Long followId) {
