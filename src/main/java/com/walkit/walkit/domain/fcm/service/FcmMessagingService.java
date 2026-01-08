@@ -77,35 +77,19 @@ public class FcmMessagingService {
         Map<String, String> payload = new java.util.HashMap<>();
         if (data != null) payload.putAll(data);
 
-        Message.Builder builder = Message.builder()
-                .setToken(token.getToken());
+        if (title != null) payload.put("title", title);
+        if (body != null) payload.put("body", body);
 
-        // IOS: Notification로 표시, data에는 데이터만
+        Message.Builder builder = Message.builder()
+                .setToken(token.getToken())
+                .putAllData(payload);
+
+        // iOS만 Notification 추가
         if (token.getDeviceType() == DeviceType.IOS) {
             builder.setNotification(Notification.builder()
                     .setTitle(title)
                     .setBody(body)
                     .build());
-
-            builder.setApnsConfig(
-                    ApnsConfig.builder()
-                            .putHeader("apns-priority", "10")
-                            .setAps(Aps.builder()
-                                    .setAlert(ApsAlert.builder()
-                                            .setTitle(title)
-                                            .setBody(body)
-                                            .build())
-                                    .setSound("default")
-                                    .build())
-                            .build()
-            );
-            builder.putAllData(payload);
-
-        } else {
-            // ANDROID: data-only, title/body를 data에 넣어줌
-            if (title != null) payload.put("title", title);
-            if (body != null) payload.put("body", body);
-            builder.putAllData(payload);
         }
 
         return builder.build();
@@ -113,7 +97,7 @@ public class FcmMessagingService {
 
 
 
-    @Transactional
+        @Transactional
     public boolean sendNotification(Long userId, String title, String body) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다. userId=" + userId));
