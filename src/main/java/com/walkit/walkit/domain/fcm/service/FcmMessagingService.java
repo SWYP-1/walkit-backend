@@ -86,6 +86,19 @@ public class FcmMessagingService {
                     .setTitle(title)
                     .setBody(body)
                     .build());
+
+            builder.setApnsConfig(
+                    ApnsConfig.builder()
+                            .putHeader("apns-priority", "10")
+                            .setAps(Aps.builder()
+                                    .setAlert(ApsAlert.builder()
+                                            .setTitle(title)
+                                            .setBody(body)
+                                            .build())
+                                    .setSound("default")
+                                    .build())
+                            .build()
+            );
             builder.putAllData(payload);
 
         } else {
