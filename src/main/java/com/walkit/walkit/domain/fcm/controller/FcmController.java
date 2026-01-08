@@ -48,10 +48,14 @@ public class FcmController {
     @PostMapping("/test")
     public String testSend(@AuthenticationPrincipal UserPrincipal principal,
                            @RequestBody FcmMessageRequestDto req) {
-        return fcmMessagingService.sendNotification(principal.getUserId(), req.getTitle(), req.getBody());
+        boolean success = fcmMessagingService.sendNotification(
+                principal.getUserId(),
+                req.getTitle(),
+                req.getBody()
+        );
+
+        return success ? "OK" : "FAIL";
     }
-
-
 
 
 }
