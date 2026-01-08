@@ -1,9 +1,11 @@
 package com.walkit.walkit.domain.fcm.service;
 
 import com.google.firebase.messaging.*;
+import com.walkit.walkit.domain.fcm.entity.DeviceType;
 import com.walkit.walkit.domain.fcm.entity.FcmToken;
 import com.walkit.walkit.domain.fcm.repository.FcmTokenRepository;
 import com.walkit.walkit.domain.user.entity.User;
+import com.walkit.walkit.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.Map;
 public class FcmMessagingService {
 
     private final FcmTokenRepository fcmTokenRepository;
+    private final UserRepository userRepository;
 
     // 단일 사용자에게 알림 전송 (단일 디바이스 정책: 활성 토큰 1개만 사용)
     @Transactional
@@ -31,12 +34,14 @@ public class FcmMessagingService {
         }
 
         try {
-            Message msg = Message.builder()
+            /*Message msg = Message.builder()
                     .setToken(fcmToken.getToken())
                     .putAllData(data != null ? data : Map.of())
                     .putData("title", title)
                     .putData("body", body)
-                    .build();
+                    .build();*/
+
+            Message msg = buildMessage(fcmToken, title, body, data);
 
             String messageId = FirebaseMessaging.getInstance().send(msg);
             log.info("FCM 전송 성공 userId={}, messageId={}", user.getId(), messageId);
@@ -68,46 +73,45 @@ public class FcmMessagingService {
     }
 
 
-    // 테스트용
-    @Transactional
-    public String sendNotification(Long userId, String title, String body) {
-        FcmToken fcmToken = fcmTokenRepository
-                .findTopByUserIdAndEnabledTrueOrderByLastUsedAtDesc(userId)
-                .orElseThrow(() -> new IllegalArgumentException("등록된 FCM 토큰이 없습니다. userId=" + userId));
+    private Message buildMessage(FcmToken token, String title, String body, Map<String, String> data) {
+        Map<String, String> payload = new java.util.HashMap<>();
+        if (data != null) payload.putAll(data);
 
-        String messageId = sendToToken(userId, fcmToken, title, body, Map.of("type", "TEST"));
-        return "메시지 전송 성공: " + messageId;
-    }
+        if (title != null) payload.put("title", title);
+        if (body != null) payload.put("body", body);
 
-    private String sendToToken(Long userId, FcmToken fcmToken, String title, String body, Map<String, String> data) {
-        try {
-            Message msg = Message.builder()
-                    .setToken(fcmToken.getToken())
-                    .setNotification(Notification.builder()
-                            .setTitle(title)
-                            .setBody(body)
-                            .build())
-                    .putAllData(data != null ? data : Map.of())
-                    .build();
+        Message.Builder builder = Message.builder()
+                .setToken(token.getToken())
+                .putAllData(payload);
 
-            String messageId = FirebaseMessaging.getInstance().send(msg);
-            log.info("FCM 전송 성공 userId={}, messageId={}", userId, messageId);
-
-            fcmToken.updateLastUsed();
-            return messageId;
-
-        } catch (FirebaseMessagingException e) {
-            MessagingErrorCode code = e.getMessagingErrorCode();
-            log.warn("FCM 전송 실패 userId={}, code={}, token={}",
-                    userId, code, maskToken(fcmToken.getToken()), e);
-
-            if (code == MessagingErrorCode.UNREGISTERED || code == MessagingErrorCode.INVALID_ARGUMENT) {
-                fcmToken.disable();
-            }
-
-            throw new RuntimeException("메시지 전송 실패: " + code, e);
+        // iOS만 Notification 추가
+        if (token.getDeviceType() == DeviceType.IOS) {
+            builder.setNotification(Notification.builder()
+                    .setTitle(title)
+                    .setBody(body)
+                    .build());
         }
+
+        return builder.build();
     }
+
+
+    @Transactional
+    public boolean sendNotification(Long userId, String title, String body) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다. userId=" + userId));
+
+        return sendNotification(
+                user,
+                title,
+                body,
+                Map.of("type", "TEST")
+        );
+    }
+
+
+
+
 
     // 토큰 마스킹 (로그용)
     private String maskToken(String token) {
