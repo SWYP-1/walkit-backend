@@ -77,23 +77,27 @@ public class FcmMessagingService {
         Map<String, String> payload = new java.util.HashMap<>();
         if (data != null) payload.putAll(data);
 
-        if (title != null) payload.put("title", title);
-        if (body != null) payload.put("body", body);
-
         Message.Builder builder = Message.builder()
-                .setToken(token.getToken())
-                .putAllData(payload);
+                .setToken(token.getToken());
 
-        // iOS만 Notification 추가
+        // IOS: Notification로 표시, data에는 데이터만
         if (token.getDeviceType() == DeviceType.IOS) {
             builder.setNotification(Notification.builder()
                     .setTitle(title)
                     .setBody(body)
                     .build());
+            builder.putAllData(payload);
+
+        } else {
+            // ANDROID: data-only, title/body를 data에 넣어줌
+            if (title != null) payload.put("title", title);
+            if (body != null) payload.put("body", body);
+            builder.putAllData(payload);
         }
 
         return builder.build();
     }
+
 
 
     @Transactional
@@ -108,8 +112,6 @@ public class FcmMessagingService {
                 Map.of("type", "TEST")
         );
     }
-
-
 
 
 
