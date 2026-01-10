@@ -15,7 +15,7 @@ public class WeeklyGoalInitializeScheduler {
 
     private final GoalRepository goalRepository;
 
-    @Scheduled(cron = "0 50 18 * * *")
+    @Scheduled(cron = "0 0 1 * * MON")
     @Transactional
     public void executeWeeklyGoalInitialize() {
         goalRepository.findAll().forEach(goal -> {
