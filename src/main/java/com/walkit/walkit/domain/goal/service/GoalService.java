@@ -47,8 +47,9 @@ public class GoalService {
     public ResponseGoalDto findGoal(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Goal goal = user.getGoal();
+        boolean isEnableUpdateGoal = checkUpdateRestrictionBool(goal);
 
-         return ResponseGoalDto.builder().targetStepCount(goal.getThisWeekTargetStepCount()).targetWalkCount(goal.getThisWeekTargetWalkCount()).build();
+        return ResponseGoalDto.builder().targetStepCount(goal.getThisWeekTargetStepCount()).targetWalkCount(goal.getThisWeekTargetWalkCount()).isEnableUpdateGoal(isEnableUpdateGoal).build();
     }
 
     public void saveGoal(Long userId, RequestGoalDto dto) {
@@ -88,6 +89,22 @@ public class GoalService {
                 throw new CustomException(ErrorCode.GOAL_UPDATE_NOT_ALLOWED);
             }
         }
+    }
+
+    private static boolean checkUpdateRestrictionBool(Goal beforeGoal) {
+        log.info("createdDate: {}", beforeGoal.getCreatedDate());
+        log.info("modifiedDate: {}", beforeGoal.getModifiedDate());
+        if (beforeGoal.getUpdatedDate() != null) {
+            long daySinceLastUpdate = ChronoUnit.DAYS.between(
+                    beforeGoal.getUpdatedDate(),
+                    LocalDateTime.now()
+            );
+
+            if (daySinceLastUpdate < 30) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean hasWalksInCurrentWeek(Long userId) {

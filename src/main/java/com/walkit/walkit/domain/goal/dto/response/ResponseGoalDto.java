@@ -9,4 +9,5 @@ public class ResponseGoalDto {
 
     private int targetStepCount;
     private int targetWalkCount;
+    private boolean isEnableUpdateGoal;
 }
