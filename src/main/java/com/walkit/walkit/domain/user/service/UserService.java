@@ -156,7 +156,8 @@ public class UserService {
                     } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                         followStatus = FollowStatus.ACCEPTED;
                     }
-                } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
+                }
+                /*else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
                     Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
 
                     if (follow == null) {
@@ -166,7 +167,8 @@ public class UserService {
                     } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                         followStatus = FollowStatus.ACCEPTED;
                     }
-                } else {
+                } */
+                else {
                     followStatus = FollowStatus.EMPTY;
                 }
                 ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).followStatus(followStatus).build();
