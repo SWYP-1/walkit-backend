@@ -157,17 +157,15 @@ public class UserService {
                         followStatus = FollowStatus.ACCEPTED;
                     }
                 }
-                /*else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
+                else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
                     Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
 
                     if (follow == null) {
                         followStatus = FollowStatus.EMPTY;
-                    } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
-                        followStatus = FollowStatus.PENDING;
                     } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                         followStatus = FollowStatus.ACCEPTED;
                     }
-                } */
+                }
                 else {
                     followStatus = FollowStatus.EMPTY;
                 }
