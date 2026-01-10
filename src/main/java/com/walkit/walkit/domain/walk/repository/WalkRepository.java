@@ -82,6 +82,16 @@ where w.user.id = :userId
                           @Param("startMillis") long startMillis,
                           @Param("endMillis") long endMillis);
 
+    // 사용자 전체 산책 기록 조회
+    @Query("""
+        select distinct w
+        from Walk w
+        left join fetch w.points p
+        where w.user.id = :userId
+        order by w.startTime desc
+    """)
+    List<Walk> findAllDetailByUserId(@Param("userId") Long userId);
+
     Optional<Walk> findFirstByUserIdOrderByCreatedDateDesc(Long userId);
 
 }

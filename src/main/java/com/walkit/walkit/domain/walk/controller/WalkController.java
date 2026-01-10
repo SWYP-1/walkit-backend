@@ -18,6 +18,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 @Tag(name = "Walk", description = "산책 기록 API")
 @RequiredArgsConstructor
@@ -101,5 +103,12 @@ public class WalkController {
         return ResponseEntity.ok(response);
     }
 
+
+    @Operation(summary = "사용자 전체 산책 기록 조회", description = "사용자의 산책 기록 전체를 조회합니다.")
+    @GetMapping("/list")
+    public ResponseEntity<List<WalkResponseDto>> getAllWalks(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        List<WalkResponseDto> response = walkService.getAllWalks(userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
+    }
 }
 

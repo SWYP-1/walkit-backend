@@ -202,6 +202,17 @@ public class WalkServiceImpl implements WalkService {
         return sum == null ? 0 : sum;
     }
 
+    // 사용자 전체 산책 기록 조회
+    public List<WalkResponseDto> getAllWalks(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        return walkRepository.findAllDetailByUserId(userId)
+                .stream()
+                .map(WalkResponseDto::fromDetail)
+                .toList();
+    }
 
 
     private void validateLatLng(Double lat, Double lng) {

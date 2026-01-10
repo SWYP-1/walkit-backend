@@ -33,4 +33,7 @@ public interface WalkService {
 
     // 최근 7개 산책 기록 조회
     List<WalkResponseDto> getRecentWalks(Long userId);
+
+    // 사용자 전체 산책 기록 조회
+    List<WalkResponseDto> getAllWalks(Long userId);
 }
