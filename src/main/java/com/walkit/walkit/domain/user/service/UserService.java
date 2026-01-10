@@ -156,17 +156,17 @@ public class UserService {
                     } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                         followStatus = FollowStatus.ACCEPTED;
                     }
-                } else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
+                }
+                else if (followRepository.existsBySenderAndReceiver(targetUser, user)) {
                     Follow follow = followRepository.findBySenderAndReceiver(targetUser, user);
 
-                    if (follow == null) {
-                        followStatus = FollowStatus.EMPTY;
-                    } else if (follow.getFollowStatus() == FollowStatus.PENDING) {
-                        followStatus = FollowStatus.PENDING;
-                    } else if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
+                    if (follow.getFollowStatus() == FollowStatus.ACCEPTED) {
                         followStatus = FollowStatus.ACCEPTED;
+                    } else {
+                        followStatus = FollowStatus.EMPTY;
                     }
-                } else {
+                }
+                else {
                     followStatus = FollowStatus.EMPTY;
                 }
                 ResponseUserNickNameFindDto dto = ResponseUserNickNameFindDto.builder().userId(targetUser.getId()).nickName(targetUser.getNickname()).imageName(targetUserImageName).followStatus(followStatus).build();
