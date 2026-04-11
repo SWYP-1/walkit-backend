@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/apple/token").permitAll()  // Apple SDK identityToken login
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/items").permitAll()
+                        .requestMatchers("/spots/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
