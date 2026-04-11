@@ -40,6 +40,8 @@ public class SpotService {
                             .blogReviewCount(blogResult.total())
                             .blogReviewLink(blogResult.link())
                             .thumbnailUrl(thumbnail)
+                            .x(place.getX())
+                            .y(place.getY())
                             .build();
                 })
                 .toList();

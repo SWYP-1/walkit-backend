@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+
 @Builder
 public class NearbySpotResponseDto {
 
@@ -15,4 +16,6 @@ public class NearbySpotResponseDto {
     private int blogReviewCount;
     private String blogReviewLink;
     private String thumbnailUrl;
+    private String x;
+    private String y;
 }
