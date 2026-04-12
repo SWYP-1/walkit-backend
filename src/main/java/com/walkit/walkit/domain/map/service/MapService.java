@@ -3,6 +3,7 @@ package com.walkit.walkit.domain.map.service;
 import com.walkit.walkit.domain.follow.entity.Follow;
 import com.walkit.walkit.domain.follow.enums.FollowStatus;
 import com.walkit.walkit.domain.follow.repository.FollowRepository;
+import com.walkit.walkit.domain.map.dto.response.FollowerLatestWalkResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerRecentActivityResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerWalkingRecordResponseDto;
 import com.walkit.walkit.domain.map.dto.response.MapCharacterDto;
@@ -10,9 +11,11 @@ import com.walkit.walkit.domain.user.entity.User;
 import com.walkit.walkit.domain.user.repository.UserRepository;
 import com.walkit.walkit.domain.walk.entity.Walk;
 import com.walkit.walkit.domain.walk.repository.WalkRepository;
+import com.walkit.walkit.domain.walkLike.repository.WalkLikeRepository;
 import com.walkit.walkit.global.exception.CustomException;
 import com.walkit.walkit.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,7 @@ public class MapService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final WalkRepository walkRepository;
+    private final WalkLikeRepository walkLikeRepository;
 
     public List<FollowerWalkingRecordResponseDto> getFollowerWalkingRecords(Long userId, double lat, double lon, int radius) {
         User user = userRepository.findByIdAndDeleted(userId, false)
@@ -126,6 +130,32 @@ public class MapService {
                             .build();
                 })
                 .toList();
+    }
+
+    public FollowerLatestWalkResponseDto getFollowerLatestWalk(Long requesterId, Long targetUserId) {
+        User requester = userRepository.findByIdAndDeleted(requesterId, false)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        User targetUser = userRepository.findByIdAndDeleted(targetUserId, false)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        boolean isFollowing =
+                followRepository.existsBySenderIdAndReceiverIdAndFollowStatus(requesterId, targetUserId, FollowStatus.ACCEPTED)
+                || followRepository.existsBySenderIdAndReceiverIdAndFollowStatus(targetUserId, requesterId, FollowStatus.ACCEPTED);
+
+        if (!isFollowing) {
+            throw new CustomException(ErrorCode.FOLLOW_NOT_FOUND);
+        }
+
+        Walk latestWalk = walkRepository.findTopWithPointsByUserId(targetUserId, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.WALK_NOT_FOUND));
+
+        int likeCount = walkLikeRepository.countByWalkId(latestWalk.getId());
+        boolean liked = walkLikeRepository.existsByUserIdAndWalkId(requesterId, latestWalk.getId());
+
+        return FollowerLatestWalkResponseDto.of(targetUser, latestWalk, likeCount, liked);
     }
 
     private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {

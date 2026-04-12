@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.map.controller;
 
+import com.walkit.walkit.domain.map.dto.response.FollowerLatestWalkResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerRecentActivityResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerWalkingRecordResponseDto;
 import com.walkit.walkit.domain.map.service.MapService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +46,17 @@ public class MapController {
     ) {
         Long userId = userPrincipal.getUserId();
         List<FollowerRecentActivityResponseDto> response = mapService.getFollowerRecentActivities(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "팔로우 최근 산책 기록 상세 조회", description = "특정 팔로우의 가장 최근 산책 기록을 상세 조회합니다.")
+    @GetMapping("/follower/{userId}/walking-records/latest")
+    public ResponseEntity<FollowerLatestWalkResponseDto> getFollowerLatestWalk(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long userId
+    ) {
+        Long requesterId = userPrincipal.getUserId();
+        FollowerLatestWalkResponseDto response = mapService.getFollowerLatestWalk(requesterId, userId);
         return ResponseEntity.ok(response);
     }
 }
