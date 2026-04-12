@@ -65,7 +65,7 @@ public class NaverSearchClient {
             if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
                 return null;
             }
-            return response.getItems().get(0).getThumbnail();
+            return response.getItems().get(0).getLink();
         } catch (WebClientResponseException e) {
             log.warn("[NaverSearchClient] 이미지 검색 실패 - status={}, query={}", e.getStatusCode(), query);
             return null;
@@ -98,7 +98,7 @@ public class NaverSearchClient {
     @Getter
     @NoArgsConstructor
     public static class ImageItem {
-        @JsonProperty("thumbnail")
-        private String thumbnail;
+        @JsonProperty("link")
+        private String link;
     }
 }
