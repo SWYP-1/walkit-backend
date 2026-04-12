@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.map.controller;
 
+import com.walkit.walkit.domain.map.dto.response.FollowerRecentActivityResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerWalkingRecordResponseDto;
 import com.walkit.walkit.domain.map.service.MapService;
 import com.walkit.walkit.global.security.jwt.UserPrincipal;
@@ -33,6 +34,16 @@ public class MapController {
     ) {
         Long userId = userPrincipal.getUserId();
         List<FollowerWalkingRecordResponseDto> response = mapService.getFollowerWalkingRecords(userId, lat, lon, radius);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "팔로우 최근 활동 목록 조회", description = "나의 팔로우 목록을 가장 최근에 산책한 순서로 조회합니다.")
+    @GetMapping("/follower/recent-activities")
+    public ResponseEntity<List<FollowerRecentActivityResponseDto>> getFollowerRecentActivities(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Long userId = userPrincipal.getUserId();
+        List<FollowerRecentActivityResponseDto> response = mapService.getFollowerRecentActivities(userId);
         return ResponseEntity.ok(response);
     }
 }
