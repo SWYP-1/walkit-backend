@@ -94,4 +94,6 @@ where w.user.id = :userId
 
     Optional<Walk> findFirstByUserIdOrderByCreatedDateDesc(Long userId);
 
+    List<Walk> findAllByUser_IdIn(List<Long> userIds);
+
 }
