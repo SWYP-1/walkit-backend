@@ -24,7 +24,10 @@ public class SpotService {
 
     // 네이버 API Rate Limit 대응: 최대 5개 장소 동시 처리
     private final Semaphore semaphore = new Semaphore(5);
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    // 장소별 enrichPlace 작업용 (outer)
+    private final ExecutorService placeExecutor = Executors.newFixedThreadPool(5);
+    // 네이버 블로그/이미지 호출용 (inner) — placeExecutor와 분리하여 데드락 방지
+    private final ExecutorService naverExecutor = Executors.newFixedThreadPool(10);
 
     public List<NearbySpotResponseDto> getNearbySpots(
             String query, double x, double y, int radius, int size, String sort
@@ -38,7 +41,7 @@ public class SpotService {
         // 장소별로 CompletableFuture 생성 (병렬 처리)
         List<CompletableFuture<NearbySpotResponseDto>> futures = places.stream()
                 .map(place -> CompletableFuture.supplyAsync(
-                        () -> enrichPlace(place, mdcContext), executor))
+                        () -> enrichPlace(place, mdcContext), placeExecutor))
                 .toList();
 
         // 전체 완료 대기 후 결과 수집
@@ -63,11 +66,11 @@ public class SpotService {
         try {
             String naverQuery = extractRegion(place.getAddressName()) + " " + place.getPlaceName();
 
-            // 블로그 + 이미지 동시 호출
+            // 블로그 + 이미지 동시 호출 (placeExecutor와 분리된 naverExecutor 사용)
             CompletableFuture<NaverSearchClient.NaverBlogResult> blogFuture =
-                    CompletableFuture.supplyAsync(() -> naverSearchClient.searchBlog(naverQuery), executor);
+                    CompletableFuture.supplyAsync(() -> naverSearchClient.searchBlog(naverQuery), naverExecutor);
             CompletableFuture<String> imageFuture =
-                    CompletableFuture.supplyAsync(() -> naverSearchClient.searchImage(naverQuery), executor);
+                    CompletableFuture.supplyAsync(() -> naverSearchClient.searchImage(naverQuery), naverExecutor);
 
             CompletableFuture.allOf(blogFuture, imageFuture).join();
 
