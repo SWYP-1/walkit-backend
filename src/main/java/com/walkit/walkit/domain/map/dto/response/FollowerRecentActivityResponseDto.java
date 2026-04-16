@@ -1,5 +1,6 @@
 package com.walkit.walkit.domain.map.dto.response;
 
+import com.walkit.walkit.domain.character.dto.response.ResponseCharacterWearDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,4 +12,6 @@ public class FollowerRecentActivityResponseDto {
     private String nickName;
     private boolean walkedYesterday;
     private MapCharacterDto responseCharacterDto;
+    private ResponseCharacterWearDto headImage;
+    private ResponseCharacterWearDto bodyImage;
 }

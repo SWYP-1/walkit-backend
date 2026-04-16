@@ -1,8 +1,13 @@
 package com.walkit.walkit.domain.map.service;
 
+import com.walkit.walkit.domain.character.dto.response.ResponseCharacterWearDto;
+import com.walkit.walkit.domain.character.entity.Character;
+import com.walkit.walkit.domain.character.entity.CharacterWear;
 import com.walkit.walkit.domain.follow.entity.Follow;
 import com.walkit.walkit.domain.follow.enums.FollowStatus;
 import com.walkit.walkit.domain.follow.repository.FollowRepository;
+import com.walkit.walkit.domain.item.enums.Position;
+import com.walkit.walkit.domain.item.enums.Tag;
 import com.walkit.walkit.domain.map.dto.response.FollowerLatestWalkResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerRecentActivityResponseDto;
 import com.walkit.walkit.domain.map.dto.response.FollowerWalkingRecordResponseDto;
@@ -63,12 +68,15 @@ public class MapService {
                 .filter(walk -> calculateHaversineDistance(lat, lon, walk.getStartLatitude(), walk.getStartLongitude()) <= radius)
                 .map(walk -> {
                     User followUser = userMap.get(walk.getUser().getId());
+                    Character character = followUser.getCharacter();
                     return FollowerWalkingRecordResponseDto.builder()
                             .userId(followUser.getId())
                             .walkId(walk.getId())
                             .latitude(walk.getStartLatitude())
                             .longitude(walk.getStartLongitude())
-                            .responseCharacterDto(MapCharacterDto.from(followUser.getCharacter()))
+                            .responseCharacterDto(MapCharacterDto.from(character))
+                            .headImage(buildHeadImage(character))
+                            .bodyImage(buildBodyImage(character))
                             .build();
                 })
                 .toList();
@@ -122,11 +130,14 @@ public class MapService {
                                     && walk.getStartTime() >= yesterdayStart
                                     && walk.getStartTime() < yesterdayEnd);
 
+                    Character character = followUser.getCharacter();
                     return FollowerRecentActivityResponseDto.builder()
                             .userId(followUser.getId())
                             .nickName(followUser.getNickname())
                             .walkedYesterday(walkedYesterday)
-                            .responseCharacterDto(MapCharacterDto.from(followUser.getCharacter()))
+                            .responseCharacterDto(MapCharacterDto.from(character))
+                            .headImage(buildHeadImage(character))
+                            .bodyImage(buildBodyImage(character))
                             .build();
                 })
                 .toList();
@@ -156,6 +167,26 @@ public class MapService {
         boolean liked = walkLikeRepository.existsByUserIdAndWalkId(requesterId, latestWalk.getId());
 
         return FollowerLatestWalkResponseDto.of(targetUser, latestWalk, likeCount, liked);
+    }
+
+    private ResponseCharacterWearDto buildHeadImage(Character character) {
+        Tag headTag = character.getCharacterWears().stream()
+                .filter(wear -> wear.getPosition() == Position.HEAD)
+                .findFirst()
+                .map(CharacterWear::getTag)
+                .orElse(null);
+        return ResponseCharacterWearDto.builder()
+                .imageName(character.getHeadImageName())
+                .itemPosition(Position.HEAD)
+                .itemTag(headTag)
+                .build();
+    }
+
+    private ResponseCharacterWearDto buildBodyImage(Character character) {
+        return ResponseCharacterWearDto.builder()
+                .imageName(character.getBodyImageName())
+                .itemPosition(Position.BODY)
+                .build();
     }
 
     private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
