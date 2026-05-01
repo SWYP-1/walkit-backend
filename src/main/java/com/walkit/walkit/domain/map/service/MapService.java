@@ -130,9 +130,16 @@ public class MapService {
                                     && walk.getStartTime() >= yesterdayStart
                                     && walk.getStartTime() < yesterdayEnd);
 
+                    Long latestWalkId = walks.stream()
+                            .filter(walk -> walk.getStartTime() != null)
+                            .max(Comparator.comparingLong(Walk::getStartTime))
+                            .map(Walk::getId)
+                            .orElse(null);
+
                     Character character = followUser.getCharacter();
                     return FollowerRecentActivityResponseDto.builder()
                             .userId(followUser.getId())
+                            .walkId(latestWalkId)
                             .nickName(followUser.getNickname())
                             .walkedYesterday(walkedYesterday)
                             .responseCharacterDto(MapCharacterDto.from(character))
