@@ -9,6 +9,7 @@ import lombok.Getter;
 public class FollowerRecentActivityResponseDto {
 
     private Long userId;
+    private Long walkId;
     private String nickName;
     private boolean walkedYesterday;
     private MapCharacterDto responseCharacterDto;

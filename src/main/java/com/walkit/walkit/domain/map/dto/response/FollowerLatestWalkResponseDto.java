@@ -30,6 +30,7 @@ public class FollowerLatestWalkResponseDto {
         private List<WalkPointResponseDto> points;
         private Long totalTime;
         private Integer stepCount;
+        private Long walkId;
     }
 
     public static FollowerLatestWalkResponseDto of(User followUser, Walk walk, int likeCount, boolean liked) {
@@ -49,6 +50,7 @@ public class FollowerLatestWalkResponseDto {
                         .points(points)
                         .totalTime(walk.getTotalTime())
                         .stepCount(walk.getStepCount())
+                        .walkId(walk.getId())
                         .build())
                 .likeCount(likeCount)
                 .liked(liked)

@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class MapService {
         User user = userRepository.findByIdAndDeleted(userId, false)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        // 1. 팔로우 유저 리스트 추출 (기존과 동일)
         List<Follow> sentFollows = followRepository.findBySenderAndFollowStatus(user, FollowStatus.ACCEPTED);
         List<Follow> receivedFollows = followRepository.findByReceiverAndFollowStatus(user, FollowStatus.ACCEPTED);
 
@@ -56,16 +58,27 @@ public class MapService {
                 receivedFollows.stream().map(Follow::getSender)
         ).distinct().toList();
 
-        if (followUsers.isEmpty()) {
-            return List.of();
-        }
+        if (followUsers.isEmpty()) return List.of();
 
         List<Long> followUserIds = followUsers.stream().map(User::getId).toList();
         Map<Long, User> userMap = followUsers.stream().collect(Collectors.toMap(User::getId, u -> u));
 
-        return walkRepository.findAllByUser_IdIn(followUserIds).stream()
+        // 2. 전체 워킹 기록을 가져와서 유저별 '최신 기록'만 필터링
+        Collection<Walk> latestWalks = walkRepository.findAllByUser_IdIn(followUserIds).stream()
                 .filter(walk -> walk.getStartLatitude() != null && walk.getStartLongitude() != null)
+                // 거리 필터링 먼저 수행 (연산량 최적화)
                 .filter(walk -> calculateHaversineDistance(lat, lon, walk.getStartLatitude(), walk.getStartLongitude()) <= radius)
+                // 핵심: 유저 ID를 키로 하여 맵을 만듦. 중복 시 id가 더 큰 것(최신)을 선택
+                .collect(Collectors.toMap(
+                        walk -> walk.getUser().getId(),
+                        walk -> walk,
+                        (existing, replacement) -> existing.getId() > replacement.getId() ? existing : replacement // ID 기준 최신 선택
+                        // 만약 createdAt 기준이라면: (existing, replacement) -> existing.getCreatedAt().isAfter(replacement.getCreatedAt()) ? existing : replacement
+                ))
+                .values();
+
+        // 3. DTO 변환
+        return latestWalks.stream()
                 .map(walk -> {
                     User followUser = userMap.get(walk.getUser().getId());
                     Character character = followUser.getCharacter();
@@ -130,9 +143,16 @@ public class MapService {
                                     && walk.getStartTime() >= yesterdayStart
                                     && walk.getStartTime() < yesterdayEnd);
 
+                    Long latestWalkId = walks.stream()
+                            .filter(walk -> walk.getStartTime() != null)
+                            .max(Comparator.comparingLong(Walk::getStartTime))
+                            .map(Walk::getId)
+                            .orElse(null);
+
                     Character character = followUser.getCharacter();
                     return FollowerRecentActivityResponseDto.builder()
                             .userId(followUser.getId())
+                            .walkId(latestWalkId)
                             .nickName(followUser.getNickname())
                             .walkedYesterday(walkedYesterday)
                             .responseCharacterDto(MapCharacterDto.from(character))
