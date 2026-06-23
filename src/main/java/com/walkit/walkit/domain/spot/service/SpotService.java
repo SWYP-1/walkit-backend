@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -41,16 +42,19 @@ public class SpotService {
         List<KakaoLocalClient.KakaoPlace> places;
 
         if (query == null || query.isBlank()) {
+            int perCategorySize = Math.max(1, (int) Math.ceil((double) size / SpotCategoryImage.values().length));
+
             List<CompletableFuture<List<KakaoLocalClient.KakaoPlace>>> categoryFutures =
                     Arrays.stream(SpotCategoryImage.values())
                             .map(cat -> CompletableFuture.supplyAsync(
-                                    () -> kakaoLocalClient.searchCategory(cat.getKakaoGroupCode(), x, y, radius, size, sort),
+                                    () -> kakaoLocalClient.searchCategory(cat.getKakaoGroupCode(), x, y, radius, perCategorySize, sort),
                                     placeExecutor))
                             .toList();
 
             places = categoryFutures.stream()
                     .flatMap(f -> f.join().stream())
                     .distinct()
+                    .sorted(Comparator.comparingInt(p -> parseDistance(p.getDistance())))
                     .limit(size)
                     .toList();
         } else {
@@ -108,6 +112,15 @@ public class SpotService {
         } finally {
             semaphore.release();
             org.slf4j.MDC.clear();
+        }
+    }
+
+    private int parseDistance(String distance) {
+        if (distance == null || distance.isBlank()) return Integer.MAX_VALUE;
+        try {
+            return Integer.parseInt(distance);
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
         }
     }
 
