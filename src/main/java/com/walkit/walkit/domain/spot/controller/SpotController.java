@@ -22,10 +22,10 @@ public class SpotController {
 
     private final SpotService spotService;
 
-    @Operation(summary = "주변 스팟 검색", description = "경도(x), 위도(y), 반경, 검색어를 기반으로 주변 스팟 목록을 반환합니다.")
+    @Operation(summary = "주변 스팟 검색", description = "경도(x), 위도(y), 반경, 검색어를 기반으로 주변 스팟 목록을 반환합니다. query 생략 시 모든 카테고리 장소를 반환합니다.")
     @GetMapping("/nearby")
     public ResponseEntity<List<NearbySpotResponseDto>> getNearbySpots(
-            @RequestParam String query,
+            @RequestParam(required = false) String query,
             @RequestParam double x,
             @RequestParam double y,
             @RequestParam(defaultValue = "1000") int radius,

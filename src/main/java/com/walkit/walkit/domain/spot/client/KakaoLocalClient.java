@@ -1,6 +1,7 @@
 package com.walkit.walkit.domain.spot.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,29 @@ public class KakaoLocalClient {
         }
     }
 
+    public List<KakaoPlace> searchCategory(String categoryGroupCode, double x, double y, int radius, int size, String sort) {
+        try {
+            KakaoLocalResponse response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/v2/local/search/category.json")
+                            .queryParam("category_group_code", categoryGroupCode)
+                            .queryParam("x", x)
+                            .queryParam("y", y)
+                            .queryParam("radius", radius)
+                            .queryParam("size", size)
+                            .queryParam("sort", sort)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(KakaoLocalResponse.class)
+                    .block();
+
+            return response != null ? response.getDocuments() : List.of();
+        } catch (WebClientResponseException e) {
+            log.warn("[KakaoLocalClient] 카테고리 검색 실패 - code={}, status={}", categoryGroupCode, e.getStatusCode());
+            return List.of();
+        }
+    }
+
     @Getter
     @NoArgsConstructor
     public static class KakaoLocalResponse {
@@ -55,6 +79,7 @@ public class KakaoLocalClient {
 
     @Getter
     @NoArgsConstructor
+    @EqualsAndHashCode(of = "placeUrl")
     public static class KakaoPlace {
         @JsonProperty("place_name")
         private String placeName;
@@ -70,6 +95,12 @@ public class KakaoLocalClient {
 
         @JsonProperty("place_url")
         private String placeUrl;
+
+        @JsonProperty("category_group_name")
+        private String categoryGroupName;
+
+        @JsonProperty("category_name")
+        private String categoryName;
 
         @JsonProperty("x")
         private String x;
