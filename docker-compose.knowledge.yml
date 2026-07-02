@@ -1,0 +1,19 @@
+services:
+  postgres-knowledge:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: walkit_knowledge
+      POSTGRES_USER: walkit
+      POSTGRES_PASSWORD: walkit1234
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgvector-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U walkit -d walkit_knowledge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgvector-data:

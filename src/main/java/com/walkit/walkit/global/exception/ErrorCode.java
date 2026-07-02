@@ -61,7 +61,11 @@ public enum ErrorCode {
     WEATHER_CACHE_UNAVAILABLE(SERVICE_UNAVAILABLE, 8002, "[Weather] 캐시 갱신 중 문제가 발생했습니다."),
 
     // NOTIFICATION
-    NOTIFICATION_NOT_FOUND(NOT_FOUND, 9001, "[Notification] 알림을 찾을 수 없습니다.");
+    NOTIFICATION_NOT_FOUND(NOT_FOUND, 9001, "[Notification] 알림을 찾을 수 없습니다."),
+
+    // RECOMMENDATION
+    RECOMMENDATION_NO_COURSES_FOUND(NOT_FOUND, 10001, "[Recommendation] 조건에 맞는 산책 코스를 찾을 수 없습니다."),
+    RECOMMENDATION_LLM_UNAVAILABLE(SERVICE_UNAVAILABLE, 10002, "[Recommendation] 추천 이유 생성 서비스가 일시적으로 사용 불가합니다.");
 
 
 

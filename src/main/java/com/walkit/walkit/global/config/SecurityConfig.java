@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll() // Prometheus
                         .requestMatchers("/items").permitAll()
                         .requestMatchers("/spots/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll()  // Hello Test (dev/local only, @Profile("!prod"))
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
