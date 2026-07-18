@@ -72,6 +72,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    // PostgreSQL (knowledge base)
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Spring AI (2.0.0 — Spring Boot 4.x / Spring Framework 7.x 호환)
+    implementation platform('org.springframework.ai:spring-ai-bom:2.0.0')
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+
     // Prometheus
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
