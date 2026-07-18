@@ -25,7 +25,7 @@ public class KakaoLocalClient {
                 .build();
     }
 
-    public List<KakaoPlace> searchKeyword(String query, double x, double y, int radius, int size, String sort) {
+    public KakaoLocalResponse searchKeyword(String query, double x, double y, int radius, int size, int page, String sort) {
         try {
             KakaoLocalResponse response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -35,20 +35,21 @@ public class KakaoLocalClient {
                             .queryParam("y", y)
                             .queryParam("radius", radius)
                             .queryParam("size", size)
+                            .queryParam("page", page)
                             .queryParam("sort", sort)
                             .build())
                     .retrieve()
                     .bodyToMono(KakaoLocalResponse.class)
                     .block();
 
-            return response != null ? response.getDocuments() : List.of();
+            return response != null ? response : KakaoLocalResponse.empty();
         } catch (WebClientResponseException e) {
             log.error("[KakaoLocalClient] 호출 실패 - status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
             throw e;
         }
     }
 
-    public List<KakaoPlace> searchCategory(String categoryGroupCode, double x, double y, int radius, int size, String sort) {
+    public KakaoLocalResponse searchCategory(String categoryGroupCode, double x, double y, int radius, int size, int page, String sort) {
         try {
             KakaoLocalResponse response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -58,23 +59,45 @@ public class KakaoLocalClient {
                             .queryParam("y", y)
                             .queryParam("radius", radius)
                             .queryParam("size", size)
+                            .queryParam("page", page)
                             .queryParam("sort", sort)
                             .build())
                     .retrieve()
                     .bodyToMono(KakaoLocalResponse.class)
                     .block();
 
-            return response != null ? response.getDocuments() : List.of();
+            return response != null ? response : KakaoLocalResponse.empty();
         } catch (WebClientResponseException e) {
             log.warn("[KakaoLocalClient] 카테고리 검색 실패 - code={}, status={}", categoryGroupCode, e.getStatusCode());
-            return List.of();
+            return KakaoLocalResponse.empty();
         }
     }
 
     @Getter
     @NoArgsConstructor
+    public static class KakaoMeta {
+        @JsonProperty("is_end")
+        private boolean isEnd;
+        @JsonProperty("total_count")
+        private int totalCount;
+        @JsonProperty("pageable_count")
+        private int pageableCount;
+    }
+
+    @Getter
+    @NoArgsConstructor
     public static class KakaoLocalResponse {
+        private KakaoMeta meta;
         private List<KakaoPlace> documents;
+
+        public List<KakaoPlace> getDocuments() {
+            return documents != null ? documents : List.of();
+        }
+
+        public static KakaoLocalResponse empty() {
+            KakaoLocalResponse r = new KakaoLocalResponse();
+            return r;
+        }
     }
 
     @Getter

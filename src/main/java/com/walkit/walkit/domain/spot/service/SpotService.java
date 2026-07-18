@@ -2,6 +2,7 @@ package com.walkit.walkit.domain.spot.service;
 
 import com.walkit.walkit.domain.spot.client.KakaoLocalClient;
 import com.walkit.walkit.domain.spot.client.NaverSearchClient;
+import com.walkit.walkit.domain.spot.dto.response.NearbySpotPageResponseDto;
 import com.walkit.walkit.domain.spot.dto.response.NearbySpotResponseDto;
 import com.walkit.walkit.domain.spot.enums.SpotCategoryImage;
 import lombok.RequiredArgsConstructor;
@@ -9,14 +10,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PreDestroy;
+
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -36,44 +43,77 @@ public class SpotService {
     // 네이버 블로그 호출용 (inner) — placeExecutor와 분리하여 데드락 방지
     private final ExecutorService naverExecutor = Executors.newFixedThreadPool(10);
 
-    public List<NearbySpotResponseDto> getNearbySpots(
-            String query, double x, double y, int radius, int size, String sort
+    @PreDestroy
+    public void shutdown() {
+        placeExecutor.shutdown();
+        naverExecutor.shutdown();
+    }
+
+    public NearbySpotPageResponseDto getNearbySpots(
+            String query, double x, double y, int radius, int size, String sort, String cursor
     ) {
+        int page = parseCursor(cursor);
         List<KakaoLocalClient.KakaoPlace> places;
+        boolean hasNext;
 
         if (query == null || query.isBlank()) {
             int perCategorySize = Math.max(1, (int) Math.ceil((double) size / SpotCategoryImage.values().length));
 
-            List<CompletableFuture<List<KakaoLocalClient.KakaoPlace>>> categoryFutures =
+            List<CompletableFuture<KakaoLocalClient.KakaoLocalResponse>> categoryFutures =
                     Arrays.stream(SpotCategoryImage.values())
                             .map(cat -> CompletableFuture.supplyAsync(
-                                    () -> kakaoLocalClient.searchCategory(cat.getKakaoGroupCode(), x, y, radius, perCategorySize, sort),
+                                    () -> kakaoLocalClient.searchCategory(cat.getKakaoGroupCode(), x, y, radius, perCategorySize, page, sort),
                                     placeExecutor))
                             .toList();
 
-            places = categoryFutures.stream()
-                    .flatMap(f -> f.join().stream())
+            List<KakaoLocalClient.KakaoLocalResponse> responses = categoryFutures.stream()
+                    .map(CompletableFuture::join)
+                    .toList();
+
+            places = responses.stream()
+                    .flatMap(r -> r.getDocuments().stream())
                     .distinct()
                     .sorted(Comparator.comparingInt(p -> parseDistance(p.getDistance())))
                     .limit(size)
                     .toList();
+
+            hasNext = responses.stream()
+                    .anyMatch(r -> r.getMeta() != null && !r.getMeta().isEnd());
         } else {
-            places = kakaoLocalClient.searchKeyword(query, x, y, radius, size, sort);
+            KakaoLocalClient.KakaoLocalResponse response =
+                    kakaoLocalClient.searchKeyword(query, x, y, radius, size, page, sort);
+            places = response.getDocuments();
+            hasNext = response.getMeta() != null && !response.getMeta().isEnd();
         }
 
-        // MDC 컨텍스트를 자식 스레드에 전파
         Map<String, String> mdcContext = org.slf4j.MDC.getCopyOfContextMap();
 
-        // 장소별로 CompletableFuture 생성 (병렬 처리)
-        List<CompletableFuture<NearbySpotResponseDto>> futures = places.stream()
+        List<NearbySpotResponseDto> items = places.stream()
                 .map(place -> CompletableFuture.supplyAsync(
                         () -> enrichPlace(place, mdcContext), placeExecutor))
-                .toList();
-
-        // 전체 완료 대기 후 결과 수집
-        return futures.stream()
+                .toList()
+                .stream()
                 .map(CompletableFuture::join)
                 .toList();
+
+        return NearbySpotPageResponseDto.builder()
+                .items(items)
+                .nextCursor(hasNext ? encodeCursor(page + 1) : null)
+                .hasNext(hasNext)
+                .build();
+    }
+
+    private int parseCursor(String cursor) {
+        if (cursor == null || cursor.isBlank()) return 1;
+        try {
+            return Integer.parseInt(new String(Base64.getDecoder().decode(cursor)));
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    private String encodeCursor(int page) {
+        return Base64.getEncoder().encodeToString(String.valueOf(page).getBytes());
     }
 
     private NearbySpotResponseDto enrichPlace(
@@ -92,8 +132,15 @@ public class SpotService {
         try {
             String naverQuery = extractRegion(place.getAddressName()) + " " + place.getPlaceName();
 
-            NaverSearchClient.NaverBlogResult blogResult =
-                    CompletableFuture.supplyAsync(() -> naverSearchClient.searchBlog(naverQuery), naverExecutor).join();
+            NaverSearchClient.NaverBlogResult blogResult;
+            try {
+                blogResult = CompletableFuture
+                        .supplyAsync(() -> naverSearchClient.searchBlog(naverQuery), naverExecutor)
+                        .get(3, TimeUnit.SECONDS);
+            } catch (TimeoutException | ExecutionException | InterruptedException e) {
+                log.warn("[SpotService] Naver 검색 타임아웃 또는 실패 - place={}", place.getPlaceName());
+                blogResult = new NaverSearchClient.NaverBlogResult(0, null);
+            }
 
             String thumbnail = SpotCategoryImage.toImageUrl(place.getCategoryName(), ncpBaseUrl);
 
