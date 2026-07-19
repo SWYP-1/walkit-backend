@@ -1,6 +1,7 @@
 package com.walkit.walkit.domain.recommendation.service;
 
 import com.walkit.walkit.domain.recommendation.model.CourseSearchResult;
+import com.walkit.walkit.domain.recommendation.model.Emotion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,14 +22,16 @@ public class VectorSearchService {
 
     private static final int TOP_CANDIDATES = 20;
 
-    public List<CourseSearchResult> search(float[] queryEmbedding, int desiredMinutes) {
+    public List<CourseSearchResult> search(float[] queryEmbedding, Emotion emotion, int desiredMinutes) {
         int minMinutes = Math.max(10, (int) (desiredMinutes * 0.5));
         int maxMinutes = Math.min(180, (int) (desiredMinutes * 1.5));
         String vectorLiteral = toVectorLiteral(queryEmbedding);
 
-        log.debug("벡터 검색: desiredMinutes={}, range=[{}, {}]", desiredMinutes, minMinutes, maxMinutes);
+        log.debug("벡터 검색: emotion={}, desiredMinutes={}, range=[{}, {}]",
+                emotion, desiredMinutes, minMinutes, maxMinutes);
 
         // <=> 는 pgvector 코사인 거리. 1 - 거리 = 유사도.
+        // recommended_emotions && ARRAY[?] : GIN 인덱스(idx_course_emotions) 활용한 배열 오버랩.
         String sql = """
                 SELECT id, external_id, source, course_name, description,
                        start_lat, start_lng, end_lat, end_lng,
@@ -37,6 +40,7 @@ public class VectorSearchService {
                        1 - (embedding <=> ?::vector) AS similarity_score
                 FROM course_embeddings
                 WHERE estimated_minutes BETWEEN ? AND ?
+                  AND recommended_emotions && ARRAY[?]::text[]
                 ORDER BY embedding <=> ?::vector
                 LIMIT ?
                 """;
@@ -46,8 +50,9 @@ public class VectorSearchService {
                     ps.setString(1, vectorLiteral);
                     ps.setInt(2, minMinutes);
                     ps.setInt(3, maxMinutes);
-                    ps.setString(4, vectorLiteral);
-                    ps.setInt(5, TOP_CANDIDATES);
+                    ps.setString(4, emotion.name());
+                    ps.setString(5, vectorLiteral);
+                    ps.setInt(6, TOP_CANDIDATES);
                 },
                 (rs, rowNum) -> new CourseSearchResult(
                         rs.getLong("id"),

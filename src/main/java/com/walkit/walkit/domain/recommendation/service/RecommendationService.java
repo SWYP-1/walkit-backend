@@ -31,7 +31,8 @@ public class RecommendationService {
     public RecommendationResponse recommend(RecommendationRequest req, Long userId) {
         float[] queryEmbedding = embeddingService.embedQuery(req.getEmotion(), req.getDesiredMinutes());
 
-        List<CourseSearchResult> candidates = vectorSearch.search(queryEmbedding, req.getDesiredMinutes());
+        List<CourseSearchResult> candidates = vectorSearch.search(
+                queryEmbedding, req.getEmotion(), req.getDesiredMinutes());
 
         double radiusKm = req.getRadiusKm() != null ? req.getRadiusKm() : 5.0;
         List<CourseSearchResult> nearby = geoFilter.filterByRadius(
